@@ -16,7 +16,8 @@ dashboardPage(skin = "red",
     sidebarMenu(
       menuItem("Base Summary", tabName = "bs"),
       menuItem("Table Builder", tabName = "tb"),
-      menuItem("Scenario Builder", tabName = "sb")
+      menuItem("Scenario Builder", tabName = "sb"),
+      menuItem("Table Builder on new Scenario", tabName = "sbtb")
     )
   ),
   dashboardBody(tabItems(
@@ -79,7 +80,28 @@ dashboardPage(skin = "red",
                actionButton("actionAddSB", label = "Add Scenario"),
                tableOutput('previewSB'),
                tableOutput('resultSB'),  width = 8
-             )))
+             ))),
+    
+    tabItem("sbtb",
+            # Sidebar with a slider input for the number of bins
+            fluidRow(
+              box(
+                #selectInput("env", "Select Scenario", choices = NULL),
+                selectInput("input_type_SBTB", "Select Summary Measure",
+                            c("Percentage", "Means","Quantiles" )),
+                uiOutput("uiSBTB"),
+                uiOutput("uiSubGrpSBTB"),
+                checkboxInput("ciSB", label = "Confidence Interval", value = TRUE),
+                actionButton("actionSBTB", label = "Preview"),  width = 4
+                #selectizeInput('freqs', 'Freq', choices = NULL)
+              ),
+              # Show a plot of the generated distribution
+              box(
+                dataTableOutput('resultSBTB'),  width = 8
+              )))
+    
+    
+    
   
 ))
 )

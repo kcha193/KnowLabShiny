@@ -26,7 +26,7 @@ shinyServer(function(input, output, session) {
   models <<- initialSim$models
   PropensityModels <<- initialSim$PropensityModels
   children <<- initialSim$children
-  
+ 
   
   #First page of the website  
   varName = env.base$dict$descriptions 
@@ -162,10 +162,7 @@ shinyServer(function(input, output, session) {
   
   newSB <- reactive({
     
-    print("Here!")
-    
-    env.scenario <<- createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
-    
+    createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
   })
   
   
@@ -200,8 +197,6 @@ shinyServer(function(input, output, session) {
     )
   })
   
-   
-  
   # hotable
   output$hotable <- renderRHandsontable({
     catAdj = env.base$cat.adjustments[[ as.character(names(which(varName == input$var_SB)))]]
@@ -220,11 +215,11 @@ shinyServer(function(input, output, session) {
   })
   
   
-  catAdjust <-  reactive({
-    input$actionAddSB
+  catAdjust <-  function(env.scenario){
     
-    catAdj <-
-    isolate(t(t(hot_to_r(input$hotable)))[,-1]  )
+    print("Here")
+    
+    catAdj <-t(t(hot_to_r(input$hotable)))[,-1] 
     
     if(is.matrix(catAdj)){
       catAdj = apply(catAdj, 2, as.numeric)
@@ -238,18 +233,18 @@ shinyServer(function(input, output, session) {
         as.character(names(which(varName == input$var_SB)))]][1,] =  as.numeric(catAdj)	
     }   
     
+   print(catAdj)
     
-  })
+    env.scenario
+  }
   
   
-  summaryOutputSB <- reactive({ #print(getwd())
+  summaryOutputSB <- function(env.scenario){ #print(getwd())
     
        
      
     sfInit(parallel=TRUE, cpus = 4, slaveOutfile = "test.txt" )
-    
-    rm(env.base)
-    
+
     sfExportAll()
     
     sfLibrary(Hmisc)
@@ -261,21 +256,75 @@ shinyServer(function(input, output, session) {
     
     sfStop()
     
-  })   
+    
+    env.scenario
+  } 
   
   output$resultSB  <- renderTable({
-    newSB()
+    env.scenario <- newSB()
     
     #setGlobalSubgroupFilterExpression(input$subGrpFor_SB)
     
-    catAdjust()
+      observeEvent( input$actionAddSB,   env.scenario <- catAdjust(env.scenario))
     
-    
-    input$actionSB
-    isolate( 
-      summaryOutputSB()
-    )
+      observeEvent( input$actionSB,    env.scenario <-summaryOutputSB(env.scenario))
+
+      env.scenario<<-env.scenario
   })  
+  
+  
+  ######################################################################################
+  
+  output$uiSBTB <- renderUI({
+    
+    # Depending on input$input_type, we'll generate a different
+    # UI component and send it to the client.
+    switch(input$input_type_SBTB,
+           "Percentage" = selectInput("dynamicSBTB", "Variable",choices = freqList),
+           "Means" = selectInput("dynamicSBTB", "Variable", choices = meansList),
+           "Quantiles" = selectInput("dynamicSBTB", "Variable", choices = quantilesList)
+    )
+  })
+  
+  output$uiSubGrpSBTB <- renderUI({
+    # Depending on input$input_type, we'll generate a different
+    # UI component and send it to the client.
+    selectInput("subGrp_SBTB", "Select Subgroup:",choices = c(None='', freqList), selectize=FALSE)
+  })
+  
+  summaryOutputSBTB <- reactive({ #print(getwd())
+    
+    print(names(which(varName == input$subGrp_SBTB)))
+    
+    inputType = c("frequencies", "means", "quintiles")
+    
+    names(inputType) = c("Percentage", "Means","Quantiles" )
+    
+    grpbyName = names(which(varName == input$subGrp_SBTB))
+    
+    if(length(grpbyName) == 0) grpbyName = ""
+    
+    results <- round(suppressWarnings(tableBuilder(env.scenario, 
+                                                   statistic = inputType[input$input_type_SBTB], 
+                                                   dict= env.scenario$dict,
+                                                   variableName = names(which(trimws(varName) == trimws(input$dynamicSBTB)))[1], 
+                                                   grpbyName = grpbyName[1], CI = input$ci, 
+                                                   logisetexpr=NULL)), 4)
+    
+    if(!is.matrix(results))
+      as.matrix(results)
+    else
+      as.data.frame(results)
+  })
+  
+  output$resultSBTB  <- DT::renderDataTable({
+    
+    input$actionSBTB
+    isolate( 
+      summaryOutputSBTB()
+    )
+    
+  }, rownames = TRUE, options = list(pageLength = 21))
   
 })
 
