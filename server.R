@@ -257,7 +257,7 @@ shinyServer(function(input, output, session) {
     sfLibrary(simarioV2)
     sfLibrary(stringr)
     
-    env.scenario <- simulate(env.scenario, input$nRun)
+    env.scenario <- simulatePShiny(env.scenario, input$nRun)
     
     sfStop()
     
