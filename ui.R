@@ -1,5 +1,6 @@
 
 library(shiny)
+library(shinydashboard)
 library(DT)
 library(rhandsontable)
 library(snowfall)
@@ -8,13 +9,22 @@ library(stringi)
 library(simarioV2)
 
 # Define UI for application that draws a histogram
-shinyUI(navbarPage(
+dashboardPage(
+  dashboardHeader(title = "KnowLAb"),
   # Application title
-  title = "KnowLab",
-  tabPanel("Base Summary",
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Base Summary", tabName = "bs"),
+      menuItem("Table Builder", tabName = "tb"),
+      menuItem("Scenario Builder", tabName = "sb")
+    )
+  ),
+  dashboardBody(tabItems(
+  
+    tabItem("bs",
            # Sidebar with a slider input for the number of bins
-           sidebarLayout(
-             sidebarPanel(
+           fluidRow(
+             box(
                selectInput("input_type", "Summary Statistics",
                            c("Percentage", "Percentage - continous grouped", "Means","Quantiles" )),
                
@@ -25,15 +35,15 @@ shinyUI(navbarPage(
              ),
              
              # Show a plot of the generated distribution
-             mainPanel(
+			   box(
                dataTableOutput('result')
              ))),
   
   
-  tabPanel("Table Builder",
+    tabItem("tb",
            # Sidebar with a slider input for the number of bins
-           sidebarLayout(
-             sidebarPanel(
+           fluidRow(
+             box(
                #selectInput("env", "Select Scenario", choices = NULL),
                selectInput("input_type_TB", "Select Summary Measure",
                            c("Percentage", "Means","Quantiles" )),
@@ -44,15 +54,15 @@ shinyUI(navbarPage(
                #selectizeInput('freqs', 'Freq', choices = NULL)
              ),
              # Show a plot of the generated distribution
-             mainPanel(
+             box(
                dataTableOutput('resultTB')
              ))),
   
   
-  tabPanel("Scenario Builder",
+    tabItem("sb",
            # Sidebar with a slider input for the number of bins
-           sidebarLayout(
-             sidebarPanel(
+           fluidRow(
+             box(
                uiOutput("uiSB"),
                selectInput("subGrp_SB", "Subgroup", choices = NULL),
                textInput("subGrpFor_SB", "Subgroup Formula"),
@@ -65,9 +75,11 @@ shinyUI(navbarPage(
                #selectizeInput('freqs', 'Freq', choices = NULL)
              ),
              # Show a plot of the generated distribution
-             mainPanel(
+             box(
                rHandsontableOutput("hotable"),
                tableOutput('previewSB'),
                tableOutput('resultSB')
              )))
+  
 ))
+)
