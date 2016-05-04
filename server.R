@@ -88,76 +88,12 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  #######################################################################################################
-  #Second Page: Table builder
-  catvars <- c(getOutcomeVars(initialSim$simframe, "categorical"), "SESBTH", "r1stchildethn", 
-               "r1stmeduc", "r1stfeduc", "z1single0", "fage", 
-               "z1single0Lvl1", "bthorder", "NPRESCH", "z1genderLvl1")
-  contvars <- c(getOutcomeVars(initialSim$simframe, "continuous"), "bwkg", "pregalc", 
-                "ga", "INTERACT", "PUNISH", "MAGE", "pregsmk")
-  
-  freqList = sort(as.character(varName[catvars]))
-  meansList =  quantilesList =  sort(as.character(varName[contvars]))
-  
-  
-  output$uiTB <- renderUI({
-    
-    # Depending on input$input_type, we'll generate a different
-    # UI component and send it to the client.
-    switch(input$input_type_TB,
-           "Percentage" = selectInput("dynamicTB", "Variable",choices = freqList),
-           "Means" = selectInput("dynamicTB", "Variable", choices = meansList),
-           "Quantiles" = selectInput("dynamicTB", "Variable", choices = quantilesList)
-    )
-  })
-  
-  output$uiSubGrpTB <- renderUI({
-    # Depending on input$input_type, we'll generate a different
-    # UI component and send it to the client.
-    selectInput("subGrp_TB", "Select Subgroup:",choices = c(None='', freqList), selectize=FALSE)
-  })
-  
-  summaryOutputTB <- reactive({ #print(getwd())
-    
-    
-    
-    print(names(which(varName == input$subGrp_TB)))
-    
-    inputType = c("frequencies", "means", "quintiles")
-    
-    names(inputType) = c("Percentage", "Means","Quantiles" )
-    
-    grpbyName = names(which(varName == input$subGrp_TB))
-    
-    if(length(grpbyName) == 0) grpbyName = ""
-    
-    results <- round(suppressWarnings(tableBuilder(env.base, 
-                         statistic = inputType[input$input_type_TB], 
-                         dict= env.base$dict,
-                         variableName = names(which(trimws(varName) == trimws(input$dynamicTB)))[1], 
-                         grpbyName = grpbyName[1], CI = input$ci, 
-                         logisetexpr=NULL)), 4)
-    
-    if(!is.matrix(results))
-      as.matrix(results)
-    else
-      as.data.frame(results)
-  })
-  
-  output$resultTB  <- DT::renderDataTable({
-    
-    input$actionTB
-    isolate( 
-      summaryOutputTB()
-    )
-    
-  }, rownames = TRUE, options = list(pageLength = 21))
   
   #################################################################################################################
   #Scenario Builder
   
-  env.scenario <- createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
-  varName_SB = sort(as.character(varName[names(env.scenario$cat.adjustments)]))
+  env.scenario <<- NULL
+  varName_SB = sort(as.character(varName[names(env.base$cat.adjustments)]))
   varName_SB = varName_SB[!is.na(varName_SB)]
   
   newSB <- reactive({
@@ -215,7 +151,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  catAdjust <-  function(env.scenario){
+  catAdjust <-  function(es){
     
     print("Here")
     
@@ -225,24 +161,22 @@ shinyServer(function(input, output, session) {
       catAdj = apply(catAdj, 2, as.numeric)
       
       for(i in 1:nrow(catAdj))
-        env.scenario$cat.adjustments[[
+        es$cat.adjustments[[
           as.character(names(which(varName == input$var_SB)))]][i,] = catAdj[i,]		   
       
     } else {
-      env.scenario$cat.adjustments[[
+      es$cat.adjustments[[
         as.character(names(which(varName == input$var_SB)))]][1,] =  as.numeric(catAdj)	
     }   
     
    print(catAdj)
     
-    env.scenario
+   es
   }
   
   
-  summaryOutputSB <- function(env.scenario){ #print(getwd())
+  simulateSB <- function(es){ #print(getwd())
     
-       
-     
     sfInit(parallel=TRUE, cpus = 4, slaveOutfile = "test.txt" )
 
     sfExportAll()
@@ -252,64 +186,84 @@ shinyServer(function(input, output, session) {
     sfLibrary(simarioV2)
     sfLibrary(stringr)
     
-    env.scenario <- simulatePShiny(env.scenario, input$nRun)
+    es <- simulatePShiny(es, input$nRun)
     
     sfStop()
     
     
-    env.scenario
+    es
   } 
   
-  output$resultSB  <- renderTable({
-    env.scenario <- newSB()
+  output$resultSB  <- renderText({
+    es <- newSB()
     
     #setGlobalSubgroupFilterExpression(input$subGrpFor_SB)
     
-      observeEvent( input$actionAddSB,   env.scenario <- catAdjust(env.scenario))
-    
-      observeEvent( input$actionSB,    env.scenario <-summaryOutputSB(env.scenario))
-
-      env.scenario<<-env.scenario
+     observeEvent( input$actionAddSB,  es <- catAdjust(es))
+      
+   observeEvent( input$actionSB,    env.scenario <<- simulateSB(es))
+      
+  
   })  
+
+#######################################################################################################
+#Second Page: Table builder
+  catvars <- c(getOutcomeVars(initialSim$simframe, "categorical"), "SESBTH", "r1stchildethn", 
+               "r1stmeduc", "r1stfeduc", "z1single0", "fage", 
+               "z1single0Lvl1", "bthorder", "NPRESCH", "z1genderLvl1")
+  contvars <- c(getOutcomeVars(initialSim$simframe, "continuous"), "bwkg", "pregalc", 
+                "ga", "INTERACT", "PUNISH", "MAGE", "pregsmk")
+  
+  freqList = sort(as.character(varName[catvars]))
+  meansList =  quantilesList =  sort(as.character(varName[contvars]))
   
   
-  ######################################################################################
-  
-  output$uiSBTB <- renderUI({
+  output$uiTB <- renderUI({
     
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
-    switch(input$input_type_SBTB,
-           "Percentage" = selectInput("dynamicSBTB", "Variable",choices = freqList),
-           "Means" = selectInput("dynamicSBTB", "Variable", choices = meansList),
-           "Quantiles" = selectInput("dynamicSBTB", "Variable", choices = quantilesList)
+    switch(input$input_type_TB,
+           "Percentage" = selectInput("dynamicTB", "Variable",choices = freqList),
+           "Means" = selectInput("dynamicTB", "Variable", choices = meansList),
+           "Quantiles" = selectInput("dynamicTB", "Variable", choices = quantilesList)
     )
   })
   
-  output$uiSubGrpSBTB <- renderUI({
+  output$uiSubGrpTB <- renderUI({
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
-    selectInput("subGrp_SBTB", "Select Subgroup:",choices = c(None='', freqList), selectize=FALSE)
+    selectInput("subGrp_TB", "Select Subgroup:",choices = c(None='', freqList), selectize=FALSE)
   })
   
-  summaryOutputSBTB <- reactive({ #print(getwd())
+  summaryOutputTB <- reactive({ #print(getwd())
     
-    print(names(which(varName == input$subGrp_SBTB)))
+    
+    
+    print(names(which(varName == input$subGrp_TB)))
     
     inputType = c("frequencies", "means", "quintiles")
     
     names(inputType) = c("Percentage", "Means","Quantiles" )
     
-    grpbyName = names(which(varName == input$subGrp_SBTB))
+    grpbyName = names(which(varName == input$subGrp_TB))
     
     if(length(grpbyName) == 0) grpbyName = ""
     
-    results <- round(suppressWarnings(tableBuilder(env.scenario, 
-                                                   statistic = inputType[input$input_type_SBTB], 
-                                                   dict= env.scenario$dict,
-                                                   variableName = names(which(trimws(varName) == trimws(input$dynamicSBTB)))[1], 
-                                                   grpbyName = grpbyName[1], CI = input$ci, 
-                                                   logisetexpr=NULL)), 4)
+    if(input$scenario){
+      results <- round(suppressWarnings(tableBuilder(env.scenario, 
+                                                     statistic = inputType[input$input_type_TB], 
+                                                     dict= env.base$dict,
+                                                     variableName = names(which(trimws(varName) == trimws(input$dynamicTB)))[1], 
+                                                     grpbyName = grpbyName[1], CI = input$ci, 
+                                                     logisetexpr=NULL)), 4)
+    }else {
+      results <- round(suppressWarnings(tableBuilder(env.base, 
+                                                     statistic = inputType[input$input_type_TB], 
+                                                     dict= env.base$dict,
+                                                     variableName = names(which(trimws(varName) == trimws(input$dynamicTB)))[1], 
+                                                     grpbyName = grpbyName[1], CI = input$ci, 
+                                                     logisetexpr=NULL)), 4)
+    }
     
     if(!is.matrix(results))
       as.matrix(results)
@@ -317,14 +271,13 @@ shinyServer(function(input, output, session) {
       as.data.frame(results)
   })
   
-  output$resultSBTB  <- DT::renderDataTable({
+  output$resultTB  <- DT::renderDataTable({
     
-    input$actionSBTB
+    input$actionTB
     isolate( 
-      summaryOutputSBTB()
+      summaryOutputTB()
     )
     
   }, rownames = TRUE, options = list(pageLength = 21))
-  
-})
 
+})  

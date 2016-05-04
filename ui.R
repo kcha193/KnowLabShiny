@@ -8,20 +8,30 @@ library(stringr)
 library(stringi)
 library(simarioV2)
 
+
+
+
+
+
 # Define UI for application that draws a histogram
 dashboardPage(skin = "red",
   dashboardHeader(title = "Knowledge Lab"),
   # Application title
   dashboardSidebar(
     sidebarMenu(
+      menuItem("First Page", tabName = "fb"),
       menuItem("Base Summary", tabName = "bs"),
       menuItem("Table Builder", tabName = "tb"),
-      menuItem("Scenario Builder", tabName = "sb"),
-      menuItem("Table Builder on new Scenario", tabName = "sbtb")
+      menuItem("Scenario Builder", tabName = "sb")
     )
   ),
   dashboardBody(tabItems(
   
+    tabItem("fb", fluidRow(box(a(href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass.html",
+     img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
+      width = 300))))),
+    
+    
     tabItem("bs",
            # Sidebar with a slider input for the number of bins
            fluidRow(
@@ -51,8 +61,9 @@ dashboardPage(skin = "red",
                uiOutput("uiTB"),
                uiOutput("uiSubGrpTB"),
                checkboxInput("ci", label = "Confidence Interval", value = TRUE),
-               actionButton("actionTB", label = "Preview"),  width = 4
-               #selectizeInput('freqs', 'Freq', choices = NULL)
+               actionButton("actionTB", label = "Preview"),  
+               checkboxInput("scenario", label = "Scenario", value = FALSE),
+               width = 4
              ),
              # Show a plot of the generated distribution
              box(
@@ -61,7 +72,7 @@ dashboardPage(skin = "red",
   
   
     tabItem("sb",
-           # Sidebar with a slider input for the number of bins
+     
            fluidRow(
              box(
                uiOutput("uiSB"),
@@ -71,35 +82,13 @@ dashboardPage(skin = "red",
                selectInput("nRun", "Number of Runs:", c(1:10), selected = 4),
                actionButton("actionPreviewSB", label = "Preview"),
                actionButton("actionSB", label = "Run Scenario"),  width = 4
-               
-               #selectizeInput('freqs', 'Freq', choices = NULL)
              ),
              # Show a plot of the generated distribution
-             box(
+             box("Setting the Scenario",
                rHandsontableOutput("hotable"),
                actionButton("actionAddSB", label = "Add Scenario"),
-               tableOutput('previewSB'),
-               tableOutput('resultSB'),  width = 8
-             ))),
-    
-    tabItem("sbtb",
-            # Sidebar with a slider input for the number of bins
-            fluidRow(
-              box(
-                #selectInput("env", "Select Scenario", choices = NULL),
-                selectInput("input_type_SBTB", "Select Summary Measure",
-                            c("Percentage", "Means","Quantiles" )),
-                uiOutput("uiSBTB"),
-                uiOutput("uiSubGrpSBTB"),
-                checkboxInput("ciSB", label = "Confidence Interval", value = TRUE),
-                actionButton("actionSBTB", label = "Preview"),  width = 4
-                #selectizeInput('freqs', 'Freq', choices = NULL)
-              ),
-              # Show a plot of the generated distribution
-              box(
-                dataTableOutput('resultSBTB'),  width = 8
-              )))
-    
+               textOutput('resultSB'),  width = 8
+             )))
     
     
   
