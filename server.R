@@ -152,9 +152,7 @@ shinyServer(function(input, output, session) {
   
   
   catAdjust <-  function(es){
-    
-    print("Here")
-    
+
     catAdj <-t(t(hot_to_r(input$hotable)))[,-1] 
     
     if(is.matrix(catAdj)){
@@ -186,12 +184,12 @@ shinyServer(function(input, output, session) {
     sfLibrary(simarioV2)
     sfLibrary(stringr)
     
-    es <- simulatePShiny(es, input$nRun)
+    env.scenario <<- simulatePShiny(es, input$nRun)
     
     sfStop()
     
     
-    es
+    return("Done!!")
   } 
   
   output$resultSB  <- renderText({
@@ -201,9 +199,7 @@ shinyServer(function(input, output, session) {
     
      observeEvent( input$actionAddSB,  es <- catAdjust(es))
       
-   observeEvent( input$actionSB,    env.scenario <<- simulateSB(es))
-      
-  
+   observeEvent( input$actionSB,     simulateSB(es))
   })  
 
 #######################################################################################################
@@ -237,8 +233,6 @@ shinyServer(function(input, output, session) {
   
   summaryOutputTB <- reactive({ #print(getwd())
     
-    
-    
     print(names(which(varName == input$subGrp_TB)))
     
     inputType = c("frequencies", "means", "quintiles")
@@ -249,21 +243,14 @@ shinyServer(function(input, output, session) {
     
     if(length(grpbyName) == 0) grpbyName = ""
     
-    if(input$scenario){
-      results <- round(suppressWarnings(tableBuilder(env.scenario, 
-                                                     statistic = inputType[input$input_type_TB], 
-                                                     dict= env.base$dict,
-                                                     variableName = names(which(trimws(varName) == trimws(input$dynamicTB)))[1], 
-                                                     grpbyName = grpbyName[1], CI = input$ci, 
-                                                     logisetexpr=NULL)), 4)
-    }else {
+
       results <- round(suppressWarnings(tableBuilder(env.base, 
-                                                     statistic = inputType[input$input_type_TB], 
-                                                     dict= env.base$dict,
-                                                     variableName = names(which(trimws(varName) == trimws(input$dynamicTB)))[1], 
-                                                     grpbyName = grpbyName[1], CI = input$ci, 
-                                                     logisetexpr=NULL)), 4)
-    }
+                   statistic = inputType[input$input_type_TB], 
+                   dict= env.base$dict,
+                   variableName = rev(names(which(trimws(varName) == trimws(input$dynamicTB))))[1], 
+                   grpbyName = grpbyName[1], CI = input$ci, 
+                   logisetexpr=NULL)), 4)
+
     
     if(!is.matrix(results))
       as.matrix(results)
@@ -276,6 +263,42 @@ shinyServer(function(input, output, session) {
     input$actionTB
     isolate( 
       summaryOutputTB()
+    )
+    
+  }, rownames = TRUE, options = list(pageLength = 21))
+  
+  summaryOutputSBTB <- reactive({ #print(getwd())
+    
+    print(names(which(varName == input$subGrp_TB)))
+    
+    inputType = c("frequencies", "means", "quintiles")
+    
+    names(inputType) = c("Percentage", "Means","Quantiles" )
+    
+    grpbyName = names(which(varName == input$subGrp_TB))
+    
+    if(length(grpbyName) == 0) grpbyName = ""
+
+      results <- round(suppressWarnings(tableBuilder(env.scenario, 
+           statistic = inputType[input$input_type_TB], 
+           dict= env.base$dict,
+           variableName = rev(names(which(trimws(varName) == trimws(input$dynamicTB))))[1], 
+           grpbyName = grpbyName[1], CI = input$ci, 
+           logisetexpr=NULL)), 4)
+
+    
+    
+    if(!is.matrix(results))
+      as.matrix(results)
+    else
+      as.data.frame(results)
+  })
+  
+  output$resultSBTB  <- DT::renderDataTable({
+    
+    input$scenario
+    isolate( 
+      summaryOutputSBTB()
     )
     
   }, rownames = TRUE, options = list(pageLength = 21))
