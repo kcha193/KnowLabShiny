@@ -92,14 +92,15 @@ shinyServer(function(input, output, session) {
   #################################################################################################################
   #Scenario Builder
   
-  env.scenario <<- NULL
+  env.scenario  <<- createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
   varName_SB = sort(as.character(varName[names(env.base$cat.adjustments)]))
   varName_SB = varName_SB[!is.na(varName_SB)]
   
-  newSB <- reactive({
+  newSB <- function(){
     
-    createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
-  })
+    env.scenario <<- createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
+    
+  }
   
   
   output$uiSB <- renderUI({   
@@ -151,30 +152,28 @@ shinyServer(function(input, output, session) {
   })
   
   
-  catAdjust <-  function(es){
-
+  changeSB <- eventReactive( input$actionAddSB, {
+    
     catAdj <-t(t(hot_to_r(input$hotable)))[,-1] 
     
     if(is.matrix(catAdj)){
       catAdj = apply(catAdj, 2, as.numeric)
       
       for(i in 1:nrow(catAdj))
-        es$cat.adjustments[[
-          as.character(names(which(varName == input$var_SB)))]][i,] = catAdj[i,]		   
+        env.scenario$cat.adjustments[[
+          as.character(names(which(varName == input$var_SB)))]][i,] <<- catAdj[i,]		   
       
     } else {
-      es$cat.adjustments[[
-        as.character(names(which(varName == input$var_SB)))]][1,] =  as.numeric(catAdj)	
+      env.scenario$cat.adjustments[[
+        as.character(names(which(varName == input$var_SB)))]][1,] <<- as.numeric(catAdj)	
     }   
     
-   print(catAdj)
+    print(catAdj)
     
-   es
-  }
+  })
   
-  
-  simulateSB <- function(es){ #print(getwd())
-    
+  simulateSB <- eventReactive(input$actionSB, { #print(getwd())
+
     sfInit(parallel=TRUE, cpus = 4, slaveOutfile = "test.txt" )
 
     sfExportAll()
@@ -184,24 +183,25 @@ shinyServer(function(input, output, session) {
     sfLibrary(simarioV2)
     sfLibrary(stringr)
     
-    env.scenario <<- simulatePShiny(es, input$nRun)
+    env.scenario <<- simulatePShiny(env.scenario, input$nRun)
     
     sfStop()
     
-    
     return("Done!!")
-  } 
+  } )
   
   output$resultSB  <- renderText({
-    es <- newSB()
-    
+   
     #setGlobalSubgroupFilterExpression(input$subGrpFor_SB)
+    changeSB()
     
-     observeEvent( input$actionAddSB,  es <- catAdjust(es))
-      
-   observeEvent( input$actionSB,     simulateSB(es))
-  })  
+    out <- "Working!"
+    
+    out <-simulateSB()
 
+    return(out)  
+  })  
+  
 #######################################################################################################
 #Second Page: Table builder
   catvars <- c(getOutcomeVars(initialSim$simframe, "categorical"), "SESBTH", "r1stchildethn", 

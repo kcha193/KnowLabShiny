@@ -22,9 +22,12 @@ dashboardPage(skin = "blue",
   ),
   dashboardBody(tabItems(
   
-    tabItem("fb", fluidRow(box(a(href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass.html",
-     img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
-      width = 300))))),
+    tabItem("fb", 
+            fluidRow(box(a(href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass.html",
+                           img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
+                               width = 300))),
+            box("Write Something here!"),
+            box("And Here!"))),
     
     
     tabItem("bs",
@@ -74,7 +77,7 @@ dashboardPage(skin = "blue",
      
            fluidRow(
              box(status = "primary",solidHeader = TRUE,
-               uiOutput("uiSB"),
+                uiOutput("uiSB"),
                selectInput("subGrp_SB", "Subgroup", choices = NULL),
                textInput("subGrpFor_SB", "Subgroup Formula"),
                selectInput("env_SB", "Name your Scenario", choices = NULL),
