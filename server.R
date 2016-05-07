@@ -172,9 +172,9 @@ shinyServer(function(input, output, session) {
     
   })
   
-  simulateSB <- eventReactive(input$actionSB, { #print(getwd())
+  simulateSB <- eventReactive(input$actionSB, { 
 
-    sfInit(parallel=TRUE, cpus = 4, slaveOutfile = "test.txt" )
+    sfInit(parallel=TRUE, cpus = 5, slaveOutfile = "test.txt" )
 
     sfExportAll()
     
