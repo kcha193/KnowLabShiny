@@ -2,8 +2,8 @@ name: KnowLabShiny
 account: kcha193
 server: beta.rstudioconnect.com
 appId: 820
-bundleId: 1548
+bundleId: 1669
 url: https://beta.rstudioconnect.com/kcha193/KnowLabShiny/
-when: 1461884416.46547
+when: 1462927845.69975
 asMultiple: FALSE
 asStatic: FALSE

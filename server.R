@@ -111,12 +111,12 @@ shinyServer(function(input, output, session) {
   
   baseOutputSB <- reactive({ 
     
-    print(names(which(trimws(varName) == trimws(input$var_SB))))
+    #print(input$var_SB)
     
-    results <- round(suppressWarnings(tableBuilder(envName = env.base, 
+    results <- round(suppressWarnings(tableBuilder(env.base, 
              statistic = "frequencies", 
-             dict= env.base$dict,
-             variableName =  names(which(trimws(varName_SB) == trimws(input$var_SB)))[1], 
+             dict = env.base$dict,
+             variableName =  rev(names(which(trimws(varName) == trimws(input$var_SB))))[1], 
              grpbyName = "", CI = FALSE, 
              logisetexpr=NULL)), 4)
     
@@ -127,8 +127,8 @@ shinyServer(function(input, output, session) {
     
   })
   
-  output$previewSB  <- renderTable({
-    input$actionPreviewSB
+  output$previewSB  <- DT::renderDataTable({
+    input$var_SB
     isolate( 
       baseOutputSB()
     )
@@ -148,6 +148,7 @@ shinyServer(function(input, output, session) {
       cbind(Rowname = rownames(catAdj), as.data.frame(apply(catAdj,2, as.numeric), stringsAsFactors = FALSE))
       
     }
+    
     rhandsontable(tbl, readOnly = FALSE) 
   })
   
@@ -167,14 +168,17 @@ shinyServer(function(input, output, session) {
       env.scenario$cat.adjustments[[
         as.character(names(which(varName == input$var_SB)))]][1,] <<- as.numeric(catAdj)	
     }   
-    
-    print(catAdj)
-    
   })
   
+  # startSB <- eventReactive(input$actionSB, { return("Simulation is Started!")} )
+  # 
+  # output$processSB <- renderText( { return(startSB())})
+  
   simulateSB <- eventReactive(input$actionSB, { 
-
-    sfInit(parallel=TRUE, cpus = 5, slaveOutfile = "test.txt" )
+    
+    env.scenario <- setGlobalSubgroupFilterExpression(env.scenario, input$subGrpFor_SB)
+    
+    sfInit(parallel=TRUE, cpus = 4, slaveOutfile = "test.txt" )
 
     sfExportAll()
     
@@ -186,21 +190,20 @@ shinyServer(function(input, output, session) {
     env.scenario <<- simulatePShiny(env.scenario, input$nRun)
     
     sfStop()
-    
-    return("Done!!")
+   
+    return("Simulation is Finished!")
   } )
   
-  output$resultSB  <- renderText({
-   
-    #setGlobalSubgroupFilterExpression(input$subGrpFor_SB)
-    changeSB()
-    
-    out <- "Working!"
-    
-    out <-simulateSB()
+  output$resultSB  <- renderPrint({
 
-    return(out)  
-  })  
+   
+    changeSB()
+
+    
+    return( simulateSB())
+  })
+  
+ 
   
 #######################################################################################################
 #Second Page: Table builder
@@ -250,8 +253,7 @@ shinyServer(function(input, output, session) {
                    variableName = rev(names(which(trimws(varName) == trimws(input$dynamicTB))))[1], 
                    grpbyName = grpbyName[1], CI = input$ci, 
                    logisetexpr=NULL)), 4)
-
-    
+      
     if(!is.matrix(results))
       as.matrix(results)
     else
@@ -285,8 +287,6 @@ shinyServer(function(input, output, session) {
            variableName = rev(names(which(trimws(varName) == trimws(input$dynamicTB))))[1], 
            grpbyName = grpbyName[1], CI = input$ci, 
            logisetexpr=NULL)), 4)
-
-    
     
     if(!is.matrix(results))
       as.matrix(results)
@@ -296,7 +296,7 @@ shinyServer(function(input, output, session) {
   
   output$resultSBTB  <- DT::renderDataTable({
     
-    input$scenario
+    input$actionTB
     isolate( 
       summaryOutputSBTB()
     )
