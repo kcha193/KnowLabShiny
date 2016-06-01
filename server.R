@@ -8,11 +8,18 @@ library(snowfall)
 library(stringr)
 library(stringi)
 library(simarioV2)
-
+library(plotly)
 
 shinyServer(function(input, output, session) {
   
  
+  textareaInput <- function(inputId, label, value="", placeholder="", rows=2){
+    tagList(
+      div(strong(label), style="margin-top: 5px;"),
+      tags$style(type="text/css", "textarea {width:100%; margin-top: 5px;}"),
+      tags$textarea(id = inputId, placeholder = placeholder, rows = rows, value))
+  }
+  
   source("SimmoduleMELC1_21.R")
   
   initialSim <<- readRDS("base/initialSim.rds")
@@ -26,7 +33,8 @@ shinyServer(function(input, output, session) {
   models <<- initialSim$models
   PropensityModels <<- initialSim$PropensityModels
   children <<- initialSim$children
- 
+  transition_probabilities <<- initialSim$transition_probabilities
+  
   
   #First page of the website  
   varName = env.base$dict$descriptions 
@@ -173,11 +181,11 @@ shinyServer(function(input, output, session) {
   # startSB <- eventReactive(input$actionSB, { return("Simulation is Started!")} )
   # 
   # output$processSB <- renderText( { return(startSB())})
-  
+
   simulateSB <- eventReactive(input$actionSB, { 
     
-    env.scenario <- setGlobalSubgroupFilterExpression(env.scenario, input$subGrpFor_SB)
-    
+    #env.scenario <- setGlobalSubgroupFilterExpression(env.scenario, input$subGrpFor_SB)
+   
     sfInit(parallel=TRUE, cpus = 4, slaveOutfile = "test.txt" )
 
     sfExportAll()
@@ -200,7 +208,7 @@ shinyServer(function(input, output, session) {
     changeSB()
 
     
-    return( simulateSB())
+    print( simulateSB())
   })
   
  
@@ -231,8 +239,95 @@ shinyServer(function(input, output, session) {
   output$uiSubGrpTB <- renderUI({
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
-    selectInput("subGrp_TB", "Select Subgroup:",choices = c(None='', freqList), selectize=FALSE)
+
+    selectInput("subGrp_TB", "Select ByGroup:",
+                choices = c(None='',  freqList), selectize=FALSE)
   })
+  
+  
+  output$uiExprTB <- renderUI({
+    # Depending on input$input_type, we'll generate a different
+    # UI component and send it to the client.
+    
+    selectInput("subGrp_TB1", "Select Subgroup for subgroup formula:",
+                choices = c(None='',  c(freqList,meansList)), selectize=FALSE)
+  })
+   
+  output$uiExprTB1 <- renderUI({
+    # Depending on input$input_type, we'll generate a different
+    # UI component and send it to the client.
+    
+    print(names(env.base$dict$codings[[names(which(varName == input$subGrp_TB1))]]))
+    
+    choice <- names(env.base$dict$codings[[names(which(varName == input$subGrp_TB1))]])
+    
+    if(is.null(choice)){
+      selectInput("subGrp_TB2", input$subGrp_TB1, 
+                  choices = list("Equals" = "==",  "Less than" = "<", 
+                                 "Greater than" = ">", "Less than or equal to" = "<=", 
+                                 "Greater than or equal to" = ">=", "Not equals to " = "!="), 
+                  selectize=FALSE)
+      
+    } else {
+    selectInput("subGrp_TB2", input$subGrp_TB1,
+          choices = choice, 
+          selectize=FALSE)
+    }
+  })
+  
+
+  logisetexprTB <-eventReactive(input$andTB | input$orTB,{
+    # Depending on input$input_type, we'll generate a different
+    # UI component and send it to the client.
+  
+    index = env.base$dict$codings[[names(which(varName == input$subGrp_TB1))]][
+      (names(env.base$dict$codings[[names(which(varName == input$subGrp_TB1))]])==input$subGrp_TB2)]
+
+    print(index)
+    if(is.null(index)){
+      paste(names(which(varName == input$subGrp_TB1)), input$subGrp_TB2, sep = " ")    
+    }else{
+      paste(names(which(varName == input$subGrp_TB1)), index, sep = "==")
+    }
+
+  })
+  
+  
+  finalFormula <<- NULL
+  
+  orlogisetexprTB <-
+    eventReactive(input$orTB , finalFormula <<- paste(finalFormula, logisetexprTB(), " | "))  
+  
+  andlogisetexprTB <-
+    eventReactive(input$andTB , finalFormula <<- paste(finalFormula, logisetexprTB(), " & ") )  
+  
+  
+  output$uilogisetexprTB <- renderUI({
+
+    final <- 
+    isolate({ 
+      finalFormula <<- NULL
+      
+      orlogisetexprTB()
+      andlogisetexprTB()
+      
+      return(finalFormula)
+    })
+    
+    textareaInput("logisetexprTB",  "Subgroup formula:", value = final)
+    
+  })
+  
+  
+   
+  # output$uilogisetexpr_TB < renderUI({
+  #   # Depending on input$input_type, we'll generate a different
+  #   # UI component and send it to the client.
+  # 
+
+  # })
+  
+  baseTB <<- NULL 
   
   summaryOutputTB <- reactive({ #print(getwd())
     
@@ -245,20 +340,26 @@ shinyServer(function(input, output, session) {
     grpbyName = names(which(varName == input$subGrp_TB))
     
     if(length(grpbyName) == 0) grpbyName = ""
-    
 
-      results <- round(suppressWarnings(tableBuilder(env.base, 
-                   statistic = inputType[input$input_type_TB], 
-                   dict= env.base$dict,
-                   variableName = rev(names(which(trimws(varName) == trimws(input$dynamicTB))))[1], 
-                   grpbyName = grpbyName[1], CI = input$ci, 
-                   logisetexpr=NULL)), 4)
+    results <- round(suppressWarnings(tableBuilder(env.base, 
+                 statistic = inputType[input$input_type_TB], 
+                 dict= env.base$dict,
+                 variableName = rev(names(which(trimws(varName) == trimws(input$dynamicTB))))[1], 
+                 grpbyName = rev(grpbyName)[1], CI = input$ci, 
+                 logisetexpr=NULL)), 4)
       
-    if(!is.matrix(results))
-      as.matrix(results)
-    else
-      as.data.frame(results)
+    baseTB <- 
+      if(!is.matrix(results)){
+        as.matrix(results)
+      }else{
+        as.data.frame(results)
+      } 
+    
+    baseTB<<- baseTB
+    
+    baseTB
   })
+  
   
   output$resultTB  <- DT::renderDataTable({
     
@@ -269,7 +370,10 @@ shinyServer(function(input, output, session) {
     
   }, rownames = TRUE, options = list(pageLength = 21))
   
-  summaryOutputSBTB <- reactive({ #print(getwd())
+  
+  SBTB <<- NULL
+  
+  summaryOutputSBTB <- reactive({ 
     
     print(names(which(varName == input$subGrp_TB)))
     
@@ -281,18 +385,27 @@ shinyServer(function(input, output, session) {
     
     if(length(grpbyName) == 0) grpbyName = ""
 
-      results <- round(suppressWarnings(tableBuilder(env.scenario, 
-           statistic = inputType[input$input_type_TB], 
-           dict= env.base$dict,
-           variableName = rev(names(which(trimws(varName) == trimws(input$dynamicTB))))[1], 
-           grpbyName = grpbyName[1], CI = input$ci, 
-           logisetexpr=NULL)), 4)
+
+    results <- round(suppressWarnings(tableBuilder(env.scenario, 
+         statistic = inputType[input$input_type_TB], 
+         dict= env.base$dict,
+         variableName = rev(names(which(trimws(varName) == trimws(input$dynamicTB))))[1], 
+         grpbyName = grpbyName[1], CI = input$ci, 
+         logisetexpr=NULL)), 4)
     
-    if(!is.matrix(results))
-      as.matrix(results)
-    else
-      as.data.frame(results)
+    SBTB <-   
+      if(!is.matrix(results)){
+        as.matrix(results)
+      }else{
+        as.data.frame(results)
+      } 
+      
+    SBTB <<-SBTB
+    
+    SBTB
   })
+  
+ 
   
   output$resultSBTB  <- DT::renderDataTable({
     
@@ -302,5 +415,114 @@ shinyServer(function(input, output, session) {
     )
     
   }, rownames = TRUE, options = list(pageLength = 21))
+  
+  limits <<- dodge <<- NULL
+  
+  combineResults <- reactive({
+    
+    baseTB <-summaryOutputTB()
+    
+    SBTB <- try(summaryOutputSBTB(), silent = TRUE)
+    if(class(SBTB) == "try-error") SBTB <- NULL
+    
+    colname <- names(baseTB)
+    
+    if(any(grepl("Lower", colname))){
+      start <- seq(1,ncol(baseTB), 3)
+      
+      tables.list <- vector(length(start), mode = "list")
+      index <- 1
+      for(i in start){
+        tables.list[[index]] <- na.omit(data.frame(Year = 1:nrow(baseTB), 
+                                                   Scenario = "Base", 
+                                                   baseTB[,i:(i+2)]))
+        if(!is.null(SBTB))
+          tables.list[[index]] <- rbind(tables.list[[index]],
+                                        na.omit(data.frame(Year = 1:nrow(SBTB), 
+                                                           Scenario = "Scenario", 
+                                                           SBTB[,i:(i+2)])))  
+        
+        names(tables.list[[index]]) = c("Year", "Scenario", "Percentage", "Lower", "Upper")
+        names(tables.list)[index] <- colname[i]
+        
+        index <- index+1
+      }
+      
+      limits <<- aes(ymax = Upper, ymin=Lower)
+      dodge <<- position_dodge(width=0.9)
+      
+    } else {
+      tables.list <- vector(length(colname), mode = "list")
+      index <- 1
+      for(i in 1:length(colname)){
+        tables.list[[index]] <-  na.omit(data.frame(Year = 1:nrow(baseTB), 
+                                                    Scenario = "Base", 
+                                                    baseTB[,i]))
+        
+        if(!is.null(SBTB))
+          tables.list[[index]] <- rbind(tables.list[[index]],
+                                        na.omit(data.frame(Year = 1:nrow(SBTB), 
+                                                           Scenario = "Scenario", 
+                                                           SBTB[,i])))  
+        
+        names(tables.list[[index]]) = c("Year", "Scenario","Percentage")
+        names(tables.list)[index] <- colname[i]
+        
+        index <- index+1
+      }
+    }
+    
+    tables.list
+  })
+  
+  
+  output$barchart<- renderPlotly({
+   
+    tables.list <- combineResults()
+    
+    colname <- names(baseTB)
+    
+    p <- 
+    ggplot(tables.list[[2]], aes(fill=Scenario, y = Percentage, x = Year)) + 
+      ggtitle(names(tables.list)[2]) + 
+      geom_bar(position="dodge", stat = "identity")
+      
+    if(any(grepl("Lower", colname)))
+      p <- p + geom_errorbar(limits, position=dodge, width=0.25)
+    
+    ggplotly(p)
+  })
+  
+  
+  output$linePlot<- renderPlotly({
+    
+ 
+    tables.list <- combineResults()
+    
+    colname <- names(baseTB)
+    
+    p <- 
+      ggplot(tables.list[[2]], aes(fill=Scenario, y = Percentage, x = Year)) + 
+      ggtitle(names(tables.list)[2]) + 
+      geom_path()
+    
+    if(any(grepl("Lower", colname)))
+      p <- p + geom_errorbar(limits, position=dodge, width=0.25)
+    
+    ggplotly(p)
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
 })  

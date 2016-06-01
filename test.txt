@@ -1,4 +1,6 @@
-starting worker for localhost:11377 
+starting worker for localhost:11034 
+Type: EXEC 
+Type: EXEC 
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
@@ -83,19 +85,3 @@ Type: EXEC
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: DONE 
-Warning messages:
-1: replacing previous import 'Hmisc::summarize' by 'plyr::summarize' when loading 'simarioV2' 
-2: replacing previous import 'Hmisc::is.discrete' by 'plyr::is.discrete' when loading 'simarioV2' 
-r 17 
-Run 1 year 18 
-Run 1 year 19 
-Run 1 year 20 
-Run 1 year 21 
-Type: EXEC 
-Type: DONE 
-Warning messages:
-1: replacing previous import 'Hmisc::summarize' by 'plyr::summarize' when loading 'simarioV2' 
-2: replacing previous import 'Hmisc::is.discrete' by 'plyr::is.discrete' when loading 'simarioV2' 

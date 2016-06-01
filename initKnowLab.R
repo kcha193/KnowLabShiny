@@ -2,6 +2,8 @@
 
 
 
+
+
 initSim <- function(num.iterations){
   
   #' List of breaks codings for adjustable continuous variables.  
@@ -737,11 +739,32 @@ initSim <- function(num.iterations){
     PropensityModels
   }
   
+  #' Load the transition probabilities.
+  #' 
+  #' @param dir
+  #'  directory holding transition probabilities
+  #' 
+  #' @return
+  #'  a list of transition probabilities
+  #' 
+  #' @export
+  #' @examples
+  #' dir <- "C:/Workspace/simario/src/demo/data/transition_probabilities/"
+  #' transition_probabilities <- loadTransitionProbabilities(dir)
+  loadTransitionProbabilities <- function(dir) {
+    transition_probabilities <- list()
+    
+    transition_probabilities$r1School <- read_csv(dir, "r1School_transition_probabilities.csv")
+   
+    transition_probabilities
+  }
+  
   
   basefiledir <- paste(getwd() ,"/base/",sep="")
   modelfiledir <- paste(getwd(),"/models/",sep="")
   catToCont.modelfiledir <- paste(getwd(), "/models_CatToCont/", sep="")
   propensityfiledir <- paste(getwd(), "/models_Propensities/", sep="")
+  transition.probabilitiesfiledir <- paste(getwd(), "/transition_probabilities/", sep="")
   
   
   cat("Initialising KnowLab\n")
@@ -751,7 +774,6 @@ initSim <- function(num.iterations){
   dict<- createDict(descriptions_dataframe, codings_dataframe)
   
   #load initial basefile
-  
   children <- loadBaseFileCSV(basefiledir, "synthBasefile_MhrswrkFixed_5000_New.csv") 
   
   #create simframe
@@ -785,10 +807,8 @@ initSim <- function(num.iterations){
   propensities <- loadMELCPropensities2(propensityfiledir, stochastic=TRUE)
   ##propensities <<- loadMELCPropensities("A0", children$A0, propensityfiledir, num.iterations)
   
-  #load individual effects?
-  
-  #or disable propensities if want to use NMDS or Dundedin basefiles
-  #propensities <<- list()
+  #load transition_probabilities
+  transition_probabilities<- loadTransitionProbabilities(transition.probabilitiesfiledir)
   
   #load aux
   binbreaks <- createBinBreaks(children)
@@ -807,6 +827,16 @@ initSim <- function(num.iterations){
   
   cat("KnowLab initialised\n")
   
+  NUM_ITERATIONS <<- num.iterations
+	dict <<- dict
+	limits <<- limits
+	binbreaks <<- binbreaks
+	catToContModels <<- catToContModels
+	models <<- models
+	PropensityModels <<- PropensityModels
+	transition_probabilities<<- transition_probabilities
+	children <<- children
+
   list(dict = dict, 
        binbreaks = binbreaks,
        childsets = childsets,
@@ -816,6 +846,7 @@ initSim <- function(num.iterations){
        catToContModels = catToContModels,
        PropensityModels = PropensityModels,
        propensities = propensities,
+       transition_probabilities = transition_probabilities,
        limits = limits)
 }
 

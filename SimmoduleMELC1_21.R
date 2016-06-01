@@ -1284,6 +1284,7 @@ simulateKnowLab <- function(Simmodule, simenv) {
   }
   
   
+   
   simulate_Score <- function() {	 		 
     
     if(iteration == 17){
@@ -1295,7 +1296,7 @@ simulateKnowLab <- function(Simmodule, simenv) {
     z1ScoreLvl1 <<- ifelse(Score > 89.88, 1,0)
   }
   
-  pre_simulation_setup_MELC <- function() {
+  pre_simulation_setup <- function() {
     
     # setup constants
     NUMCHILDREN <<- length(A0)
@@ -1316,6 +1317,10 @@ simulateKnowLab <- function(Simmodule, simenv) {
     
     mage_years <<- MAGE + 1
     #when look at collated means - can see the effect from y2 onwards but doesn't show effect for y1
+    
+    school <- sapply(1:5000, function(i) sample(1:100, 1, prob = transition_probabilities$r1School[i,]))
+    
+    r1School <<- school
   }
   
   
@@ -1344,16 +1349,13 @@ simulateKnowLab <- function(Simmodule, simenv) {
   
   
   attach(simenv$simframe, name="simframe")
-  NUM_ITERATIONS <<- 21
+  NUM_ITERATIONS <- 21
   
   outcomes <- createOutcomeMatrices(simenv$simframe, "years1_21", c(1:NUM_ITERATIONS))
   
-  pre_simulation_setup_MELC()
+  pre_simulation_setup()
   
   store_current_values_in_outcomes(1)
-  
-  #browser()
-  z1OverweightLvl1 <- numeric(5000)
   
   for (iteration in 2:NUM_ITERATIONS) {
     #iteration =5
@@ -1404,8 +1406,10 @@ simulateKnowLab <- function(Simmodule, simenv) {
     
   }
   
+  
   detach("simframe")
-  outcomes
+  
+ outcomes
   
 }
 
