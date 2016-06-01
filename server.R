@@ -144,8 +144,10 @@ shinyServer(function(input, output, session) {
   
   # hotable
   output$hotable <- renderRHandsontable({
+ 
     catAdj = env.base$cat.adjustments[[ as.character(names(which(varName == input$var_SB)))]]
     
+
     tbl <-
     if(nrow(catAdj) == 1){	
       temp = cbind(Rowname = colnames(catAdj),  as.data.frame(apply(catAdj,2, as.numeric)))
@@ -416,12 +418,12 @@ shinyServer(function(input, output, session) {
     
   }, rownames = TRUE, options = list(pageLength = 21))
   
-  limits <<- dodge <<- NULL
+  limitsGGplot <<- dodge <<- NULL
   
   combineResults <- reactive({
     
     baseTB <-summaryOutputTB()
-    
+   
     SBTB <- try(summaryOutputSBTB(), silent = TRUE)
     if(class(SBTB) == "try-error") SBTB <- NULL
     
@@ -448,7 +450,7 @@ shinyServer(function(input, output, session) {
         index <- index+1
       }
       
-      limits <<- aes(ymax = Upper, ymin=Lower)
+      limitsGGplot <<- aes(ymax = Upper, ymin=Lower)
       dodge <<- position_dodge(width=0.9)
       
     } else {
@@ -488,7 +490,7 @@ shinyServer(function(input, output, session) {
       geom_bar(position="dodge", stat = "identity")
       
     if(any(grepl("Lower", colname)))
-      p <- p + geom_errorbar(limits, position=dodge, width=0.25)
+      p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
     
     ggplotly(p)
   })
@@ -507,22 +509,9 @@ shinyServer(function(input, output, session) {
       geom_path()
     
     if(any(grepl("Lower", colname)))
-      p <- p + geom_errorbar(limits, position=dodge, width=0.25)
+      p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
     
     ggplotly(p)
   })
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
 })  
