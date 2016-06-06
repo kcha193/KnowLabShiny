@@ -2,8 +2,8 @@ name: KnowLabShiny
 account: kcha193
 server: shinyapps.io
 appId: 96757
-bundleId: 437266
+bundleId: 469064
 url: https://kcha193.shinyapps.io/KnowLabShiny/
-when: 1461884955.62078
+when: 1464839459.1378
 asMultiple: FALSE
 asStatic: FALSE
