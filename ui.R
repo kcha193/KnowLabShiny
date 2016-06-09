@@ -103,6 +103,7 @@ dashboardPage(skin = "red",
                   box (
                     actionButton("actionAddSB", label = "Add Scenario"),
                     h2("Scenario simulation log:"),
+                    verbatimTextOutput('StartSim'),
                     verbatimTextOutput('resultSB'), width = 12),  width = 8
               ))),
   
@@ -114,6 +115,7 @@ dashboardPage(skin = "red",
                selectInput("input_type_TB", "Select Summary Measure",
                            c("Percentage", "Means","Quantiles" )),
                uiOutput("uiTB"),
+               uiOutput("uiVar"),
                uiOutput("uiSubGrpTB"),
                uiOutput("uiExprTB"),
                uiOutput("uiExprTB1"),

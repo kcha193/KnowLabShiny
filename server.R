@@ -10,6 +10,8 @@ library(stringr)
 library(stringi)
 library(simarioV2)
 library(plotly)
+library(dplyr)
+library(tidyr)
 
 shinyServer(function(input, output, session) {
   
@@ -120,6 +122,7 @@ shinyServer(function(input, output, session) {
   varList <- rbind(meansList,freqList )  
   
   env.scenario  <<- createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
+  
   varName_SB = sort(as.character(varName[names(env.base$cat.adjustments)]))
   varName_SB = varName_SB[!is.na(varName_SB)]
   
@@ -139,18 +142,13 @@ shinyServer(function(input, output, session) {
   baseOutputSB <- reactive({ 
     
     #print(input$var_SB)
-    
-    results <- round(suppressWarnings(tableBuilder(env.base, 
-             statistic = "frequencies", 
+   
+    results <- tableBuilderNew(env.base, statistic = "frequencies", 
              dict = env.base$dict,
              variableName =  rev(names(which(trimws(varName) == trimws(input$var_SB))))[1], 
-             grpbyName = "", CI = FALSE, 
-             logisetexpr=NULL)), 4)
+             grpbyName = "", logisetexpr="")
     
-    if(!is.matrix(results))
-      as.matrix(results)
-    else
-      as.data.frame(results)
+    results
     
   })
   
@@ -199,11 +197,7 @@ shinyServer(function(input, output, session) {
     }   
   })
   
-  # startSB <- eventReactive(input$actionSB, { return("Simulation is Started!")} )
-  # 
-  # output$processSB <- renderText( { return(startSB())})
 
-  
   output$uiExprSB <- renderUI({
      
     selectInput("subGrp_SB", "Select Subgroup for subgroup formula:",
@@ -267,9 +261,13 @@ shinyServer(function(input, output, session) {
     textareaInput("logisetexprSB",  "Subgroup formula:", value = finalFormSB())
   })
   
+  startsim <- eventReactive(input$actionSB, { return("Start simulation!")})
+  
+  
   simulateSB <- eventReactive(input$actionSB, { 
     
-    env.scenario <- setGlobalSubgroupFilterExpression(env.scenario, input$uilogisetexprSB)
+    if(!is.null(input$uilogisetexprSB))
+        env.scenario <- setGlobalSubgroupFilterExpression(env.scenario, input$uilogisetexprSB)
    
     sfInit(parallel=TRUE, cpus = 4, slaveOutfile = "test.txt" )
 
@@ -286,6 +284,13 @@ shinyServer(function(input, output, session) {
    
     return("Simulation is Finished!")
   } )
+  
+  
+    
+    
+  output$StartSim <-renderPrint({
+    print(startsim())
+  })
   
   output$resultSB  <- renderPrint({
 
@@ -342,9 +347,9 @@ shinyServer(function(input, output, session) {
       if(is.null(choice)){
         inputPanel(
           selectInput("subGrp_TB2", input$subGrp_TB1, 
-                      choices = c("Equals" = "==",  "Less than" = "<", 
-                                     "Greater than" = ">", "Less than or equal to" = "<=", 
-                                     "Greater than or equal to" = ">=", "Not equals to " = "!="), 
+                      choices = c("Equals" = " == ",  "Less than" = " < ", 
+                                     "Greater than" = " > ", "Less than or equal to" = " <= ", 
+                                     "Greater than or equal to" = " >= ", "Not equals to " = " != "), 
                       selectize=FALSE),
           textInput("subGrpNum_TB2", "" )
         )
@@ -369,7 +374,7 @@ shinyServer(function(input, output, session) {
     if(is.null(index)){
       paste(varList$Var[varList$Name == input$subGrp_TB1], paste(input$subGrp_TB2, input$subGrpNum_TB2), sep = " ")    
     }else{
-      paste(varList$Var[varList$Name == input$subGrp_TB1], index, sep = "==")
+      paste(varList$Var[varList$Name == input$subGrp_TB1], index, sep = " == ")
     }
 
   })
@@ -380,8 +385,8 @@ shinyServer(function(input, output, session) {
     
     finalFormula <<-
     switch(input$operatorTB, 
-         "And" = paste(finalFormula, logisetexprTB(), " & "),
-         "Or" = paste(finalFormula, logisetexprTB(), " | "),
+         "And" = paste(finalFormula, logisetexprTB(), "&"),
+         "Or" = paste(finalFormula, logisetexprTB(), "|"),
          "Complete" = paste(finalFormula, logisetexprTB(), ""),
          "Reset" = ""
     )
@@ -390,8 +395,6 @@ shinyServer(function(input, output, session) {
     finalFormula
   })
   
-   
-    
     
   output$uilogisetexprTB <- renderUI({  
     textareaInput("logisetexprTB",  "Subgroup formula:", value = finalForm())
@@ -412,24 +415,17 @@ shinyServer(function(input, output, session) {
     print(grpbyName)
     
     if(length(grpbyName) == 0) grpbyName = ""
-
-   
-    results <- round(suppressWarnings(tableBuilder(env.base, 
+ 
+    results <- tableBuilderNew(env.base, 
                  statistic = inputType[input$input_type_TB], 
                  variableName = varList$Var[varList$Name==input$dynamicTB],
                     grpbyName = grpbyName, CI = input$ci, 
-                 logisetexpr= trimws(input$logisetexprTB))), 4)
+                 logisetexpr = trimws(input$logisetexprTB))
       
-    baseTB <- 
-      if(!is.matrix(results)){
-        as.matrix(results)
-      }else{
-        as.data.frame(results)
-      } 
+   
+    baseTB <<- results
     
-    baseTB<<- baseTB
-    
-    baseTB
+    results
   })
   
   
@@ -462,24 +458,17 @@ shinyServer(function(input, output, session) {
     if(length(grpbyName) == 0) grpbyName = ""
 
 
-    results <- round(suppressWarnings(tableBuilder(env.scenario, 
+    results <-tableBuilderNew(env.scenario, 
          statistic = inputType[input$input_type_TB],
          variableName = varList$Var[varList$Name==input$dynamicTB],
          grpbyName = rev(grpbyName)[1], CI = input$ci, 
-         logisetexpr=NULL)), 4)
+         logisetexpr=trimws(input$logisetexprTB))
 
 
-    SBTB <-   
-      if(!is.matrix(results)){
-        as.matrix(results)
-      }else{
-        as.data.frame(results)
-      } 
+  
+    SBTB <<-results
     
-    
-    SBTB <<-SBTB
-    
-    SBTB
+    results
   })
   
  
@@ -498,66 +487,38 @@ shinyServer(function(input, output, session) {
  
   })
   
-  limitsGGplot <<- dodge <<- NULL
-  
-  
-  
+ 
   combineResults <- reactive({
     
     baseTB <-summaryOutputTB()
-   
+  
+    
     SBTB <- try(summaryOutputSBTB(), silent = TRUE)
     if(class(SBTB) == "try-error") SBTB <- NULL
     
     colname <- names(baseTB)
     
-    if(any(grepl("Lower", colname))){
-      start <- seq(1,ncol(baseTB), 3)
-      
-      tables.list <- vector(length(start), mode = "list")
-      index <- 1
-      for(i in start){
-        tables.list[[index]] <- na.omit(data.frame(Year = 1:nrow(baseTB), 
-                                                   Scenario = "Base", 
-                                                   baseTB[,i:(i+2)]))
-        if(!is.null(SBTB))
-          tables.list[[index]] <- rbind(tables.list[[index]],
-                                        na.omit(data.frame(Year = 1:nrow(SBTB), 
-                                                           Scenario = "Scenario", 
-                                                           SBTB[,i:(i+2)])))  
-        
-        names(tables.list[[index]]) = c("Year", "Scenario", input$input_type_TB, "Lower", "Upper")
-        names(tables.list)[index] <- colname[i]
-        
-        index <- index+1
-      }
-      
-      limitsGGplot <<- aes(ymax = Upper, ymin=Lower)
-      dodge <<- position_dodge(width=0.9)
-      
-    } else {
-      tables.list <- vector(length(colname), mode = "list")
-      index <- 1
-      for(i in 1:length(colname)){
-        tables.list[[index]] <-  na.omit(data.frame(Year = 1:nrow(baseTB), 
-                                                    Scenario = "Base", 
-                                                    baseTB[,i]))
-        
-        if(!is.null(SBTB))
-          tables.list[[index]] <- rbind(tables.list[[index]],
-                                        na.omit(data.frame(Year = 1:nrow(SBTB), 
-                                                           Scenario = "Scenario", 
-                                                           SBTB[,i])))  
-        
-        names(tables.list[[index]]) = c("Year", "Scenario", input$input_type_TB)
-        names(tables.list)[index] <- colname[i]
-        
-        index <- index+1
-      }
-    }
     
-    tables.list
+    combineResults <- data.frame(Scenario = "Base", baseTB)
+    
+    if(!is.null(SBTB))
+      combineResults <- rbind(combineResults,data.frame(Scenario = "Scenario", SBTB))
+    
+    combineResults
   })
+  
+  output$uiVar <- renderUI({
+    selectInput("Var_TB", "Select Variable Group:",  
+                selected = unique(combineResults()$Var)[1], 
+                choices = unique(combineResults()$Var), selectize=FALSE)
+  })
+  
+  
+  # output$uiGrpBy <- renderUI({
+  #   selectInput("subGrp_TB", "Select ByGroup:",
+  #               selected = unique(combineResults()$groupByData)[1], 
+  #               choices = unique(combineResults()$groupByData), selectize=FALSE)
+  # })
   
   
   output$barchart<- renderPlotly({
@@ -566,14 +527,18 @@ shinyServer(function(input, output, session) {
     
     colname <- names(summaryOutputTB())
     
+    limitsGGplot <- aes(ymax = Upper, ymin=Lower)
+    dodge <- position_dodge(width=0.9)
+    
+    if(input$input_type_TB == "Percentage")
+      tables.list <- tables.list[tables.list$Var==input$Var_TB, ]
+    
     p <- 
-    if(input$input_type_TB == "Percentage"){  
-      ggplot(tables.list[[2]], aes(fill=Scenario, y = Percentage, x = Year)) +  
-        ggtitle(names(tables.list)[2]) + geom_bar(position="dodge", stat = "identity")
-    }else if(input$input_type_TB == "Means"){
-      ggplot(tables.list[[1]], aes(fill=Scenario, y = Means, x = Year)) +  
-      ggtitle(names(tables.list)[1]) + geom_bar(position="dodge", stat = "identity")
-   }
+    ggplot(tables.list, aes(fill=Scenario, y = Mean, x = Year)) +  
+      ggtitle(varList$Name[varList$Name==input$dynamicTB]) + 
+      geom_bar(position="dodge", stat = "identity")
+    
+    
     if(any(grepl("Lower", colname)))
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
     
@@ -585,15 +550,15 @@ shinyServer(function(input, output, session) {
     tables.list <- combineResults()
     
     colname <- names(summaryOutputTB())
+    limitsGGplot <- aes(ymax = Upper, ymin=Lower)
+    dodge <- position_dodge(width=0.9)
     
-    p <- 
-    if(input$input_type_TB == "Percentage"){  
-      ggplot(tables.list[[2]], aes(colour = Scenario, y = Percentage, x = Year)) +  
-        ggtitle(names(tables.list)[2]) +  geom_path()
-    }else if(input$input_type_TB == "Means"){
-      ggplot(tables.list[[1]], aes(colour = Scenario, y = Means, x = Year)) +  
-        ggtitle(names(tables.list)[1]) +  geom_path()
-    }  
+    if(input$input_type_TB == "Percentage")
+      tables.list <- tables.list[tables.list$Var==input$Var_TB, ] 
+    
+    p <-
+    ggplot(tables.list, aes(colour = Scenario, y = Mean, x = Year)) +  
+      ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path()
 
     if(any(grepl("Lower", colname)))
       p <- p + geom_errorbar(limitsGGplot, width=0.2)

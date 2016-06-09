@@ -1,10 +1,10 @@
-starting worker for localhost:11788 
+starting worker for localhost:11286 
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
-JOB STARTED AT Thu Jun 02 15:30:30 2016 ON SC-STA-291922 (OSWindows) 7 x64
+JOB STARTED AT Fri Jun 10 02:14:27 2016 ON SC-STA-291922 (OSWindows) 7 x64
  
 Type: EXEC 
 Type: EXEC 
@@ -14,9 +14,6 @@ Type: EXEC
 Type: EXEC 
 R Version:  R version 3.3.0 (2016-05-03) 
 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
@@ -129,6 +126,3 @@ Run 1 year 20
 Run 1 year 21 
 Type: EXEC 
 Type: DONE 
-Warning messages:
-1: replacing previous import 'Hmisc::summarize' by 'plyr::summarize' when loading 'simarioV2' 
-2: replacing previous import 'Hmisc::is.discrete' by 'plyr::is.discrete' when loading 'simarioV2' 
