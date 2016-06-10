@@ -145,10 +145,11 @@ shinyServer(function(input, output, session) {
    
     results <- tableBuilderNew(env.base, statistic = "frequencies", 
              dict = env.base$dict,
-             variableName =  rev(names(which(trimws(varName) == trimws(input$var_SB))))[1], 
+             variableName = rev(names(which(trimws(varName) == trimws(input$var_SB))))[1], 
              grpbyName = "", logisetexpr="")
     
-    results
+    
+    results %>% select(Var, Year, Mean) %>% spread(Var, Mean)
     
   })
   
@@ -286,8 +287,6 @@ shinyServer(function(input, output, session) {
   } )
   
   
-    
-    
   output$StartSim <-renderPrint({
     print(startsim())
   })

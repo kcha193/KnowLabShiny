@@ -4,26 +4,6 @@ Type: EXEC
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
-JOB STARTED AT Fri Jun 10 02:14:27 2016 ON SC-STA-291922 (OSWindows) 7 x64
- 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-R Version:  R version 3.3.0 (2016-05-03) 
-
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
