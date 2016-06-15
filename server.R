@@ -104,66 +104,55 @@ shinyServer(function(input, output, session) {
   
   #################################################################################################################
   #Scenario Builder
-  catvars <- c(getOutcomeVars(initialSim$simframe, "categorical"), "SESBTH", 
-               "r1stmeduc", "r1stfeduc", "fage",
-               "z1single0Lvl1", "bthorder", "NPRESCH", "z1genderLvl1")
-  contvars <- c(getOutcomeVars(initialSim$simframe, "continuous"), "bwkg", "pregalc", 
-                "ga", "INTERACT", "PUNISH", "MAGE", "pregsmk")
+  catvars <- c("z1single0", "pregalc", getOutcomeVars(initialSim$simframe, "categorical"), "SESBTH", 
+               "r1stmeduc", "r1stfeduc", "fage", "bthorder", "NPRESCH", "z1genderLvl1" )
+  contvars <- c(getOutcomeVars(initialSim$simframe, "continuous"), "bwkg", 
+                "ga", "MAGE", "BREAST")
   
-  freqList <-  data.frame(Var =catvars, Name = as.character(trimws(varName[catvars])), stringsAsFactors = FALSE)
+  freqList <-  data.frame(Var =catvars, 
+                          Name = as.character(trimws(varName[catvars])), 
+                          stringsAsFactors = FALSE)
   
-  freqList <- freqList[order(freqList$Name),]
+
+  meansList <-  quantilesList <-data.frame(Var = contvars, 
+                                           Name = as.character(trimws(varName[contvars])), 
+                                           stringsAsFactors = FALSE)
   
-  meansList <-  quantilesList <-data.frame(Var = contvars, Name = as.character(trimws(varName[contvars])), stringsAsFactors = FALSE)
-  
-  meansList <- meansList[order(meansList$Name),]  
   quantilesList <- quantilesList[order(quantilesList$Name),]  
   
-  varList <- rbind(meansList,freqList )  
+  varList <- rbind(freqList, meansList)  
+  
+   
+  var_SB <- names(env.base$cat.adjustments)
+
+  var_SB_New <- unlist(sapply(var_SB, function(x) rev(varList$Var[grep(x, varList$Var)])[1]))
+
+  varName_SB <-  data.frame(old =var_SB,
+                            Var =var_SB_New, 
+                            Name = trimws(varName[var_SB_New]), 
+                            stringsAsFactors = FALSE)
+  
+  varName_SB <- varName_SB[order(varName_SB$Name),]  
+  
+  varList <- varList[order(varList$Name),]  
   
   env.scenario  <<- createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
   
-  varName_SB = sort(as.character(varName[names(env.base$cat.adjustments)]))
-  varName_SB = varName_SB[!is.na(varName_SB)]
-  
   newSB <- function(){
-    
     env.scenario <<- createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
-    
   }
-  
   
   output$uiSB <- renderUI({   
     selectInput("var_SB", "Select Variable to Examine",
-                choices = varName_SB, selectize=FALSE)    
+                choices = varName_SB$Name, selectize=FALSE)    
   })
   
   
-  baseOutputSB <- reactive({ 
-    
-    #print(input$var_SB)
-   
-    results <- tableBuilderNew(env.base, statistic = "frequencies", 
-             dict = env.base$dict,
-             variableName = rev(names(which(trimws(varName) == trimws(input$var_SB))))[1], 
-             grpbyName = "", logisetexpr="")
-    
-    
-    results %>% select(Var, Year, Mean) %>% spread(Var, Mean)
-    
-  })
-  
-  output$previewSB  <- DT::renderDataTable({
-    input$var_SB
-    isolate( 
-      baseOutputSB()
-    )
-  })
-  
+ 
   # hotable
   output$hotable <- renderRHandsontable({
  
-    catAdj = env.base$cat.adjustments[[ as.character(names(which(varName == input$var_SB)))]]
+    catAdj = env.base$cat.adjustments[[ as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
     
 
     tbl <-
@@ -202,7 +191,7 @@ shinyServer(function(input, output, session) {
   output$uiExprSB <- renderUI({
      
     selectInput("subGrp_SB", "Select Subgroup for subgroup formula:",
-                choices = c(None='',  c(freqList$Name,meansList$Name)), selectize=FALSE)
+                choices = c(None='',  c(varList$Name)), selectize=FALSE)
   })
   
   output$uiExprSB1 <- renderUI({
@@ -238,7 +227,7 @@ shinyServer(function(input, output, session) {
     if(is.null(index)){
       paste(varList$Var[varList$Name == input$subGrp_SB], paste(input$subGrp_SB1, input$subGrpNum_SB2), sep = " ")    
     }else{
-      paste(varList$Var[varList$Name == input$subGrp_SB], index, sep = "==")
+      paste(varList$Var[varList$Name == input$subGrp_SB], index, sep = " == ")
     }
     
   })
@@ -261,6 +250,32 @@ shinyServer(function(input, output, session) {
   output$uilogisetexprSB <- renderUI({  
     textareaInput("logisetexprSB",  "Subgroup formula:", value = finalFormSB())
   })
+  
+  
+  baseOutputSB <- reactive({ 
+    
+    print(as.character(varName_SB$Var[varName_SB$Name==input$var_SB]))
+    
+    results <- tableBuilderNew(env.base, statistic = "frequencies", 
+                               dict = env.base$dict,
+                               variableName = as.character(varName_SB$Var[varName_SB$Name==input$var_SB]),
+                               grpbyName = "", 
+                               logisetexpr=trimws(input$logisetexprSB))
+    
+    results %>% select(Var, Year, Mean) %>% spread(Var, Mean)
+    
+  })
+  
+  output$previewSB  <- DT::renderDataTable({
+    input$preview_SB
+    isolate( 
+      datatable(baseOutputSB(), class = 'table-condensed', 
+                options = list(scrollX = TRUE, scrollY = TRUE,
+                               fixedColumns = list(leftColumns = 2)), 
+                rownames = FALSE)
+    )
+  })
+  
   
   startsim <- eventReactive(input$actionSB, { return("Start simulation!")})
   

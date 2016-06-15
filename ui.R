@@ -91,7 +91,8 @@ dashboardPage(skin = "red",
                                  )),
                   uiOutput("uilogisetexprSB"),
                   selectInput("nRun", "Number of Runs:", c(1:10), selected = 4),
-                  actionButton("actionSB", label = "Run Scenario"),  width = 4
+                  actionButton("preview_SB", label = "Preview"),
+                  actionButton("actionSB", label = "Run Scenario"),  width = 3
               ),
               # Show a plot of the generated distribution
               box(title ="Setting the Scenario", status = "warning", solidHeader = TRUE,
@@ -101,10 +102,11 @@ dashboardPage(skin = "red",
                        dataTableOutput("previewSB"), width = 6),
                   hr(),
                   box (
+                   
                     actionButton("actionAddSB", label = "Add Scenario"),
                     h2("Scenario simulation log:"),
                     verbatimTextOutput('StartSim'),
-                    verbatimTextOutput('resultSB'), width = 12),  width = 8
+                    verbatimTextOutput('resultSB'), width = 12),  width = 9
               ))),
   
     tabItem("tb",
