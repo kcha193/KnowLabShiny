@@ -196,7 +196,10 @@ shinyServer(function(input, output, session) {
   
   output$uiExprSB1 <- renderUI({
     
-    choice <- names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_SB]]])
+    if(input$subGrp_SB == "")
+      return()
+    else  
+      choice <- names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_SB]]])
     
     if(is.null(choice)){
       inputPanel(
@@ -269,10 +272,11 @@ shinyServer(function(input, output, session) {
   output$previewSB  <- DT::renderDataTable({
     input$preview_SB
     isolate( 
-      datatable(baseOutputSB(), class = 'table-condensed', 
-                options = list(scrollX = TRUE, scrollY = TRUE,
-                               fixedColumns = list(leftColumns = 2)), 
-                rownames = FALSE)
+     datatable(baseOutputSB(), class = 'table-condensed', 
+               options = list(pageLength = 21, dom = 't',
+                              scrollX = TRUE, scrollY = TRUE,
+                                fixedColumns = list(leftColumns = 2)), 
+                    rownames = FALSE)
     )
   })
   
@@ -326,9 +330,9 @@ shinyServer(function(input, output, session) {
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
     switch(input$input_type_TB,
-           "Percentage" = selectInput("dynamicTB", "Variable",choices = freqList$Name),
-           "Means" = selectInput("dynamicTB", "Variable", choices =  meansList$Name),
-           "Quantiles" = selectInput("dynamicTB", "Variable", choices =  quantilesList$Name)
+           "Percentage" = selectInput("dynamicTB", "Variable",choices = sort(freqList$Name)),
+           "Means" = selectInput("dynamicTB", "Variable", choices =  sort(meansList$Name)),
+           "Quantiles" = selectInput("dynamicTB", "Variable", choices =  sort(quantilesList$Name))
     )
   })
   
@@ -337,7 +341,7 @@ shinyServer(function(input, output, session) {
     # UI component and send it to the client.
 
     selectInput("subGrp_TB", "Select ByGroup:",
-                choices = c(None='',  freqList$Name), selectize=FALSE)
+                choices = c(None='',  sort(freqList$Name)), selectize=FALSE)
   })
   
   
@@ -346,7 +350,7 @@ shinyServer(function(input, output, session) {
     # UI component and send it to the client.
     
     selectInput("subGrp_TB1", "Select Subgroup for subgroup formula:",
-                choices = c(None='',  c(freqList$Name,meansList$Name)), selectize=FALSE)
+                choices = c(None='',  sort(c(freqList$Name,meansList$Name))), selectize=FALSE)
   })
    
   output$uiExprTB1 <- renderUI({
@@ -354,16 +358,18 @@ shinyServer(function(input, output, session) {
     # UI component and send it to the client.
     
     #print(names(env.base$dict$codings[[names(which(varName == input$subGrp_TB1))]]))
-    
-    choice <- names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]])
+    if(input$subGrp_TB1 == "")
+      return()
+    else  
+      choice <- names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]])
     
     isolate(
       if(is.null(choice)){
         inputPanel(
           selectInput("subGrp_TB2", input$subGrp_TB1, 
                       choices = c("Equals" = " == ",  "Less than" = " < ", 
-                                     "Greater than" = " > ", "Less than or equal to" = " <= ", 
-                                     "Greater than or equal to" = " >= ", "Not equals to " = " != "), 
+                                 "Greater than" = " > ", "Less than or equal to" = " <= ", 
+                                 "Greater than or equal to" = " >= ", "Not equals to " = " != "), 
                       selectize=FALSE),
           textInput("subGrpNum_TB2", "" )
         )
@@ -404,8 +410,6 @@ shinyServer(function(input, output, session) {
          "Complete" = paste(finalFormula, logisetexprTB(), ""),
          "Reset" = ""
     )
-    
-    
     finalFormula
   })
   
@@ -420,7 +424,7 @@ shinyServer(function(input, output, session) {
   summaryOutputTB <- eventReactive( input$actionTB, { #print(getwd())
     
     
-    inputType = c("frequencies", "means", "quintiles")
+    inputType = c("frequencies", "means", "quantiles")
     
     names(inputType) = c("Percentage", "Means","Quantiles" )
     
@@ -436,7 +440,8 @@ shinyServer(function(input, output, session) {
                     grpbyName = grpbyName, CI = input$ci, 
                  logisetexpr = trimws(input$logisetexprTB))
       
-   
+  
+    
     baseTB <<- results
     
     results
@@ -445,15 +450,26 @@ shinyServer(function(input, output, session) {
   
   output$resultTB  <- DT::renderDataTable({
 
-      DT::datatable( summaryOutputTB(), rownames = TRUE, 
-                     extensions = 'Buttons',  
-                     options = list(pageLength = 21, dom = 'Bfrtip',
-                                    buttons = 
-                                      list('copy', 'print', list(
-                                        extend = 'collection',
-                                        buttons = c('csv', 'excel', 'pdf'),
-                                        text = 'Download'
-                                      ))))
+    results <- summaryOutputTB()
+    
+    
+    if(input$input_type_TB == "Percentage"){
+      mean <- results %>% select(Var, Year,Mean)%>% spread(Var, Mean)
+      lower <- results %>% select(Var, Year,Lower)%>% spread(Var, Lower)
+      names(lower)[-1] <- paste(names(lower)[-1] , "Lower", sep = ".")
+      upper <- results %>% select(Var, Year, Upper)%>% spread(Var, Upper)
+      names(upper)[-1] <- paste(names(upper)[-1] , "Upper", sep = ".")
+      
+      results <- mean %>% left_join(lower) %>% left_join(upper)
+      
+      index <- as.numeric(sapply(2:(2+ncol(mean)-2), function(x) seq(x, ncol(results), ncol(mean)-1)))
+      
+      results <- results[, c(1,index)]
+    }
+    
+    DT::datatable(results, rownames = FALSE, 
+              options = list(pageLength = 21, dom = 't',
+                             scrollX = TRUE))
   })
   
   
@@ -463,7 +479,7 @@ shinyServer(function(input, output, session) {
     
     print(names(which(varName == input$subGrp_TB)))
     
-    inputType = c("frequencies", "means", "quintiles")
+    inputType = c("frequencies", "means", "quantiles")
     
     names(inputType) = c("Percentage", "Means","Quantile" )
     
@@ -479,7 +495,6 @@ shinyServer(function(input, output, session) {
          logisetexpr=trimws(input$logisetexprTB))
 
 
-  
     SBTB <<-results
     
     results
@@ -489,15 +504,24 @@ shinyServer(function(input, output, session) {
   
   output$resultSBTB  <- DT::renderDataTable({
 
-      datatable(summaryOutputSBTB(), rownames = TRUE, 
-                extensions = 'Buttons',  
-                options = list(pageLength = 21, dom = 'Bfrtip',
-                               buttons = 
-                                 list('copy', 'print', list(
-                                   extend = 'collection',
-                                   buttons = c('csv', 'excel', 'pdf'),
-                                   text = 'Download'
-                                 ))))
+    results <- summaryOutputSBTB()
+    
+    if(input$input_type_TB == "Percentage"){
+      mean <- results %>% select(Var, Year,Mean)%>% spread(Var, Mean)
+      lower <- results %>% select(Var, Year,Lower)%>% spread(Var, Lower)
+      names(lower)[-1] <- paste(names(lower)[-1] , "Lower", sep = ".")
+      upper <- results %>% select(Var, Year, Upper)%>% spread(Var, Upper)
+      names(upper)[-1] <- paste(names(upper)[-1] , "Upper", sep = ".")
+      
+      results <- mean %>% left_join(lower) %>% left_join(upper)
+      
+      index <- as.numeric(sapply(2:(2+ncol(mean)-2), function(x) seq(x, ncol(results), ncol(mean)-1)))
+      
+      results <- results[, c(1,index)]
+    }
+    DT::datatable(results, rownames = FALSE, 
+                options = list(pageLength = 21, dom = 't',
+                               scrollX = TRUE))
  
   })
   

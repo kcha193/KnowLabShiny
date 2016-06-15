@@ -90,8 +90,8 @@ dashboardPage(skin = "red",
                                    onInitialize = I('function() { this.setValue(""); }')
                                  )),
                   uiOutput("uilogisetexprSB"),
-                  selectInput("nRun", "Number of Runs:", c(1:10), selected = 4),
                   actionButton("preview_SB", label = "Preview"),
+                  selectInput("nRun", "Number of Runs:", c(1:10), selected = 4),
                   actionButton("actionSB", label = "Run Scenario"),  width = 3
               ),
               # Show a plot of the generated distribution
@@ -102,7 +102,6 @@ dashboardPage(skin = "red",
                        dataTableOutput("previewSB"), width = 6),
                   hr(),
                   box (
-                   
                     actionButton("actionAddSB", label = "Add Scenario"),
                     h2("Scenario simulation log:"),
                     verbatimTextOutput('StartSim'),
@@ -133,11 +132,8 @@ dashboardPage(skin = "red",
              ),
              # Show a plot of the generated distribution
              tabBox(width = 9,height = "850px",
-                tabPanel("Tables", 
-                         box(title = "Base",status = "success", solidHeader = TRUE,
-                                       dataTableOutput('resultTB'),  width = 6),
-                         box(title = "Scenario",status = "info", solidHeader = TRUE,
-                             dataTableOutput('resultSBTB'),  width = 6)),
+                tabPanel(title = "Base", dataTableOutput('resultTB')),
+                tabPanel(title = "Scenario",  dataTableOutput('resultSBTB')),
                 tabPanel("Barchart", plotlyOutput("barchart", width = "70%", height = "700px")),    
                 tabPanel("Line plot", plotlyOutput("linePlot", width = "70%", height = "700px"))      
              )))
