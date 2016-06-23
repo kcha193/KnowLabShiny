@@ -5,23 +5,37 @@ library(shinydashboard)
 library(DT)
 library(rhandsontable)
 library(plotly)
+library(sweetalertR)
+
+options(shiny.maxRequestSize=10000*1024^2)
 
 dashboardPage(skin = "red",
   dashboardHeader(title = "Knowledge Lab"),
+  
   # Application title
   dashboardSidebar(
     sidebarMenu(
+     
       menuItem("First Page", tabName = "fb", icon = icon("home")),
-      #menuItem("Base Summary", tabName = "bs", icon = icon("database")),
       menuItem("Scenario Builder", tabName = "sb", icon = icon("refresh")),
-      menuItem("Table Builder", tabName = "tb", icon = icon("table"))
-    )
-  ),
-  dashboardBody(tabItems(
-  
-    tabItem("fb", 
+      menuItem("Table Builder", tabName = "tb", icon = icon("table")),
+      br(),
+      box(title ="Project upload", background ="navy", status = "primary",solidHeader = TRUE, 
+          fileInput('file1', 'Choose Project File', accept=c('Rdata/rds', '.Rdata')),  
+          width = 12),
+      br(),
+      box(title ="Saved Scenarios", background ="navy",  status = "primary",solidHeader = TRUE, 
+          uiOutput("selectSB"), width = 12),
+      br(),
+      textInput("wrkSpaceName", label = "Name the Project:"),
+      downloadButton('saveWrkspace', "Save Project")      
+      )),
+  dashboardBody(
+    tabItems( 
+      tabItem("fb", 
             fluidRow(
-            box(h3("Developing a knowledge laboratory of the early life-course using 
+            box(
+              h3("Developing a knowledge laboratory of the early life-course using 
                    systematic reviews and meta analyses"),
               p("This is a three -year project funded by the Ministry of Business, Innovation 
                     and Employment through its health and Society  fund in 2013."),
@@ -54,31 +68,14 @@ dashboardPage(skin = "red",
               a(href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass.html",
                 img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
                     width = 200))),
-            box("And Here!"))),
-    
-    tabItem("bs",
-           # Sidebar with a slider input for the number of bins
-           fluidRow(
-             box(title ="Variable", 
-                 status = "primary",solidHeader = TRUE,
-               selectInput("input_type", "Summary Statistics",
-                           c("Percentage", "Percentage - continous grouped", "Means","Quantiles" )),
-               
-               uiOutput("ui"),
-               actionButton("previewBS", label = "Preview"),
-			   downloadButton('downloadData', 'Download'),
-               #selectizeInput('freqs', 'Freq', choices = NULL)
-               width = 4),
-             
-             # Show a plot of the generated distribution
-			   box(title = "Base", status = "success", solidHeader = TRUE,
-               dataTableOutput('result'), width = 8
-             ))),
+            box())),
     
     tabItem("sb",
             fluidRow(
-              box(title ="Variable", 
+              box(title ="Variable", width = 3,
                   status = "primary",solidHeader = TRUE,
+                  textInput("nameSB", "Name your scenario"),
+                  actionButton("newSB", label = "New scenario"),
                   uiOutput("uiSB"),
                   uiOutput("uiSubGrpSB"),
                   uiOutput("uiExprSB"),
@@ -91,23 +88,18 @@ dashboardPage(skin = "red",
                                  )),
                   uiOutput("uilogisetexprSB"),
                   actionButton("preview_SB", label = "Preview"),
+                  actionButton("actionAddSB", label = "Add Scenario"),
                   selectInput("nRun", "Number of Runs:", c(1:10), selected = 4),
-                  actionButton("actionSB", label = "Run Scenario"),  width = 3
-              ),
+                  actionButton("actionSB", label = "Run Scenario"),
+                  h3("Scenario simulation log:"),
+                  verbatimTextOutput('StartSim'),
+                  verbatimTextOutput('resultSB')),
               # Show a plot of the generated distribution
               box(title ="Setting the Scenario", status = "warning", solidHeader = TRUE,
                   box (title = "Cat Adjustment", status = "success", solidHeader = TRUE,
-                       rHandsontableOutput("hotable"), width = 6),
+                      rHandsontableOutput("hotable"), width = 6, height = 600),
                   box (title = "Base value", status = "info", solidHeader = TRUE, 
-                       dataTableOutput("previewSB"), width = 6),
-                  hr(),
-                  box (
-                    actionButton("actionAddSB", label = "Add Scenario"),
-                    h2("Scenario simulation log:"),
-                    verbatimTextOutput('StartSim'),
-                    verbatimTextOutput('resultSB'), width = 12),  width = 9
-              ))),
-  
+                       dataTableOutput("previewSB"),  width = 6, height = 600),  width = 9))),
     tabItem("tb",
            # Sidebar with a slider input for the number of bins
            fluidRow(
@@ -131,11 +123,24 @@ dashboardPage(skin = "red",
                actionButton("actionTB", label = "Show")
              ),
              # Show a plot of the generated distribution
-             tabBox(width = 9,height = "850px",
+             tabBox(width = 9, height = "750px", id = "mainTabset",
                 tabPanel(title = "Base", dataTableOutput('resultTB')),
                 tabPanel(title = "Scenario",  dataTableOutput('resultSBTB')),
                 tabPanel("Barchart", plotlyOutput("barchart", width = "70%", height = "700px")),    
-                tabPanel("Line plot", plotlyOutput("linePlot", width = "70%", height = "700px"))      
-             )))
-))
-)
+                tabPanel("Line plot", plotlyOutput("linePlot", width = "70%", height = "700px"))) 
+             ))
+)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+

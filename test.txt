@@ -1,64 +1,4 @@
-starting worker for localhost:11948 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-JOB STARTED AT Wed Jun 15 17:25:34 2016 ON SC-STA-291922 (OSWindows) 7 x64
- 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-R Version:  R version 3.3.0 (2016-05-03) 
-
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Loading required package: lattice
-Loading required package: survival
-Loading required package: Formula
-Loading required package: ggplot2
-
-Attaching package: 'Hmisc'
-
-The following objects are masked from 'package:base':
-
-    format.pval, round.POSIXt, trunc.POSIXt, units
-
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Library Hmisc loaded.
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
+starting worker for localhost:11274 
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
@@ -96,17 +36,12 @@ Type: EXEC
 Type: EXEC 
 Type: EXEC 
 Type: EXEC 
-Library stringr loaded.
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
-Type: EXEC 
 Type: EXEC 
 Run 1 year 2 
 Run 1 year 3 
 Run 1 year 4 
+Evaluating logiset expression: "" for variable 
+Adjusting z1accom :  1 0 
 Run 1 year 5 
 Run 1 year 6 
 Run 1 year 7 
