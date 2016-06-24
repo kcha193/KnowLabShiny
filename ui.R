@@ -15,20 +15,22 @@ dashboardPage(skin = "red",
   # Application title
   dashboardSidebar(
     sidebarMenu(
-     
       menuItem("First Page", tabName = "fb", icon = icon("home")),
+      menuItem("Model input", tabName = "mi", icon = icon("line-chart")),
       menuItem("Scenario Builder", tabName = "sb", icon = icon("refresh")),
       menuItem("Table Builder", tabName = "tb", icon = icon("table")),
       br(),
-      box(title ="Project upload", background ="navy", status = "primary",solidHeader = TRUE, 
-          fileInput('file1', 'Choose Project File', accept=c('Rdata/rds', '.Rdata')),  
+      box(title ="Project upload", background ="black", status = "primary",solidHeader = TRUE, 
+          fileInput('file1', 'Choose Project File', accept=c('.RData')),  
           width = 12),
       br(),
-      box(title ="Saved Scenarios", background ="navy",  status = "primary",solidHeader = TRUE, 
+      box(title ="Saved Scenarios", background ="black",  status = "primary",solidHeader = TRUE, 
           uiOutput("selectSB"), width = 12),
       br(),
       textInput("wrkSpaceName", label = "Name the Project:"),
-      downloadButton('saveWrkspace', "Save Project")      
+      downloadButton('saveWrkspace', "Save Project"),
+      h3("Contact email:"), 
+      a("k.chang@auckland.ac.nz", href= "mailto:k.chang@auckland.ac.nz")
       )),
   dashboardBody(
     tabItems( 
@@ -69,7 +71,7 @@ dashboardPage(skin = "red",
                 img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
                     width = 200))),
             box())),
-    
+      tabItem("mi"),
     tabItem("sb",
             fluidRow(
               box(title ="Variable", width = 3,
@@ -120,7 +122,11 @@ dashboardPage(skin = "red",
                            )),
                uiOutput("uilogisetexprTB"),
                checkboxInput("ci", label = "Confidence Interval", value = TRUE),
-               actionButton("actionTB", label = "Show")
+               actionButton("actionTB", label = "Show"),
+               br(),
+               downloadButton('downloadTable', 'Download Table'),
+               br(),
+               downloadButton('downloadPlot', 'Download Plot')
              ),
              # Show a plot of the generated distribution
              tabBox(width = 9, height = "750px", id = "mainTabset",

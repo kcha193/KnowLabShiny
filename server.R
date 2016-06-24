@@ -12,7 +12,7 @@ library(simarioV2)
 library(plotly)
 library(dplyr)
 library(tidyr)
-library(xlsx)
+library(openxlsx)
 
 shinyServer(function(input, output, session) {
   
@@ -154,7 +154,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$uiExprSB1 <- renderUI({
-    if(input$subGrp_SB == "")
+    if(input$subGrp_SB == '')
       return()
     else  
       choice <- names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_SB]]])
@@ -198,8 +198,8 @@ shinyServer(function(input, output, session) {
     
     finalFormulaSB <<-
       switch(input$operatorSB, 
-             "And" = paste(finalFormulaSB, logisetexprSB(), " & "),
-             "Or" = paste(finalFormulaSB, logisetexprSB(), " | "),
+             "And" = paste(finalFormulaSB, logisetexprSB(), "&"),
+             "Or" = paste(finalFormulaSB, logisetexprSB(), "|"),
              "Complete" = paste(finalFormulaSB, logisetexprSB(), ""),
              "Reset" = ""
       )
@@ -338,19 +338,16 @@ shinyServer(function(input, output, session) {
   })
   
   output$uiSubGrpTB <- renderUI({
-    # Depending on input$input_type, we'll generate a different
-    # UI component and send it to the client.
 
     input$input_type_TB
-    
+  
+
     selectInput("subGrp_TB", "Select ByGroup:",
                 choices = c(None='',  sort(freqList$Name)))
   })
   
   
   output$uiExprTB <- renderUI({
-    # Depending on input$input_type, we'll generate a different
-    # UI component and send it to the client.
     input$input_type_TB
     
     selectInput("subGrp_TB1", "Select Subgroup for subgroup formula:",
@@ -358,9 +355,7 @@ shinyServer(function(input, output, session) {
   })
    
   output$uiExprTB1 <- renderUI({
-    # Depending on input$input_type, we'll generate a different
-    # UI component and send it to the client.
-    
+  
     #print(names(env.base$dict$codings[[names(which(varName == input$subGrp_TB1))]]))
     if(input$subGrp_TB1 == "")
       return()
@@ -426,7 +421,7 @@ shinyServer(function(input, output, session) {
   
   baseTB <<- NULL 
   
-  summaryOutputTB <- eventReactive( input$actionTB, { #print(getwd())
+  summaryOutputTB <- eventReactive( input$actionTB, { 
     
     inputType = c("frequencies", "means", "quantiles")
     
@@ -451,6 +446,7 @@ shinyServer(function(input, output, session) {
     results
   })
   
+  tableResult <<- list()
   
   output$resultTB  <- DT::renderDataTable({
 
@@ -486,7 +482,11 @@ shinyServer(function(input, output, session) {
       
       results <- results[, c(1,index)]
 
-    }
+    } else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") &
+              names(results) %in% "Var"){
+    
+      return(NULL)
+    }    
     
     index <- c(grep("Lower", colnames(results)), grep("Upper", colnames(results)))
     
@@ -494,8 +494,9 @@ shinyServer(function(input, output, session) {
       results <- results[,-index]
     
     
-    finalFormula <<- NULL
-    
+    temp <- tableResult
+    temp$Base <-results
+    tableResult <<- temp
     
     DT::datatable(results, rownames = FALSE, 
               options = list(pageLength = 21, dom = 't',
@@ -560,7 +561,11 @@ shinyServer(function(input, output, session) {
                                  function(x) seq(x, ncol(results), ncol(mean)-1)))
       
       results <- results[, c(1,index)]
-    }
+    }else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") &
+             names(results) %in% "Var"){
+      
+      return(NULL)
+    }    
     
     index <- c(grep("Lower", colnames(results)), grep("Upper", colnames(results)))
     
@@ -568,14 +573,31 @@ shinyServer(function(input, output, session) {
       results <- results[,-index]
     
     
+    temp <- tableResult
+    temp$Scenario <-results
+    tableResult <<- temp
     
     DT::datatable(results, rownames = FALSE, 
                 options = list(pageLength = 21, dom = 't',
                                scrollX = TRUE))
- 
   })
   
  
+  output$downloadTable <- downloadHandler(
+    filename = function() {
+      paste('Table Result-',  input$input_type_TB, " ", 
+                              input$dynamicTB, '.xlsx', sep='')
+    },
+    content = function(con) {
+      
+      write.xlsx(tableResult, con)
+      
+      tableResult <<- list()
+    }
+  )
+  
+  
+  
   combineResults <- reactive({
     
     baseTB <-summaryOutputTB()
@@ -594,7 +616,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$uiVar <- renderUI({
-    selectInput("Var_TB", "Select Variable Group:",  
+    selectInput("Var_TB", "Select a level to compare:",  
                 selected = unique(combineResults()$Var)[2], 
                 choices = unique(combineResults()$Var))
   })
@@ -645,14 +667,21 @@ shinyServer(function(input, output, session) {
     ggplotly(p)
   })
   
-  output$treeTB <- renderTree({
-    list(
-      SavedTable = list(
-        SubListA = list(leaf1 = "", leaf2 = "", leaf3=""),
-        SubListB = list(leafA = "", leafB = "")
-      )
-    )
-  })
+  
+  output$downloadPlot <- downloadHandler(
+    filename = function() {
+      if(last_plot()$data[[1]]$type == "scatter")
+        type <- "Line"
+      else 
+        type <- "Bar"
+      
+      paste(type,'Plot-', input$input_type_TB, "-", 
+            input$dynamicTB, '.png', sep='')
+    },
+    content = function(con) {
+      ggsave(con)
+    }
+  )
   
   
   output$saveWrkspace <- downloadHandler(
@@ -664,6 +693,8 @@ shinyServer(function(input, output, session) {
       save(savedScenario, file = file)
     }
   )
+  
+
   
   
 })  
