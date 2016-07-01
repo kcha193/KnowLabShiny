@@ -2,9 +2,9 @@ name: KnowLabShiny
 account: kcha193
 server: shinyapps.io
 appId: 96757
-bundleId: 488020
+bundleId: 492939
 url: https://kcha193.shinyapps.io/KnowLabShiny/
-when: 1466733148.43656
+when: 1467245466.3429
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: dynamically adding new Tab.R

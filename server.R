@@ -2,17 +2,17 @@
 
 #devtools::install_github("kcha193/simarioV2")
 
-
 library(shiny)
 library(shinydashboard)
 library(DT)
 library(rhandsontable)
-library(snowfall)
+library(parallel)
 library(simarioV2)
 library(plotly)
 library(dplyr)
 library(tidyr)
 library(openxlsx)
+library(reshape2)
 
 shinyServer(function(input, output, session) {
   
@@ -39,19 +39,20 @@ shinyServer(function(input, output, session) {
   children <<- initialSim$children
   transition_probabilities <<- initialSim$transition_probabilities
   
-  
-  varName <- env.base$dict$descriptions 
+  varName <- initialSim$dict$descriptions 
   
   savedScenario <<- list()
   
   #############################################################################################
   #Sorting out the Variables
   
-  catvars <- unique(c("z1single0", "pregalc", getOutcomeVars(initialSim$simframe, "categorical"), 
-               "SESBTH", "r1stmeduc", "r1stfeduc", "fage", "bthorder", "NPRESCH", "z1genderLvl1",
-               "r1stchildethn",    names(binbreaks)))
-  contvars <- c(getOutcomeVars(initialSim$simframe, "continuous"), "bwkg", 
-                "ga", "MAGE", "BREAST")
+  time_invariant_vars <- attr(initialSim$simframe, "time_invariant_vars")
+  
+  catvars <- unique(c(time_invariant_vars$Varname[time_invariant_vars$Outcome_type=="categorical"], 
+                      getOutcomeVars(initialSim$simframe, "categorical"),  names(binbreaks)))
+  
+  contvars <- unique(c(getOutcomeVars(initialSim$simframe, "continuous"), 
+                time_invariant_vars$Varname[time_invariant_vars$Outcome_type=="continuous"]))
   
   freqList <-  data.frame(Var =catvars, 
                           Name = as.character(trimws(varName[catvars])), 
@@ -83,13 +84,13 @@ shinyServer(function(input, output, session) {
   meansList <- meansList[order(meansList$Name),]  
   
   
-  catvars <- unique(c("z1single0", "pregalc", getOutcomeVars(initialSim$simframe, "categorical"), "SESBTH", 
-               "r1stmeduc", "r1stfeduc", "fage", "bthorder", "NPRESCH", "z1genderLvl1","r1stchildethn",
-               names(binbreaks)))
-
-  freqList <-  data.frame(Var =catvars, 
-                          Name = as.character(trimws(varName[catvars])), 
-                          stringsAsFactors = FALSE)
+  # catvars <- unique(c("z1single0", "pregalc", getOutcomeVars(initialSim$simframe, "categorical"), "SESBTH", 
+  #              "r1stmeduc", "r1stfeduc", "fage", "bthorder", "NPRESCH", "z1genderLvl1","r1stchildethn",
+  #              names(binbreaks)))
+  # 
+  # freqList <-  data.frame(Var =catvars, 
+  #                         Name = as.character(trimws(varName[catvars])), 
+  #                         stringsAsFactors = FALSE)
   
   freqList <- freqList[order(freqList$Name),]  
   
@@ -201,8 +202,8 @@ shinyServer(function(input, output, session) {
              "And" = paste(finalFormulaSB, logisetexprSB(), "&"),
              "Or" = paste(finalFormulaSB, logisetexprSB(), "|"),
              "Complete" = paste(finalFormulaSB, logisetexprSB(), ""),
-             "Reset" = ""
-      )
+             "Reset" = "" )
+    
     finalFormulaSB
   })
   
@@ -231,7 +232,9 @@ shinyServer(function(input, output, session) {
     results <- baseOutputSB()
     
     if(nrow(results) == 1){
+      rownames(results) <- results$Year
       results <- t(results[,-1])
+      
       datatable(results, class = 'table-condensed', 
                 options = list(pageLength = 21, dom = 't',
                                scrollX = TRUE, scrollY = TRUE,
@@ -261,18 +264,19 @@ shinyServer(function(input, output, session) {
     if(!is.null(input$uilogisetexprSB))
         env.scenario <- setGlobalSubgroupFilterExpression(env.scenario, input$uilogisetexprSB)
    
-    sfInit(parallel=TRUE, cpus = 4, slaveOutfile = "test.txt" )
-
-    sfLibrary(snowfall)
-    sfLibrary(simarioV2)
-
-    sfExport( "binbreaks", "transition_probabilities", "models", 
-              "PropensityModels", "children")
     
-    env.scenario <- simulatePShiny(env.scenario, input$nRun)
+    cl <- makeCluster(detectCores()-1)
     
-    sfStop()
+    clusterExport(cl, c("binbreaks", "transition_probabilities", "models", 
+                        "PropensityModels", "children"))
+    
+    clusterEvalQ(cl, {library(simarioV2)})
+    clusterSetRNGStream(cl, 1)
    
+    env.scenario <- simulatePShiny(cl, env.scenario, 10)
+    
+    stopCluster(cl)
+
     temp <- savedScenario
     temp$X <- env.scenario
     names(temp)[length(temp)] <-env.scenario$name
@@ -387,9 +391,10 @@ shinyServer(function(input, output, session) {
     # UI component and send it to the client.
   
     index = env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]][
-      (names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]])==input$subGrp_TB2)]
+      (names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]])==
+         input$subGrp_TB2)]
 
-    print(index)
+    
     if(is.null(index)){
       paste(varList$Var[varList$Name == input$subGrp_TB1], 
             paste(input$subGrp_TB2, input$subGrpNum_TB2), sep = " ")    
@@ -399,9 +404,32 @@ shinyServer(function(input, output, session) {
 
   })
   
+  logisetexprTB1 <-eventReactive(input$operatorTB, {
+    # Depending on input$input_type, we'll generate a different
+    # UI component and send it to the client.
+    
+    index = input$subGrp_TB2
+    
+    if(is.null(index)){
+      paste( input$subGrp_TB1, paste(input$subGrp_TB2, input$subGrpNum_TB2), sep = " ")    
+    }else{
+      paste(input$subGrp_TB1, index, sep = " == ")
+    }
+    
+  })
+  
   finalFormula <<- NULL
+  finalFormulaPrint <<- NULL
   
   finalForm <- reactive({
+    
+    finalFormulaPrint <<-
+      switch(input$operatorTB, 
+             "And" = paste(finalFormulaPrint, logisetexprTB1(), "&"),
+             "Or" = paste(finalFormulaPrint, logisetexprTB1(), "|"),
+             "Complete" = paste(finalFormulaPrint, logisetexprTB1(), ""),
+             "Reset" = ""
+      )
     
     finalFormula <<-
     switch(input$operatorTB, 
@@ -452,36 +480,24 @@ shinyServer(function(input, output, session) {
 
     results <- summaryOutputTB()
     
+    browser()
     
-    if(input$input_type_TB == "Percentage" && any(names(results) %in% "groupByData")){
-      mean <- results %>% select(Var, groupByData, Year,Mean)%>% spread(Var, Mean)
-      lower <- results %>% select(Var, groupByData, Year,Lower)%>% spread(Var, Lower)
-      names(lower)[-c(1,2)] <- paste(names(lower)[-c(1,2)] , "Lower", sep = ".")
-      upper <- results %>% select(Var, groupByData, Year, Upper)%>% spread(Var, Upper)
-      names(upper)[-c(1,2)] <- paste(names(upper)[-c(1,2)] , "Upper", sep = ".")
+    if(input$input_type_TB == "Percentage" & any(names(results) %in% "groupByData")){
       
-      results <- mean %>% left_join(lower) %>% left_join(upper)
-      
-      index <- as.numeric(sapply(3:(3+ncol(mean)-3), 
-                                 function(x) seq(x, ncol(results), ncol(mean)-2)))
-      
-      results <- results[, c(1,index)]
-      
+      results <- dcast(melt(results, id.vars = c("Var", "groupByData", "Year")), 
+            Year~  groupByData + Var + variable)
       
     }else if(input$input_type_TB == "Percentage"){
-      mean <- results %>% select(Var, Year,Mean)%>% spread(Var, Mean)
-      lower <- results %>% select(Var, Year,Lower)%>% spread(Var, Lower)
-      names(lower)[-1] <- paste(names(lower)[-1] , "Lower", sep = ".")
-      upper <- results %>% select(Var, Year, Upper)%>% spread(Var, Upper)
-      names(upper)[-1] <- paste(names(upper)[-1] , "Upper", sep = ".")
-      
-      results <- mean %>% left_join(lower) %>% left_join(upper)
-      
-      index <- as.numeric(sapply(2:(2+ncol(mean)-2), 
-                                 function(x) seq(x, ncol(results), ncol(mean)-1)))
-      
-      results <- results[, c(1,index)]
+    
+      results <- dcast(melt(results, id.vars = c("Var", "Year")), 
+                       Year~ Var + variable)
 
+    } else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") & 
+              any(names(results) %in% "groupByData") ){
+
+      results <- dcast(melt(results, id.vars = c("groupByData", "Year")), 
+                       Year ~ groupByData + variable)
+      
     } else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") &
               names(results) %in% "Var"){
     
@@ -493,10 +509,11 @@ shinyServer(function(input, output, session) {
     if(!input$ci)
       results <- results[,-index]
     
-    
     temp <- tableResult
     temp$Base <-results
     tableResult <<- temp
+    
+   
     
     DT::datatable(results, rownames = FALSE, 
               options = list(pageLength = 21, dom = 't',
@@ -533,36 +550,22 @@ shinyServer(function(input, output, session) {
 
     results <- summaryOutputSBTB()
     
-    if(input$input_type_TB == "Percentage" && any(names(results) %in% "groupByData")){
-      mean <- results %>% select(Var, groupByData, Year,Mean)%>% spread(Var, Mean)
-      lower <- results %>% select(Var, groupByData, Year,Lower)%>% spread(Var, Lower)
-      names(lower)[-c(1,2)] <- paste(names(lower)[-c(1,2)] , "Lower", sep = ".")
-      upper <- results %>% select(Var, groupByData, Year, Upper)%>% spread(Var, Upper)
-      names(upper)[-c(1,2)] <- paste(names(upper)[-c(1,2)] , "Upper", sep = ".")
-      
-      results <- mean %>% left_join(lower) %>% left_join(upper)
-      
-      index <- as.numeric(sapply(3:(3+ncol(mean)-3), 
-                                 function(x) seq(x, ncol(results), ncol(mean)-2)))
-      
-      results <- results[, c(1,index)]
-      
+    if(input$input_type_TB == "Percentage" & any(names(results) %in% "groupByData")){
+      results <- dcast(melt(results, id.vars = c("Var", "groupByData", "Year")), 
+                       Year~  groupByData + Var + variable)
       
     }else if(input$input_type_TB == "Percentage"){
-      mean <- results %>% select(Var, Year,Mean)%>% spread(Var, Mean)
-      lower <- results %>% select(Var, Year,Lower)%>% spread(Var, Lower)
-      names(lower)[-1] <- paste(names(lower)[-1] , "Lower", sep = ".")
-      upper <- results %>% select(Var, Year, Upper)%>% spread(Var, Upper)
-      names(upper)[-1] <- paste(names(upper)[-1] , "Upper", sep = ".")
+      results <- dcast(melt(results, id.vars = c("Var", "Year")), 
+                       Year~ Var + variable)
       
-      results <- mean %>% left_join(lower) %>% left_join(upper)
+    } else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") & 
+              any(names(results) %in% "groupByData") ){
       
-      index <- as.numeric(sapply(2:(2+ncol(mean)-2), 
-                                 function(x) seq(x, ncol(results), ncol(mean)-1)))
+      results <- dcast(melt(results, id.vars = c("groupByData", "Year")), 
+                       Year ~ groupByData + variable)
       
-      results <- results[, c(1,index)]
-    }else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") &
-             names(results) %in% "Var"){
+    } else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") &
+              names(results) %in% "Var"){
       
       return(NULL)
     }    
@@ -575,6 +578,8 @@ shinyServer(function(input, output, session) {
     
     temp <- tableResult
     temp$Scenario <-results
+    names(temp)[2] <- input$selSB
+    
     tableResult <<- temp
     
     DT::datatable(results, rownames = FALSE, 
@@ -586,17 +591,28 @@ shinyServer(function(input, output, session) {
   output$downloadTable <- downloadHandler(
     filename = function() {
       paste('Table Result-',  input$input_type_TB, " ", 
-                              input$dynamicTB, '.xlsx', sep='')
+                              input$dynamicTB, " ", 
+                              input$selSB, '.xlsx', sep='')
     },
     content = function(con) {
+      
+      print(finalFormulaPrint)
+      
+      temp <- data.frame(Variable = input$dynamicTB)
+      
+      if(input$selSB != "")
+        temp$Scenario = input$selSB
+      
+      if(!is.null(finalFormulaPrint))
+        temp$SubgroupFormula = finalFormulaPrint
+      
+      tableResult$info <- t(temp)
       
       write.xlsx(tableResult, con)
       
       tableResult <<- list()
     }
   )
-  
-  
   
   combineResults <- reactive({
     

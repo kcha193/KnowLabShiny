@@ -5,7 +5,6 @@ library(shinydashboard)
 library(DT)
 library(rhandsontable)
 library(plotly)
-library(sweetalertR)
 
 options(shiny.maxRequestSize=10000*1024^2)
 
@@ -83,7 +82,9 @@ dashboardPage(skin = "red",
                   uiOutput("uiExprSB"),
                   uiOutput("uiExprSB1"),
                   selectizeInput("operatorSB", "Operators (And/Or/Complete/Reset):",
-                                 choices = c("And" = "And", "Or" = "Or", "Complete" = "Complete", "Reset" = "Reset"),
+                                 choices = c("And" = "And", "Or" = "Or", 
+                                             "Complete" = "Complete", 
+                                             "Reset" = "Reset"),
                                  options = list(
                                    placeholder = 'Please select an operators below',
                                    onInitialize = I('function() { this.setValue(""); }')
@@ -101,7 +102,7 @@ dashboardPage(skin = "red",
                   box (title = "Cat Adjustment", status = "success", solidHeader = TRUE,
                       rHandsontableOutput("hotable"), width = 6, height = 600),
                   box (title = "Base value", status = "info", solidHeader = TRUE, 
-                       dataTableOutput("previewSB"),  width = 6, height = 600),  width = 9))),
+                       dataTableOutput("previewSB"),  width = 6, height = 780),  width = 9))),
     tabItem("tb",
            # Sidebar with a slider input for the number of bins
            fluidRow(
