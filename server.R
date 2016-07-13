@@ -120,7 +120,7 @@ shinyServer(function(input, output, session) {
     tbl <-
     if(nrow(catAdj) == 1){	
       temp = cbind(Rowname = colnames(catAdj),  as.data.frame(apply(catAdj,2, as.numeric)))
-      colnames(temp) <- c("Level", "Year 1")
+      colnames(temp) <- c("Level",  input$var_SB)
       
       temp
     }else {
@@ -234,6 +234,7 @@ shinyServer(function(input, output, session) {
     if(nrow(results) == 1){
       rownames(results) <- results$Year
       results <- t(results[,-1])
+      colnames(results) <- c(input$var_SB)
       
       datatable(results, class = 'table-condensed', 
                 options = list(pageLength = 21, dom = 't',
@@ -479,8 +480,6 @@ shinyServer(function(input, output, session) {
   output$resultTB  <- DT::renderDataTable({
 
     results <- summaryOutputTB()
-    
-    browser()
     
     if(input$input_type_TB == "Percentage" & any(names(results) %in% "groupByData")){
       
