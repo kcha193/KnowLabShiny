@@ -222,9 +222,10 @@ shinyServer(function(input, output, session) {
                                variableName = as.character(varName_SB$Var[varName_SB$Name==input$var_SB]),
                                grpbyName = "", 
                                logisetexpr=trimws(input$logisetexprSB))
+
+    temp <- results %>% select(Var, Year, Mean) %>% spread(Var, Mean) 
     
-    results %>% select(Var, Year, Mean) %>% spread(Var, Mean)
-    
+    temp[, c("Year", unique(results$Var))]
   })
   
   output$previewSB  <- DT::renderDataTable({
@@ -232,9 +233,10 @@ shinyServer(function(input, output, session) {
     results <- baseOutputSB()
     
     if(nrow(results) == 1){
+
       rownames(results) <- results$Year
       results <- t(results[,-1])
-      colnames(results) <- c(input$var_SB)
+      colnames(results) <- isolate(input$var_SB)
       
       datatable(results, class = 'table-condensed', 
                 options = list(pageLength = 21, dom = 't',
