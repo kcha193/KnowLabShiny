@@ -59,8 +59,8 @@ initSim <- function(num.iterations){
     #names(binbreaks$fage_years) <- c(NA, "< 20", "20 - 24", "25 - 29", "30 - 34", "35 - 39", "40+", "No father")
     names(binbreaks$fage_years) <- c(NA, "1", "2", "3", "4", "5", "6", "7")
     
-    binbreaks$MAGE.4cat <- c(0, 19, 24, 29, 98)
-    names(binbreaks$MAGE.4cat) <- c(NA, "<20", "20 -24", "25-29", "30+")
+    #binbreaks$MAGE.4cat <- c(0, 19, 24, 29, 98)
+   # names(binbreaks$MAGE.4cat) <- c(NA, "<20", "20 -24", "25-29", "30+")
     
     ##binbreaks$fage_years <- c(0, 19, 24, 29, 34, 39, 98)  
     ##names(binbreaks$fage_years) <- c(NA, "< 20", "20 - 24", "25 - 29", "30 - 34", "35 - 39", "40+")
@@ -548,6 +548,26 @@ initSim <- function(num.iterations){
     # models$IQA16 <- loadGLMCSV(modelfiledir, "IQA16.csv")
     
     models$ScoreA17 <- loadGLMCSV(modelfiledir, "ScoreA17.csv")
+    models$ScoreA17Ethn2 <- loadGLMCSV(modelfiledir, "ScoreA17Ethn2.csv")
+    
+    models$z1NEETGender0A16 <- loadGLMCSV(modelfiledir, "z1NEETGender0A16.csv")
+    models$z1NEETGender0A18 <- loadGLMCSV(modelfiledir, "z1NEETGender0A18.csv")
+    models$z1NEETGender0A20 <- loadGLMCSV(modelfiledir, "z1NEETGender0A20.csv")
+    models$z1NEETGender0A17 <- loadGLMCSV(modelfiledir, "z1NEETGender0A17.csv")
+    models$z1NEETGender0A19 <- loadGLMCSV(modelfiledir, "z1NEETGender0A19.csv")
+    models$z1NEETGender0A21 <- loadGLMCSV(modelfiledir, "z1NEETGender0A21.csv")
+    
+    models$z1NEETGender1A16 <- loadGLMCSV(modelfiledir, "z1NEETGender1A16.csv")
+    models$z1NEETGender1A18 <- loadGLMCSV(modelfiledir, "z1NEETGender1A18.csv")
+    models$z1NEETGender1A20 <- loadGLMCSV(modelfiledir, "z1NEETGender1A20.csv")
+    models$z1NEETGender1A17 <- loadGLMCSV(modelfiledir, "z1NEETGender1A17.csv")
+    models$z1NEETGender1A19 <- loadGLMCSV(modelfiledir, "z1NEETGender1A19.csv")
+    models$z1NEETGender1A21 <- loadGLMCSV(modelfiledir, "z1NEETGender1A21.csv")
+    
+    models$z1BullyA15 <- loadGLMCSV(modelfiledir, "z1BullyA15.csv")
+    models$z1BullyA16 <- loadGLMCSV(modelfiledir, "z1BullyA16.csv")
+    models$z1BullyA17_21 <- loadGLMCSV(modelfiledir, "z1BullyA17_21.csv")
+    
     
     cat("Loaded models\n")
     models

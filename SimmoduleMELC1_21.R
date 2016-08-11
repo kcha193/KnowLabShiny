@@ -1,7 +1,5 @@
 
 
-
-
 simulateKnowLab <- function(Simmodule, simenv) {
   
   #' Simulate the typology of family circumstances.
@@ -495,10 +493,15 @@ simulateKnowLab <- function(Simmodule, simenv) {
       z1chres.prev[chres_previous>0] <- 1
       z1chres.prev[chres_previous==0] <- 0
       if (iteration<=5) {
-        z1chres <- predSimBinomsSelect_notChangeScores(z1chres.prev, models$z1chresPrev0.a2_5, models$z1chresPrev1.a2_5)
+        z1chres <- predSimBinomsSelect_notChangeScores(z1chres.prev, 
+                                                       models$z1chresPrev0.a2_5, 
+                                                       models$z1chresPrev1.a2_5)
       } else if (iteration>5 & iteration<=13) {
-        z1chres <- predSimBinomsSelect_notChangeScores(z1chres.prev, models$z1chresPrev0.a6_13, models$z1chresPrev1.a6_13)
+        z1chres <- predSimBinomsSelect_notChangeScores(z1chres.prev, 
+                                                       models$z1chresPrev0.a6_13, 
+                                                       models$z1chresPrev1.a6_13)
       } 
+      
       #for children that do have a change in residence, simulate the number of changes
       if (iteration<=5) {
         chres.pre <- predSimNBinom(models$chres.a2_5) + 1
@@ -1065,81 +1068,92 @@ simulateKnowLab <- function(Simmodule, simenv) {
       PUNISH <<- tempPUNISH
       
     }
-    
   }
   
-  
-  simulate_depression <- function() {
-    if (iteration==18) {
-      alcabuseLvl1 <<- rbinom(NUMCHILDREN, 1, .163)
-      depressionLvl1 <<- predSimBinom(models$depression)	
-    } else {
-      alcabuseLvl1 <<- NAs
-      depressionLvl1 <<- NAs
-    }
-  }
-  
-  
+
   simulate_Sleep <- function(){
     
+ 
+    sleepTime <- numeric(5000)
+    r1Sleep <- numeric(5000)
     
-    r1SleepLvl1 <- numeric(5000)
-    r1SleepLvl2 <- numeric(5000)
-    r1SleepLvl3 <- numeric(5000)
-    
-    
-    set.seed(8122015) 	 
-    if(iteration>=2 & iteration<=4) {			
+    if(iteration>=2 & iteration<=3) {			
       #browser()
       
-      sleepTime <- rnorm(5000, 11, 0.6)
+      sleepTime[z1genderLvl1 == 0] <- rnorm(sum(z1genderLvl1 == 0), 10.5, 0.6)
+      sleepTime[z1genderLvl1 == 1] <- rnorm(sum(z1genderLvl1 == 1), 10.5 - 9/60, 0.6)
       
-      r1SleepLvl3[sleepTime>12] <- 1
-      r1SleepLvl2[sleepTime<=12 & sleepTime>=10] <- 1
-      r1SleepLvl1[sleepTime<10] <- 1	
+        r1Sleep[sleepTime>11.5] <- 3
+      r1Sleep[sleepTime<=11.5 & sleepTime>=9.5] <- 2
+      r1Sleep[sleepTime<9.5] <- 1
       
-    } else if(iteration>=5 & iteration<=9) {			
+      
+    } else if(iteration>=4 & iteration<=5) {			
+      
+      
+      sleepTime[z1genderLvl1 == 0] <- rnorm(sum(z1genderLvl1 == 0), 12, 0.6)
+      sleepTime[z1genderLvl1 == 1] <- rnorm(sum(z1genderLvl1 == 1), 12 - 11/60, 0.6)
+      
+         
+      r1Sleep[sleepTime>13] <- 3
+      r1Sleep[sleepTime<=13 & sleepTime>=11] <- 2
+      r1Sleep[sleepTime<11] <- 1	
+      
+      
+    } else if(iteration>=6 & iteration<=7) {			
+      
+      sleepTime[z1genderLvl1 == 0] <- rnorm(sum(z1genderLvl1 == 0), 10, 0.6)
+      sleepTime[z1genderLvl1 == 1] <- rnorm(sum(z1genderLvl1 == 1), 10 - 16 /60, 0.6)
+      
+        
+      r1Sleep[sleepTime>11] <- 3
+      r1Sleep[sleepTime<=11& sleepTime>=9] <- 2
+      r1Sleep[sleepTime<9] <- 1
+      
+      
+      
+    } else if(iteration>=8 & iteration<=9) {			
       #browser()
       
-      sleepTime <- rnorm(5000, 10, 0.6)
+      sleepTime<- rnorm(5000, 10, 0.6)	
       
-      r1SleepLvl3[sleepTime>10.5] <- 1
-      r1SleepLvl2[sleepTime<=10.5 & sleepTime>=9] <- 1
-      r1SleepLvl1[sleepTime<9] <- 1	
+        
+      r1Sleep[sleepTime>11] <- 3
+      r1Sleep[sleepTime<=11 & sleepTime>=9] <- 2
+      r1Sleep[sleepTime<9] <- 1
       
-    } else if(iteration>=10) {			
+      
+    } else if(iteration>=10 & iteration<=19) {			
       #browser()
       
-      sleepTime <- rnorm(5000, 9, 0.6)
+      sleepTime <- rnorm(5000, 8.875, 0.6)
       
-      r1SleepLvl3[sleepTime>9] <- 1
-      r1SleepLvl2[sleepTime<=9 & sleepTime>=8] <- 1
-      r1SleepLvl1[sleepTime<8] <- 1	
+        
+      r1Sleep[sleepTime>10] <- 3
+      r1Sleep[sleepTime<=10 & sleepTime>=8] <- 2
+      r1Sleep[sleepTime<8] <- 1	
       
     } else {		
       
-      r1SleepLvl1 <- NAs  
-      r1SleepLvl2 <- NAs
-      r1SleepLvl3 <- NAs     
-      
+      r1Sleep <- NAs  
+    
     }	
     
-    r1SleepLvl1 <<- r1SleepLvl1  
-    r1SleepLvl2 <<- r1SleepLvl2
-    r1SleepLvl3 <<- r1SleepLvl3     
+    r1Sleep <<- r1Sleep
+    
+    
+    r1SleepLvl1 <<- ifelse(r1Sleep == 1, 1, 0)
+    r1SleepLvl2 <<- ifelse(r1Sleep == 2, 1, 0)		
+    r1SleepLvl3 <<- ifelse(r1Sleep == 3, 1, 0)
+
     
   }
   
   
   simulate_childrenOverweight <- function() {  	  
     
-    #browser()
-    
-    #For the new scenerio
-    
-    if( iteration<19)	  
-      r1Sleep <<- get(paste("r1SleepA", iteration, sep =""))
-    
+    # if(iteration<19)	  
+    #   r1Sleep <<- get(paste("r1SleepA", iteration, sep =""))
     
     r1Sleep <- adjustCatVar(r1Sleep, "r1Sleep", simenv = simenv, iteration = iteration)
     
@@ -1147,7 +1161,7 @@ simulateKnowLab <- function(Simmodule, simenv) {
     r1SleepLvl2 <- ifelse(r1Sleep == 2, 1, 0)		
     r1SleepLvl3 <- ifelse(r1Sleep == 3, 1, 0)
     
-    
+  
     z1breastLvl1 <- ifelse(BREAST == 0, 0, 1)
     z1pregsmkLvl1 <- ifelse(pregsmk == 0, 0, 1)		
     
@@ -1155,13 +1169,14 @@ simulateKnowLab <- function(Simmodule, simenv) {
     r1ParentEducLvl2 <- ifelse(r1ParentEduc == 2, 1, 0)		
     r1ParentEducLvl3 <- ifelse(r1ParentEduc == 3, 1, 0)
     
-    r1mBMILvl1 <- ifelse(r1mBMI == 1, 1, 0)
-    r1mBMILvl2 <- ifelse(r1mBMI == 2, 1, 0)		
-    r1mBMILvl3 <- ifelse(r1mBMI == 3, 1, 0)
+    #browser()
+    
+    # r1mBMILvl1 <- ifelse(r1mBMI == 1, 1, 0)
+    # r1mBMILvl2 <- ifelse(r1mBMI == 2, 1, 0)		
+    # r1mBMILvl3 <- ifelse(r1mBMI == 3, 1, 0)
     
     
     if(iteration>=2 ) {			
-      
       
       z1OverweightLvl1 <<- 
         predSimBinom(models[[paste("z1OverweightA", iteration, sep = "")]])	   
@@ -1286,14 +1301,101 @@ simulateKnowLab <- function(Simmodule, simenv) {
   
    
   simulate_Score <- function() {	 		 
-    
+
     if(iteration == 17){
-      Score <<- predSimNorm(models$ScoreA17)		 		  		  
-    } else{
-      Score <<- NAs
-    }
+      
+      currectScore <- NAs
+      
+      currectScore[r1stchildethn != 2] <- predSimNorm(models$ScoreA17, 
+                                               set = r1stchildethn != 2)	 
+
+      currectScore[r1stchildethn == 2] <- predSimNorm(models$ScoreA17Ethn2,
+                                               set = r1stchildethn == 2)	 		
+      
+      Score <<- currectScore
+
+      z1ScoreLvl1 <<- ifelse(currectScore > 88, 1,0)
+      
+      z1FailLvl1 <<- ifelse(currectScore <= 78.5, 1,0)
+      
+      z1DropLvl1 <<- ifelse(currectScore > 78.5 & currectScore <= 88, 1,0)
+
+    } 
+   }
+  
+  
+  simulate_NEET <- function() {	 		 
+   
+    if(iteration >=16 & iteration <= 21){
+      
+      z1NEETLvl1[z1genderLvl1 == 0] <<- 
+        predSimBinom(models[[paste("z1NEETGender0A", iteration, sep = "")]], set = z1genderLvl1 == 0)	   
+      z1NEETLvl1[z1genderLvl1 == 1] <<- 
+        predSimBinom(models[[paste("z1NEETGender1A", iteration, sep = "")]], set = z1genderLvl1 == 1)	
+      
+  } else {
+      z1NEETLvl1 <<- NAs
+    }  
+   
+  }
+  
+  simulate_Bully <- function() {	 		 
     
-    z1ScoreLvl1 <<- ifelse(Score > 89.88, 1,0)
+    if(iteration >=15 & iteration <= 16){
+      
+      z1BullyLvl1 <<- 
+        predSimBinom(models[[paste("z1BullyA", iteration, sep = "")]])	   
+    
+    } else if(iteration >=17 & iteration <= 21){
+      
+      z1BullyLvl1 <<- 
+        predSimBinom(models$z1BullyA17_21)	   
+      
+    } else      {
+      z1BullyLvl1 <<- NAs
+    }  
+    
+  }
+  
+  simulate_AlcAbuse <- function() {	 		 
+    
+    if(iteration >=15 & iteration <= 21){
+      
+      z1ParentAlcLvl1 <<- 
+        suppressWarnings(apply(cbind(sapply(parentAlcohol$mother[match(MAGE+iteration, parentAlcohol$Age)], function(x) rbinom(1,1,x)), 
+                                     sapply(parentAlcohol$father[match(fage_imputed+iteration, parentAlcohol$Age)], function(x) rbinom(1,1,x))), 1,
+                               function(x) max(x, na.rm = TRUE)))
+      
+      z1AlcAbuseLvl1 <<- 
+        predSimBinom(models[[paste("z1AlcAbuseA", iteration, sep = "")]])	   
+    
+      
+    } else      {
+      z1AlcAbuseLvl1 <<- NAs
+    }  
+    
+  }
+  
+  simulate_Depress <- function() {	 		 
+    
+    
+    if(iteration >=15 & iteration <= 21){
+      
+      z1ParentDepressLvl1 <<- 
+        suppressWarnings(apply(cbind(sapply(parentDepress$mother[match(MAGE+iteration, parentDepress$Age)], 
+                                            function(x) rbinom(1,1,x)), 
+                                     sapply(parentDepress$father[match(fage_imputed+iteration, parentDepress$Age)], 
+                                            function(x) rbinom(1,1,x))), 1,
+                               function(x) max(x, na.rm = TRUE)))
+     
+      z1DepressLvl1 <<- 
+        predSimBinom(models[[paste("z1DepressA", iteration, sep = "")]])	   
+   
+      
+    } else {
+      z1DepressLvl1 <<- NAs
+    }  
+    
   }
   
   pre_simulation_setup <- function() {
@@ -1318,15 +1420,58 @@ simulateKnowLab <- function(Simmodule, simenv) {
     mage_years <<- MAGE + 1
     #when look at collated means - can see the effect from y2 onwards but doesn't show effect for y1
     
-    school <- sapply(1:5000, function(i) sample(1:100, 1, prob = transition_probabilities$r1School[i,]))
+    school <-sapply(1:5000, function(i) sample(1:100, 1, prob = transition_probabilities$r1School[i,]))
+    
+      
+   
+    
+    r1SchoolFunding <<-
+    c(2, 2, 0, 2, 2, 2, 2, 0, 1, 2, 0, 2, 2, 1, 2, 0, 2, 2, 2, 
+      2, 0, 2, 2, 0, 2, 2, 2, 2, 2, 0, 2, 2, 1, 2, 2, 1, 2,
+      2, 2, 2, 2, 2 ,2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+      2, 1, 2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 2, 1,
+      2, 2, 2, 2, 2, 2, 0, 2 ,2, 2, 2, 2, 2, 2, 2, 0, 2, 1, 2, 
+      1, 2, 1, 2, 1, 1, 2)[school]
+    
+    r1SchoolFundingLvl1 <<- ifelse(r1SchoolFunding == 1, 1,0)
+    r1SchoolFundingLvl2 <<- ifelse(r1SchoolFunding == 2, 1,0)
+    
     
     r1School <<- school
+
+    alcoholModel <- 
+      data.frame( Age = c(29.5, 39.5, 49.5, 59.5, 69.5, 79.5), 
+                  male = c(28.6, 27.1, 25.4, 20.8, 14.8, 5.4),
+                  female = c(15.5, 12.5, 11.7, 6.1, 3.1, 0.8))
+    
+    pA <- data.frame(Age = 25:90 )
+    
+    pA$father <- predict(lm(male ~ Age, alcoholModel), pA)/100
+    pA$mother <-predict(lm(female ~ Age, alcoholModel),pA)/100
+    pA$mother[pA$mother < 0.008] <- 0.008
+    
+    parentAlcohol <<-pA
+    
+    depressModel <- 
+      data.frame( Age = c(29.5, 39.5, 49.5, 59.5, 69.5, 79.5), 
+                  male = c(5.3, 5.3, 5.0, 4.5, 3.4, 3.3),
+                  female = c(10.0, 9.2, 6.2, 6.0, 4.4, 3.3))
+    
+    pD <- data.frame(Age = 25:90 )
+    
+    pD$father <- predict(lm(male ~ Age, depressModel), pD)/100
+    pD$mother <-predict(lm(female ~ Age, depressModel),pD)/100
+    pD$mother[pD$mother < 0.0018] <- 0.0018
+    
+    
+    parentDepress <<- pD
   }
   
   
   store_current_values_in_outcomes <- function(xcol) {
     outcomes <<- lapply(outcomes, function(x) {
-      x[,xcol] <- get(attr(x,"varname"));x 
+      x[,xcol] <- get(attr(x,"varname"));
+      x 
     }) 
   }
   
@@ -1342,11 +1487,9 @@ simulateKnowLab <- function(Simmodule, simenv) {
     }, previous, names(previous)))
   }
   
-  
+ 
   # SIMULATION STARTS HERE
-  # simenv <- env.base
-  # simenv <- env.scenario
-  
+ 
   
   attach(simenv$simframe, name="simframe")
   NUM_ITERATIONS <- 21
@@ -1362,8 +1505,6 @@ simulateKnowLab <- function(Simmodule, simenv) {
     
     #if(iteration ==5) browser()
     
-    #browser()
-    
     cat("Run", simenv$num_runs_simulated+1, "year", iteration, "\n")
     
     # setup vars for this iteration
@@ -1375,7 +1516,7 @@ simulateKnowLab <- function(Simmodule, simenv) {
     
     
     #KNOWLAB models		  
-    #simulate_Sleep()	
+    simulate_Sleep()	
     
     simulate_childrenOverweight()		
     
@@ -1383,6 +1524,11 @@ simulateKnowLab <- function(Simmodule, simenv) {
     # simulate_childrenObese()     
     
     simulate_Score()
+    simulate_NEET()
+    
+    simulate_Bully()
+    simulate_AlcAbuse()
+    simulate_Depress()
     
     #MELC models	
     simulate_family_household()      
@@ -1390,10 +1536,10 @@ simulateKnowLab <- function(Simmodule, simenv) {
     simulate_employment()      
     simulate_material_circumstances()      
     simulate_behavioural_factors()      
-    simulate_depression()      
     simulate_health_service_use()      
     simulate_conduct()      
     simulate_reading()      	  
+
     
     store_current_values_in_outcomes(iteration)
     

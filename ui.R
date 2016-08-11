@@ -5,12 +5,12 @@ library(shinydashboard)
 library(DT)
 library(rhandsontable)
 library(plotly)
+library(visNetwork)
 
 options(shiny.maxRequestSize=10000*1024^2)
 
-dashboardPage(skin = "red",
-  dashboardHeader(title = "Knowledge Lab"),
-  
+dashboardPage(skin = "red", title = "Knowledge Lab",
+  dashboardHeader(title = "Knowledge Lab" ),
   # Application title
   dashboardSidebar(
     sidebarMenu(
@@ -26,14 +26,23 @@ dashboardPage(skin = "red",
       box(title ="Saved Scenarios", background ="black",  status = "primary",solidHeader = TRUE, 
           uiOutput("selectSB"), width = 12),
       br(),
-      textInput("wrkSpaceName", label = "Name the Project:"),
-      downloadButton('saveWrkspace', "Save Project"),
-      h3("Latest Update:"),
-      h4("2016-07-01"),
-      h3("Contact email:"), 
-      a("k.chang@auckland.ac.nz", href= "mailto:k.chang@auckland.ac.nz")
-      )),
+      box(textInput("wrkSpaceName", label = "Name the Project:"),
+          downloadButton('saveWrkspace', "Save Project") ,
+          h3("Latest Update:"),
+          h4("2016-08-01"),
+          h3("Contact email:"), 
+          a("k.chang@auckland.ac.nz", 
+            href= "mailto:k.chang@auckland.ac.nz"), 
+          width = 12, background ="black"))), 
   dashboardBody(
+    tags$head(
+      tags$link(rel = "stylesheet", type = "text/css", href = "bootstrap.css"),
+      tags$style(HTML('
+      .main-header .logo {
+                      font-weight: bold;
+                      font-size: 24px;
+                      }
+                      '))),
     tabItems( 
       tabItem("fb", 
             fluidRow(
@@ -72,7 +81,11 @@ dashboardPage(skin = "red",
                 img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
                     width = 200))),
             box())),
-      tabItem("mi"),
+      tabItem("mi", tabBox(width = 12, height = "750px",
+        tabPanel(title = "Obesity", visNetworkOutput('oModel', width = "100%", height = "700px")),
+        tabPanel(title = "Education",  visNetworkOutput('eModel' )),
+        tabPanel(title = "Mental Health",  visNetworkOutput('mModel' ))
+        )),
     tabItem("sb",
             fluidRow(
               box(title ="Variable", width = 3,
@@ -83,18 +96,14 @@ dashboardPage(skin = "red",
                   uiOutput("uiSubGrpSB"),
                   uiOutput("uiExprSB"),
                   uiOutput("uiExprSB1"),
-                  selectizeInput("operatorSB", "Operators (And/Or/Complete/Reset):",
-                                 choices = c("And" = "And", "Or" = "Or", 
-                                             "Complete" = "Complete", 
-                                             "Reset" = "Reset"),
-                                 options = list(
-                                   placeholder = 'Please select an operators below',
-                                   onInitialize = I('function() { this.setValue(""); }')
-                                 )),
+                  actionButton("andSB", "And"),
+                  actionButton("orSB", "Or"),
+                  actionButton("completeSB", "Complete"),
+                  actionButton("resetSB", "Reset"),
                   uiOutput("uilogisetexprSB"),
                   actionButton("preview_SB", label = "Preview"),
                   actionButton("actionAddSB", label = "Add Scenario"),
-                  selectInput("nRun", "Number of Runs:", c(1:10), selected = 4),
+                  selectInput("nRun", "Number of Runs:", c(1:10), selected = 10),
                   actionButton("actionSB", label = "Run Scenario"),
                   h3("Scenario simulation log:"),
                   verbatimTextOutput('StartSim'),
@@ -117,14 +126,13 @@ dashboardPage(skin = "red",
                uiOutput("uiSubGrpTB"),
                uiOutput("uiExprTB"),
                uiOutput("uiExprTB1"),
-               selectizeInput("operatorTB", "Operators (And/Or/Complete/Reset):",
-                           choices = c("And" = "And", "Or" = "Or", "Complete" = "Complete", "Reset" = "Reset"),
-                           options = list(
-                             placeholder = 'Please select an operators below',
-                             onInitialize = I('function() { this.setValue(""); }')
-                           )),
+               actionButton("andTB", "And"),
+               actionButton("orTB", "Or"),
+               actionButton("completeTB", "Complete"),
+               actionButton("resetTB", "Reset"),
                uiOutput("uilogisetexprTB"),
                checkboxInput("ci", label = "Confidence Interval", value = TRUE),
+               actionButton("reset", label = "Reset"),
                actionButton("actionTB", label = "Show"),
                br(),
                downloadButton('downloadTable', 'Download Table'),
@@ -135,10 +143,16 @@ dashboardPage(skin = "red",
              tabBox(width = 9, height = "750px", id = "mainTabset",
                 tabPanel(title = "Base", dataTableOutput('resultTB')),
                 tabPanel(title = "Scenario",  dataTableOutput('resultSBTB')),
-                tabPanel("Barchart", plotlyOutput("barchart", width = "70%", height = "700px")),    
-                tabPanel("Line plot", plotlyOutput("linePlot", width = "70%", height = "700px"))) 
-             ))
-)))
+                navbarMenu("Barchart" ,
+                  tabPanel("Base only", plotlyOutput("barchartBase", width = "100%", height = "700px")),  
+                  tabPanel("Scenario only", plotlyOutput("barchartSC", width = "100%", height = "700px")),
+                  tabPanel("Base versus Scenario", plotlyOutput("barchart", width = "100%", height = "700px"))),
+                navbarMenu("Line plot" ,
+                 tabPanel("Base only", plotlyOutput("linePlotBase", width = "100%", height = "700px")),  
+                 tabPanel("Scenario only", plotlyOutput("linePlotSC", width = "100%", height = "700px")),
+                 tabPanel("Base versus Scenario", plotlyOutput("linePlot", width = "100%", height = "700px"))
+             )))
+))))
 
 
 

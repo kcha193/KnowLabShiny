@@ -13,6 +13,8 @@ library(dplyr)
 library(tidyr)
 library(openxlsx)
 library(reshape2)
+library(visNetwork)
+
 
 shinyServer(function(input, output, session) {
   
@@ -29,6 +31,7 @@ shinyServer(function(input, output, session) {
   initialSim <<- readRDS("base/initialSim.rds")
   env.base  <<- readRDS("base/FullBaseRun.rds")
   
+  
   NUM_ITERATIONS <<- 21
   dict <<- initialSim$dict
   limits <<- initialSim$limits
@@ -39,12 +42,107 @@ shinyServer(function(input, output, session) {
   children <<- initialSim$children
   transition_probabilities <<- initialSim$transition_probabilities
   
-  varName <- initialSim$dict$descriptions 
+  rv <- reactiveValues(env.scenario = NULL, finalFormulaSB = NULL, savedScenario = list())
   
-  savedScenario <<- list()
+  #############################################################################################
+  
+  
+  output$oModel <- renderVisNetwork({
+    # customization adding more variables (see visNodes and visEdges)
+    nodes <- data.frame(id = 1:8, 
+                        label = c("Overweight/Obesity", "SES", "Brestfeeding",
+                                  "Sleep Duration", "Breakfast", "Maternal BMI", 
+                                  "Cesarean Delivery", "Smoke In Pregnancy"),       # labels
+                        group = c("GrA", "GrB"),                                     # groups 
+                        value = 1:8,                                                # size 
+                        shape = "ellipse",         # shape
+                        title = paste0("<p><b>", 1:8,"</b><br>Node !</p>"),         # tooltip
+                        color = c("orange"),# color
+                        shadow = c(TRUE), 
+                        font.size = 30)                  # shadow
+    
+    edges <- data.frame(from = 2:8, to = 1,
+                        label = paste("Edge", 1:7),                                 # labels
+                        length = c(500),                                        # length
+                        arrows = c("to"),            # arrows
+                        dashes = c( FALSE),                                    # dashes
+                        title = paste("Edge", 1:7),                                 # tooltip
+                        smooth = c(TRUE),                                    # smooth
+                        shadow = c( TRUE), 
+                        font.size = 30)                       # shadow
+    
+    visNetwork(nodes, edges)%>% 
+      visEdges(arrows = "from")  %>% 
+      visHierarchicalLayout(direction = "RL", levelSeparation = 500)
+    
+  })
+    
+    
+
+    
+  output$eModel <- renderVisNetwork({
+    # customization adding more variables (see visNodes and visEdges)
+    nodes <- data.frame(id = 1:10, 
+                        label = paste("Node", 1:10),                                 # labels
+                        group = c("GrA", "GrB"),                                     # groups 
+                        value = 1:10,                                                # size 
+                        shape = c("square", "triangle", "box", "circle", "dot", "star",
+                                  "ellipse", "database", "text", "diamond"),         # shape
+                        title = paste0("<p><b>", 1:10,"</b><br>Node !</p>"),         # tooltip
+                        color = c("darkred", "grey", "orange", "darkblue", "purple"),# color
+                        shadow = c(FALSE, TRUE, FALSE, TRUE, TRUE))                  # shadow
+    
+    edges <- data.frame(from = sample(1:10,8), to = sample(1:10, 8),
+                        label = paste("Edge", 1:8),                                 # labels
+                        length = c(100,500),                                        # length
+                        arrows = c("to", "from", "middle", "middle;to"),            # arrows
+                        dashes = c(TRUE, FALSE),                                    # dashes
+                        title = paste("Edge", 1:8),                                 # tooltip
+                        smooth = c(FALSE, TRUE),                                    # smooth
+                        shadow = c(FALSE, TRUE, FALSE, TRUE))                       # shadow
+    
+    visNetwork(nodes, edges) 
+    
+  })
+   
+  
+  output$mModel <-  renderVisNetwork({
+    # customization adding more variables (see visNodes and visEdges)
+    nodes <- data.frame(id = 1:10, 
+                        label = paste("Node", 1:10),                                 # labels
+                        group = c("GrA", "GrB"),                                     # groups 
+                        value = 1:10,                                                # size 
+                        shape = c("square", "triangle", "box", "circle", "dot", "star",
+                                  "ellipse", "database", "text", "diamond"),         # shape
+                        title = paste0("<p><b>", 1:10,"</b><br>Node !</p>"),         # tooltip
+                        color = c("darkred", "grey", "orange", "darkblue", "purple"),# color
+                        shadow = c(FALSE, TRUE, FALSE, TRUE, TRUE))                  # shadow
+    
+    edges <- data.frame(from = sample(1:10,8), to = sample(1:10, 8),
+                        label = paste("Edge", 1:8),                                 # labels
+                        length = c(100,500),                                        # length
+                        arrows = c("to", "from", "middle", "middle;to"),            # arrows
+                        dashes = c(TRUE, FALSE),                                    # dashes
+                        title = paste("Edge", 1:8),                                 # tooltip
+                        smooth = c(FALSE, TRUE),                                    # smooth
+                        shadow = c(FALSE, TRUE, FALSE, TRUE))                       # shadow
+    
+    visNetwork(nodes, edges) 
+    
+  })
+  
+  
+  
+  
+  
+  
   
   #############################################################################################
   #Sorting out the Variables
+  
+  varName <- initialSim$dict$descriptions 
+  
+  
   
   time_invariant_vars <- attr(initialSim$simframe, "time_invariant_vars")
   
@@ -82,27 +180,20 @@ shinyServer(function(input, output, session) {
   varList <- varList[order(varList$Name),]  
   
   meansList <- meansList[order(meansList$Name),]  
-  
-  
-  # catvars <- unique(c("z1single0", "pregalc", getOutcomeVars(initialSim$simframe, "categorical"), "SESBTH", 
-  #              "r1stmeduc", "r1stfeduc", "fage", "bthorder", "NPRESCH", "z1genderLvl1","r1stchildethn",
-  #              names(binbreaks)))
-  # 
-  # freqList <-  data.frame(Var =catvars, 
-  #                         Name = as.character(trimws(varName[catvars])), 
-  #                         stringsAsFactors = FALSE)
-  
+ 
   freqList <- freqList[order(freqList$Name),]  
   
-  #################################################################################################################
+  ################################################################################
   #Scenario Builder
   
-  #env.scenario  <<- createSimenv("scenario", initialSim$simframe, initialSim$dict, "years1_21")
-  
+ 
   env.scenario <<- NULL
   
   observeEvent(input$newSB ,{ 
-      env.scenario <<- createSimenv(input$nameSB, initialSim$simframe, initialSim$dict, "years1_21")  })
+      env.scenario <<- createSimenv(input$nameSB, 
+                                    initialSim$simframe, initialSim$dict, "years1_21")
+      rv$finalFormulaSB<- NULL
+  })
   
   
   output$uiSB <- renderUI({  
@@ -129,23 +220,7 @@ shinyServer(function(input, output, session) {
       }
     
     rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>% 
-      hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 1, allowInvalid = TRUE)  
-  })
-  
-  
-  changeSB <- eventReactive( input$actionAddSB, {
-    catAdj <-t(t(hot_to_r(input$hotable)))[,-1] 
-    if(is.matrix(catAdj)){
-      catAdj = apply(catAdj, 2, as.numeric)
-      
-      for(i in 1:nrow(catAdj))
-        env.scenario$cat.adjustments[[
-          as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][i,] <<- catAdj[i,]		   
-      
-    } else {
-      env.scenario$cat.adjustments[[
-        as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][1,] <<- as.numeric(catAdj)	
-    }   
+      hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE)
   })
   
 
@@ -177,7 +252,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-  logisetexprSB <-eventReactive(input$operatorSB, {
+  logisetexprSB <-eventReactive( input$andSB | input$orSB | input$completeSB, {
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
     
@@ -186,30 +261,33 @@ shinyServer(function(input, output, session) {
     
     print(index)
     if(is.null(index)){
-      paste(varList$Var[varList$Name == input$subGrp_SB], paste(input$subGrp_SB1, input$subGrpNum_SB2), sep = " ")    
+      paste(varList$Var[varList$Name == input$subGrp_SB], 
+            paste(input$subGrp_SB1, input$subGrpNum_SB2), sep = " ")    
     }else{
       paste(varList$Var[varList$Name == input$subGrp_SB], index, sep = " == ")
     }
     
   })
   
-  finalFormulaSB <<- NULL
-  
-  finalFormSB <- reactive({
-    
-    finalFormulaSB <<-
-      switch(input$operatorSB, 
-             "And" = paste(finalFormulaSB, logisetexprSB(), "&"),
-             "Or" = paste(finalFormulaSB, logisetexprSB(), "|"),
-             "Complete" = paste(finalFormulaSB, logisetexprSB(), ""),
-             "Reset" = "" )
-    
-    finalFormulaSB
+  observeEvent( input$andSB, { 
+    rv$finalFormulaSB <- paste(rv$finalFormulaSB, logisetexprSB(), "&")
   })
   
+  observeEvent( input$orSB, { 
+    rv$finalFormulaSB <- paste(rv$finalFormulaSB, logisetexprSB(), "|")
+  })
   
+  observeEvent( input$completeSB, { 
+    rv$finalFormulaSB <- paste(rv$finalFormulaSB, logisetexprSB())
+  })
+  
+  observeEvent( input$resetSB, { 
+    rv$finalFormulaSB <- NULL
+  })
+  
+
   output$uilogisetexprSB <- renderUI({  
-    textareaInput("logisetexprSB",  "Subgroup formula:", value = finalFormSB())
+    textareaInput("logisetexprSB",  "Subgroup formula:", value = rv$finalFormulaSB)
   })
   
   
@@ -223,6 +301,7 @@ shinyServer(function(input, output, session) {
                                grpbyName = "", 
                                logisetexpr=trimws(input$logisetexprSB))
 
+    
     temp <- results %>% select(Var, Year, Mean) %>% spread(Var, Mean) 
     
     temp[, c("Year", unique(results$Var))]
@@ -252,6 +331,69 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  
+  output$resultSB  <- renderPrint({
+    
+    observeEvent(input$newSB ,{ 
+      rv$env.scenario <- createSimenv( input$nameSB, 
+                                       initialSim$simframe, 
+                                       initialSim$dict, "years1_21")  
+      
+    })
+    
+    
+    observeEvent( input$actionAddSB, {
+      catAdj <-t(t(hot_to_r( input$hotable)))[,-1] 
+      
+      if(is.matrix(catAdj)){
+        catAdj = apply(catAdj, 2, function(x) as.numeric(x)/100)
+        
+        for(i in 1:nrow(catAdj))
+          rv$env.scenario$cat.adjustments[[
+            as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][i,] <- catAdj[i,]		   
+        
+      } else {
+        rv$env.scenario$cat.adjustments[[
+          as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][1,] <- as.numeric(catAdj)/100	
+      }
+    })
+    
+
+    
+    observeEvent(input$actionSB, { 
+      
+      if(!is.null(input$uilogisetexprSB))
+        rv$env.scenario <- setGlobalSubgroupFilterExpression( rv$env.scenario, 
+                                                              input$uilogisetexprSB)
+      
+      
+      rv$env.scenario <- simulateSimario(rv$env.scenario, 10)
+      
+      
+      index <- 
+        mapply(all.equal, env.base$modules$run_results$run1, 
+               rv$env.scenario$modules$run_results$run1) != "TRUE"
+      
+      rv$env.scenario$modules$run_results <- 
+        lapply(rv$env.scenario$modules$run_results, function(x) x[index])
+      
+      
+      if(rv$env.scenario$name %in% names(rv$savedScenario)[length(rv$savedScenario)]  ){
+        rv$savedScenario[rv$env.scenario$name] <- rv$env.scenario
+      } else {
+        rv$savedScenario$XxxX <-  rv$env.scenario
+        
+        names(rv$savedScenario)[length(rv$savedScenario)] <-rv$env.scenario$name
+      }
+      
+      rv$env.scenario <- NULL
+      
+      print("Simulation is Finished!" )
+    })
+    
+  })
+  
+  
   output$StartSim <-renderPrint({
     if(input$newSB == 0)
       return(NULL)
@@ -259,79 +401,37 @@ shinyServer(function(input, output, session) {
     if(input$newSB == input$actionSB)
       "Simulation is Finished!"
     else 
-      "Setting scenario!"
-  })
-  
-  simulateSB <- eventReactive(input$actionSB, { 
-    
-    if(!is.null(input$uilogisetexprSB))
-        env.scenario <- setGlobalSubgroupFilterExpression(env.scenario, input$uilogisetexprSB)
-   
-    
-    cl <- makeCluster(detectCores()-1)
-    
-    clusterExport(cl, c("binbreaks", "transition_probabilities", "models", 
-                        "PropensityModels", "children"))
-    
-    clusterEvalQ(cl, {library(simarioV2)})
-    clusterSetRNGStream(cl, 1)
-   
-    env.scenario <- simulatePShiny(cl, env.scenario, 10)
-    
-    stopCluster(cl)
-
-    temp <- savedScenario
-    temp$X <- env.scenario
-    names(temp)[length(temp)] <-env.scenario$name
-    savedScenario <<- temp
-    
-    print("Simulation is Finished!" )
-  })
-
-  output$resultSB  <- renderPrint({
-    changeSB()
-    
-    simulateSB()
+      "Setting the current scenario!"
   })
   
   
-  #################################################################################################################
-  #Scenario Builder
   
-  loadSB <- reactive({
+  ###############################################################################
+  observeEvent(input$file1, {
     inFile <- input$file1
     
     if (is.null(inFile))
       return(NULL)
-  
-    temp <- savedScenario
     
     load(inFile$datapath)
-    temp <- c(temp, savedScenario)
-    savedScenario <<- temp  
-      
-    temp
-  })
-  
+    
+    rv$savedScenario <- c(rv$savedScenario, savedScenario)
+    
+    rm(savedScenario)}  
+  )
   
   output$selectSB <- renderUI({
-   
-    if(input$actionSB == 0)
-      selectInput("selSB", "Select saved Scenario:",
-                  choices = c(names(loadSB())))
-    else {
-      simulateSB()
-      selectInput("selSB", "Select saved Scenario:",
-                choices = c(names(savedScenario)))
-    }
+    
+
+    selectInput("selSB", "Select saved Scenario:",
+                choices = c(names(rv$savedScenario )))
+    
   })
   
-  
- 
-  
-#######################################################################################################
+###################################################################################
 #Table builder
 
+  
   
   output$uiTB <- renderUI({
     
@@ -347,7 +447,7 @@ shinyServer(function(input, output, session) {
   output$uiSubGrpTB <- renderUI({
 
     input$input_type_TB
-  
+    rv$finalFormulaSB<- NULL
 
     selectInput("subGrp_TB", "Select ByGroup:",
                 choices = c(None='',  sort(freqList$Name)))
@@ -389,7 +489,7 @@ shinyServer(function(input, output, session) {
   })
   
 
-  logisetexprTB <-eventReactive(input$operatorTB, {
+  logisetexprTB <-eventReactive(input$andTB | input$orTB | input$completeTB, {
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
   
@@ -420,33 +520,26 @@ shinyServer(function(input, output, session) {
     }
     
   })
+
   
-  finalFormula <<- NULL
-  finalFormulaPrint <<- NULL
-  
-  finalForm <- reactive({
-    
-    finalFormulaPrint <<-
-      switch(input$operatorTB, 
-             "And" = paste(finalFormulaPrint, logisetexprTB1(), "&"),
-             "Or" = paste(finalFormulaPrint, logisetexprTB1(), "|"),
-             "Complete" = paste(finalFormulaPrint, logisetexprTB1(), ""),
-             "Reset" = ""
-      )
-    
-    finalFormula <<-
-    switch(input$operatorTB, 
-         "And" = paste(finalFormula, logisetexprTB(), "&"),
-         "Or" = paste(finalFormula, logisetexprTB(), "|"),
-         "Complete" = paste(finalFormula, logisetexprTB(), ""),
-         "Reset" = ""
-    )
-    finalFormula
+  observeEvent( input$andTB, { 
+    rv$finalFormulaSB <- paste(rv$finalFormulaSB, logisetexprTB(), "&")
   })
   
+  observeEvent( input$orTB, { 
+    rv$finalFormulaSB <- paste(rv$finalFormulaSB, logisetexprTB(), "|")
+  })
+  
+  observeEvent( input$completeTB, { 
+    rv$finalFormulaSB <- paste(rv$finalFormulaSB, logisetexprTB())
+  })
+  
+  observeEvent( input$resetTB, { 
+    rv$finalFormulaSB <- NULL
+  })
     
   output$uilogisetexprTB <- renderUI({  
-    textareaInput("logisetexprTB",  "Subgroup formula:", value = finalForm())
+    textareaInput("logisetexprTB",  "Subgroup formula:", value = rv$finalFormulaSB)
   })
   
   
@@ -464,14 +557,26 @@ shinyServer(function(input, output, session) {
     
     if(length(grpbyName) == 0) grpbyName = ""
  
-    #browser()
-    
     results <- tableBuilderNew(env.base, 
                  statistic = inputType[input$input_type_TB], 
                  variableName = varList$Var[varList$Name==input$dynamicTB],
-                    grpbyName = grpbyName, CI = input$ci, 
+                 grpbyName = grpbyName, CI = input$ci, 
                  logisetexpr = trimws(input$logisetexprTB))
     
+    
+    
+    if("Var" %in% names(results) )
+      temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
+    else 
+      temp <- results  %>% distinct( Mean, Lower, Upper, .keep_all = TRUE)
+      
+    if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
+      results <- temp %>% filter(Year == 1)
+    } else if((nrow(temp) != nrow(results))){
+      results <- temp
+    }
+      
+      
     baseTB <<- results
     
     results
@@ -482,26 +587,32 @@ shinyServer(function(input, output, session) {
   output$resultTB  <- DT::renderDataTable({
 
     results <- summaryOutputTB()
+  
+   
     
-    if(input$input_type_TB == "Percentage" & any(names(results) %in% "groupByData")){
+    if(length(unique(results$Year))==1 ){
+      
+      if(results$Year[1] == 1)
+        results$Year <- "Childhood"
+      
+      colnames(results)[1] <- ""
+      
+    } else if(input$input_type_TB == "Percentage" &  "groupByData" %in% names(results) ){
       
       results <- dcast(melt(results, id.vars = c("Var", "groupByData", "Year")), 
-            Year~  groupByData + Var + variable)
+            Year~groupByData + Var + variable)
       
     }else if(input$input_type_TB == "Percentage"){
-    
       results <- dcast(melt(results, id.vars = c("Var", "Year")), 
-                       Year~ Var + variable)
+                       Year~Var + variable)
 
-    } else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") & 
-              any(names(results) %in% "groupByData") ){
-
+    } else if(input$input_type_TB %in% c("Means", "Quantiles") & 
+              "groupByData" %in% names(results) ){
       results <- dcast(melt(results, id.vars = c("groupByData", "Year")), 
                        Year ~ groupByData + variable)
       
-    } else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") &
-              names(results) %in% "Var"){
-    
+    } else if(input$input_type_TB %in% c("Means", "Quantiles") &
+              "Var" %in% names(results)){
       return(NULL)
     }    
     
@@ -513,12 +624,15 @@ shinyServer(function(input, output, session) {
     temp <- tableResult
     temp$Base <-results
     tableResult <<- temp
-    
-   
-    
-    DT::datatable(results, rownames = FALSE, 
-              options = list(pageLength = 21, dom = 't',
-                             scrollX = TRUE))
+ 
+    colnames(results) <- 
+      paste0('<span style="font-size:20px">',colnames(results),'</span>')
+      
+    DT::datatable(results, rownames = FALSE, extensions = 'Scroller', escape = FALSE,
+              options = list(pageLength = 9999999, dom = 't',
+                             scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
+                             scrollCollapse = TRUE))  %>%
+      formatStyle(1:ncol(results), 'font-size' = '20px')
   })
   
   
@@ -536,12 +650,25 @@ shinyServer(function(input, output, session) {
     
     if(length(grpbyName) == 0) grpbyName = ""
 
-    results <-tableBuilderNew(savedScenario[[input$selSB]], 
+    results <-tableBuilderNew(rv$savedScenario[[input$selSB]], 
           statistic = inputType[input$input_type_TB], 
           variableName = varList$Var[varList$Name==input$dynamicTB],
           grpbyName = grpbyName, CI = input$ci, 
-          logisetexpr = trimws(input$logisetexprTB))
+          logisetexpr = trimws(input$logisetexprTB),
+          envBase = env.base)
 
+    
+    if("Var" %in% names(results) )
+      temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
+    else 
+      temp <- results  %>% distinct( Mean, Lower, Upper, .keep_all = TRUE)
+    
+    if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
+      results <- temp %>% filter(Year == 1)
+    } else if((nrow(temp) != nrow(results))){
+      results <- temp
+    }
+    
     SBTB <<-results
     
     results
@@ -551,23 +678,29 @@ shinyServer(function(input, output, session) {
 
     results <- summaryOutputSBTB()
     
-    if(input$input_type_TB == "Percentage" & any(names(results) %in% "groupByData")){
+    if(length(unique(results$Year))==1 ){
+      
+      colnames(results)[1] <- ""
+      
+      if(results$Year[1] == 1)
+        results$Year <- "Childhood"
+      
+    } else if(input$input_type_TB == "Percentage" &  "groupByData" %in% names(results) ){
+      
       results <- dcast(melt(results, id.vars = c("Var", "groupByData", "Year")), 
-                       Year~  groupByData + Var + variable)
+                       Year~groupByData + Var + variable)
       
     }else if(input$input_type_TB == "Percentage"){
       results <- dcast(melt(results, id.vars = c("Var", "Year")), 
-                       Year~ Var + variable)
+                       Year~Var + variable)
       
-    } else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") & 
-              any(names(results) %in% "groupByData") ){
-      
+    } else if(input$input_type_TB %in% c("Means", "Quantiles") & 
+              "groupByData" %in% names(results) ){
       results <- dcast(melt(results, id.vars = c("groupByData", "Year")), 
                        Year ~ groupByData + variable)
       
-    } else if((input$input_type_TB == "Means" | input$input_type_TB == "Quantiles") &
-              names(results) %in% "Var"){
-      
+    } else if(input$input_type_TB %in% c("Means", "Quantiles") &
+              "Var" %in% names(results)){
       return(NULL)
     }    
     
@@ -576,16 +709,20 @@ shinyServer(function(input, output, session) {
     if(!input$ci)
       results <- results[,-index]
     
-    
     temp <- tableResult
-    temp$Scenario <-results
-    names(temp)[2] <- input$selSB
-    
+    temp$Base <-results
     tableResult <<- temp
     
-    DT::datatable(results, rownames = FALSE, 
-                options = list(pageLength = 21, dom = 't',
-                               scrollX = TRUE))
+    colnames(results) <- 
+      paste0('<span style="font-size:20px">',colnames(results),'</span>')
+    
+    DT::datatable(results, rownames = FALSE, extensions = 'Scroller', escape = FALSE,
+                  options = list(pageLength = 9999999, dom = 't',
+                                 scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
+                                 scrollCollapse = TRUE))  %>%
+      formatStyle(1:ncol(results), 'font-size' = '20px')
+  
+    
   })
   
  
@@ -597,15 +734,16 @@ shinyServer(function(input, output, session) {
     },
     content = function(con) {
       
-      print(finalFormulaPrint)
+      print(rv$finalFormulaSB)
       
       temp <- data.frame(Variable = input$dynamicTB)
       
       if(input$selSB != "")
         temp$Scenario = input$selSB
       
-      if(!is.null(finalFormulaPrint))
-        temp$SubgroupFormula = finalFormulaPrint
+      if(!is.null(rv$finalFormulaSB))
+        temp$SubgroupFormula = rv$finalFormulaSB
+    
       
       tableResult$info <- t(temp)
       
@@ -638,6 +776,70 @@ shinyServer(function(input, output, session) {
                 choices = unique(combineResults()$Var))
   })
   
+  output$barchartBase<- renderPlotly({
+    
+    tables.list <- combineResults()
+    
+    tables.list <- tables.list %>% filter(Scenario == "Base")
+    
+    colname <- names(summaryOutputTB())
+    
+    limitsGGplot <- aes(ymax = Upper, ymin=Lower)
+    dodge <- position_dodge(width=0.9)
+    
+    if(input$input_type_TB == "Percentage")
+      tables.list <- tables.list[tables.list$Var==input$Var_TB, ]
+    
+    tables.list$Year <- factor(tables.list$Year)
+   
+    p <- if("groupByData" %in% names(tables.list))
+      ggplot(tables.list, aes(fill=groupByData, y = Mean, x = Year))
+    else 
+      ggplot(tables.list, aes(y = Mean, x = Year)) 
+    
+    p  <-  p +  ggtitle(varList$Name[varList$Name==input$dynamicTB]) + 
+      geom_bar(position="dodge", stat = "identity") + 
+      theme(text = element_text(size = 15))
+    
+    
+    if(isolate(input$ci))
+      p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
+    
+    ggplotly(p)
+  })
+  
+  output$barchartSC<- renderPlotly({
+    
+    tables.list <- combineResults()
+    
+    tables.list <- tables.list %>% filter(Scenario == "Scenario")
+    
+    colname <- names(summaryOutputTB())
+    
+    limitsGGplot <- aes(ymax = Upper, ymin=Lower)
+    dodge <- position_dodge(width=0.9)
+    
+    if(input$input_type_TB == "Percentage")
+      tables.list <- tables.list[tables.list$Var==input$Var_TB, ]
+    
+    tables.list$Year <- factor(tables.list$Year)
+   
+    p <- if("groupByData" %in% names(tables.list))
+      ggplot(tables.list, aes(fill=groupByData, y = Mean, x = Year))
+    else 
+      ggplot(tables.list, aes(y = Mean, x = Year)) 
+    
+    p  <-  p +  ggtitle(varList$Name[varList$Name==input$dynamicTB]) + 
+      geom_bar(position="dodge", stat = "identity") + 
+      theme(text = element_text(size = 15))
+    
+    
+    if(isolate(input$ci))
+      p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
+    
+    ggplotly(p)
+  })
+  
   
   output$barchart<- renderPlotly({
    
@@ -651,10 +853,19 @@ shinyServer(function(input, output, session) {
     if(input$input_type_TB == "Percentage")
       tables.list <- tables.list[tables.list$Var==input$Var_TB, ]
     
+    tables.list$Year <- factor(tables.list$Year)
+    
+    p <- if("groupByData" %in% names(tables.list))
+      ggplot(tables.list, aes(fill=Scenario, y = Mean, x = Year)) + facet_wrap(~groupByData)
+    else 
+      ggplot(tables.list, aes(fill=Scenario, y = Mean, x = Year)) 
+    
+    
     p <- 
-    ggplot(tables.list, aes(fill=Scenario, y = Mean, x = Year)) +  
+      p +  
       ggtitle(varList$Name[varList$Name==input$dynamicTB]) + 
-      geom_bar(position="dodge", stat = "identity")
+      geom_bar(position="dodge", stat = "identity") + 
+      theme(text = element_text(size = 15))
     
     
     if(any(grepl("Lower", colname)))
@@ -663,9 +874,42 @@ shinyServer(function(input, output, session) {
     ggplotly(p)
   })
   
-  output$linePlot<- renderPlotly({
+  
+  
+  output$linePlotBase<- renderPlotly({
     
     tables.list <- combineResults()
+    
+    tables.list <- tables.list %>% filter(Scenario == "Base")
+    
+    colname <- names(summaryOutputTB())
+    limitsGGplot <- aes(ymax = Upper, ymin=Lower)
+    dodge <- position_dodge(width=0.9)
+  
+    
+    if(input$input_type_TB == "Percentage")
+      tables.list <- tables.list[tables.list$Var==input$Var_TB, ] 
+    
+    p <- if("groupByData" %in% names(tables.list))
+      ggplot(tables.list, aes(colour=groupByData, y = Mean, x = Year))
+    else 
+      ggplot(tables.list, aes(y = Mean, x = Year)) 
+    
+    p  <- p + ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path() + 
+      theme(text = element_text(size = 15))
+                                                            
+    if(isolate(input$ci))
+      p <- p + geom_errorbar(limitsGGplot, width=0.2)
+    
+    ggplotly(p)
+  })
+  
+  output$linePlotSC<- renderPlotly({
+    
+    
+    tables.list <- combineResults()
+    
+    tables.list <- tables.list %>% filter(Scenario == "Scenario")
     
     colname <- names(summaryOutputTB())
     limitsGGplot <- aes(ymax = Upper, ymin=Lower)
@@ -674,16 +918,49 @@ shinyServer(function(input, output, session) {
     if(input$input_type_TB == "Percentage")
       tables.list <- tables.list[tables.list$Var==input$Var_TB, ] 
     
-    p <-
-    ggplot(tables.list, aes(colour = Scenario, y = Mean, x = Year)) +  
-      ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path()
-
-    if(any(grepl("Lower", colname)))
+    p <- if("groupByData" %in% names(tables.list))
+      ggplot(tables.list, aes(colour=groupByData, y = Mean, x = Year))
+    else 
+      ggplot(tables.list, aes(y = Mean, x = Year)) 
+    
+    p  <- p+  ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path() + 
+      theme(text = element_text(size = 15))
+    
+    if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, width=0.2)
     
     ggplotly(p)
   })
   
+  
+  output$linePlot<- renderPlotly({
+    
+    tables.list <- combineResults()
+    
+    limitsGGplot <- aes(ymax = Upper, ymin=Lower)
+    dodge <- position_dodge(width=0.9)
+    
+    if(input$input_type_TB == "Percentage")
+      tables.list <- tables.list[tables.list$Var==input$Var_TB, ] 
+    
+    p <- if("groupByData" %in% names(tables.list))
+      ggplot(tables.list, aes(colour=groupByData, y = Mean, x = Year))
+    else 
+      ggplot(tables.list, aes(y = Mean, x = Year)) 
+    
+    p <- p +  ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  
+      geom_path(aes(linetype = Scenario)) + 
+      theme(text = element_text(size = 15))
+
+    if(isolate(input$ci))
+      p <- p + geom_errorbar(limitsGGplot, width=0.2)
+    
+    
+    ggplotly(p)
+  })
+  
+  
+ 
   
   output$downloadPlot <- downloadHandler(
     filename = function() {
@@ -706,6 +983,7 @@ shinyServer(function(input, output, session) {
       paste(input$wrkSpaceName,".RData", sep = "") 
     },
     content = function(file) {
+      savedScenario <- rv$savedScenario
       
       save(savedScenario, file = file)
     }
