@@ -13,7 +13,8 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
   dashboardHeader(title = "Knowledge Lab" ),
   # Application title
   dashboardSidebar(
-    sidebarMenu(
+    sidebarMenu( 
+      id = "tabs",
       menuItem("First Page", tabName = "fb", icon = icon("home")),
       menuItem("Model input", tabName = "mi", icon = icon("line-chart")),
       menuItem("Scenario Builder", tabName = "sb", icon = icon("refresh")),
@@ -29,7 +30,7 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
       box(textInput("wrkSpaceName", label = "Name the Project:"),
           downloadButton('saveWrkspace', "Save Project") ,
           h3("Latest Update:"),
-          h4("2016-08-01"),
+          h4("2016-09-21"),
           h3("Contact email:"), 
           a("k.chang@auckland.ac.nz", 
             href= "mailto:k.chang@auckland.ac.nz"), 
@@ -47,45 +48,47 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
       tabItem("fb", 
             fluidRow(
             box(
-              h3("Developing a knowledge laboratory of the early life-course using 
-                   systematic reviews and meta analyses"),
-              p("This is a three -year project funded by the Ministry of Business, Innovation 
-                    and Employment through its health and Society  fund in 2013."),
-                p("We will identify key determinants of child and adolescent outcomes, 
-                and will integrate estimates from systematic reviews and meta-analyses for 
-                these determinants into a working model of the early life-course (developed 
-                from an existing model we have created). We will use the working model as a 
-                \"knowledge laboratory\" to (i) test the validity of the underlying behavioural 
-                equations and specific knowledge sources (meta-analyses, systematic reviews), 
-                and (ii) test policy scenarios by carrying out experiments on the 'virtual cohort' 
-                created by the working model."),
-                 p("This research will involve the development of a micro-simulation model and 
-                associated computer software that allows users (policy makers, planners, analysts) 
-                to easily programme simulations and view the results. The end product will be an 
-                expert decision-support tool that will be available to the public policy 
-                community."),
-                p("The research plan involves (i) identifying published systematic reviews 
-                and meta analyses relating to key outcomes for children and adolescents (to age 18); 
-                  (ii) integrating estimates from these studies into, and thus enhancing, an existing
-                  micro-simulation model of the early life-course; (iii) validating the enhanced model,
-                  and thus published estimates, by comparing simulated results to published New Zealand 
-                  benchmarks; and (iv) using the validated enhanced model to test the impact of various
-                  policies on key child and adolescent outcomes."),
-                p("In using these best estimates to develop a micro-simulation model with 
-                which policy scenarios can be tested, our proposal will benefit NZ 
-                  families/whanau by determining the policies that have the greatest 
-                  impact on the lives of New Zealand children. Moreover, we will be
-                  uniquely placed to assess the impact of distinctive Maori programmes, 
-                  such as Kohanga reo and Whanau Ora."),
+              h3("KNOWLEDGE LAB (A knowledge laboratory of the early life-course)"),
+              p("Knowledge Lab is a microsimulation model of New Zealand children’s development 
+                from birth to age 21. Micro-simulation is a technique that creates a virtual world 
+                which mimics the real world, with the population of ‘virtual’ individuals looking very 
+                much like the population of real individuals – in our case, children developing from birth 
+                through to early adulthood.  A key feature of microsimulation is that allows virtual experiments 
+                to be carried out, where the effects of changing aspects of children’s lives can be simulated, 
+                and the results quantified. What if we could reduce child bullying? What if fewer children had 
+                ear infections? What if we could improve the diet and activity of children? How would children’s 
+                lives improve as a result of these changes?  These are the sorts of questions Knowledge Lab has 
+                been set up to answer."),
+              p("To construct Knowledge Lab, we first identified key determinants of child and adolescent 
+                outcomes, in association with policy representative from the New Zealand Ministries of Health,
+                Education, Social Development and Justice, as well as Te Puni Kōkiri, the Social Policy 
+                Evaluation and Research Unit (SuPERU), and the Children’s Commission.  We then integrated 
+                estimates from systematic reviews and meta-analyses for the impact of these determinants 
+                into a working micro-simulation model of the early life-course, building on an earlier 
+                microsimulation model we had developed:", a("Modelling the Early life-course.", 
+                href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/compass-projects/a-modelling-tool-to-improve-the-policy-response-on-issues-concerning-children-and-young-people.html")),
+              p("Steps in this process have involved (i) identifying published systematic reviews 
+                and meta analyses relating to key outcomes for children and adolescents (to age 21); 
+                (ii) integrating estimates from these studies into, and thus enhancing, an existing 
+                micro-simulation model of the early life-course; (iii) validating the enhanced model, 
+                and thus published estimates, by comparing simulated results to published New Zealand 
+                benchmarks; and (iv) using the validated enhanced model to test the impact of various 
+                policies on key child and adolescent outcomes."),
+              p("The end product is an expert decision-support tool that is available for use by the
+                public policy community. This tool have been developed as an interactive web application
+                using Shiny R package and R programming language. Thus, the Shiny app can be shared as a web page, 
+                which allows the user to run across a number of different platforms, and does not require 
+                any specialist software to be installed."),
+              p(""),
               a(href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass.html",
                 img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
-                    width = 200))),
-            box())),
-      tabItem("mi", tabBox(width = 12, height = "750px",
-        tabPanel(title = "Obesity", visNetworkOutput('oModel', width = "100%", height = "700px")),
-        tabPanel(title = "Education",  visNetworkOutput('eModel' )),
-        tabPanel(title = "Mental Health",  visNetworkOutput('mModel' ))
-        )),
+                    width = 200))))),
+      tabItem("mi", visNetworkOutput('oModel', width = "100%", height = "800px")),
+        #       tabBox(width = 12, height = "750px",
+        # tabPanel(title = "Obesity", visNetworkOutput('oModel', width = "100%", height = "700px")),
+        # tabPanel(title = "Education",  visNetworkOutput('eModel' )),
+        # tabPanel(title = "Mental Health",  visNetworkOutput('mModel' ))
+        # )),
     tabItem("sb",
             fluidRow(
               box(title ="Variable", width = 3,
@@ -131,6 +134,10 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                actionButton("completeTB", "Complete"),
                actionButton("resetTB", "Reset"),
                uiOutput("uilogisetexprTB"),
+               selectInput("basePop", "Apply subgroup to:", 
+                           c("Base population (Before scenario testing)", 
+                             "Scenario population (After scenario testing)"), 
+                           selected = "Scenario population (After scenario testing)"),
                checkboxInput("ci", label = "Confidence Interval", value = TRUE),
                actionButton("reset", label = "Reset"),
                actionButton("actionTB", label = "Show"),

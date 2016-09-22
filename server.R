@@ -6,7 +6,6 @@ library(shiny)
 library(shinydashboard)
 library(DT)
 library(rhandsontable)
-library(parallel)
 library(simarioV2)
 library(plotly)
 library(dplyr)
@@ -14,7 +13,6 @@ library(tidyr)
 library(openxlsx)
 library(reshape2)
 library(visNetwork)
-
 
 shinyServer(function(input, output, session) {
   
@@ -24,6 +22,34 @@ shinyServer(function(input, output, session) {
       tags$style(type="text/css", "textarea {width:100%; margin-top: 5px;}"),
       tags$textarea(id = inputId, placeholder = placeholder, rows = rows, value))
   }
+  
+  
+  # dataModal <- function(failed = FALSE) {
+  #   modalDialog(
+  #     passwordInput("pwd", "Enter password" ),
+  #     span('Hint: Name of the R package used.'),
+  # 
+  #     if (failed)
+  #       div(tags$b("Invalid password", style = "color: red;")),
+  # 
+  #     footer = tagList(
+  #       actionButton("ok", "OK")
+  #     )
+  #   )
+  # }
+  # 
+  # observe({
+  #   showModal(dataModal())
+  # })
+  # 
+  # observeEvent(input$ok, {
+  #   # Check that data object exists and is data frame.
+  #   if(input$pwd == "simario") {
+  #     removeModal()
+  #   } else {
+  #     showModal(dataModal(failed = TRUE))
+  #   }
+  # })
   
   
   source("SimmoduleMELC1_21.R")
@@ -49,90 +75,33 @@ shinyServer(function(input, output, session) {
   
   output$oModel <- renderVisNetwork({
     # customization adding more variables (see visNodes and visEdges)
-    nodes <- data.frame(id = 1:8, 
-                        label = c("Overweight/Obesity", "SES", "Brestfeeding",
-                                  "Sleep Duration", "Breakfast", "Maternal BMI", 
-                                  "Cesarean Delivery", "Smoke In Pregnancy"),       # labels
-                        group = c("GrA", "GrB"),                                     # groups 
-                        value = 1:8,                                                # size 
-                        shape = "ellipse",         # shape
-                        title = paste0("<p><b>", 1:8,"</b><br>Node !</p>"),         # tooltip
-                        color = c("orange"),# color
-                        shadow = c(TRUE), 
-                        font.size = 30)                  # shadow
     
-    edges <- data.frame(from = 2:8, to = 1,
-                        label = paste("Edge", 1:7),                                 # labels
-                        length = c(500),                                        # length
-                        arrows = c("to"),            # arrows
-                        dashes = c( FALSE),                                    # dashes
-                        title = paste("Edge", 1:7),                                 # tooltip
-                        smooth = c(TRUE),                                    # smooth
-                        shadow = c( TRUE), 
-                        font.size = 30)                       # shadow
+    nodes <- read.csv("base/nodes.csv")
+    edges  <- read.csv("base/edges.csv")
     
-    visNetwork(nodes, edges)%>% 
-      visEdges(arrows = "from")  %>% 
-      visHierarchicalLayout(direction = "RL", levelSeparation = 500)
-    
-  })
-    
-    
-
-    
-  output$eModel <- renderVisNetwork({
-    # customization adding more variables (see visNodes and visEdges)
-    nodes <- data.frame(id = 1:10, 
-                        label = paste("Node", 1:10),                                 # labels
-                        group = c("GrA", "GrB"),                                     # groups 
-                        value = 1:10,                                                # size 
-                        shape = c("square", "triangle", "box", "circle", "dot", "star",
-                                  "ellipse", "database", "text", "diamond"),         # shape
-                        title = paste0("<p><b>", 1:10,"</b><br>Node !</p>"),         # tooltip
-                        color = c("darkred", "grey", "orange", "darkblue", "purple"),# color
-                        shadow = c(FALSE, TRUE, FALSE, TRUE, TRUE))                  # shadow
-    
-    edges <- data.frame(from = sample(1:10,8), to = sample(1:10, 8),
-                        label = paste("Edge", 1:8),                                 # labels
-                        length = c(100,500),                                        # length
-                        arrows = c("to", "from", "middle", "middle;to"),            # arrows
-                        dashes = c(TRUE, FALSE),                                    # dashes
-                        title = paste("Edge", 1:8),                                 # tooltip
-                        smooth = c(FALSE, TRUE),                                    # smooth
-                        shadow = c(FALSE, TRUE, FALSE, TRUE))                       # shadow
-    
-    visNetwork(nodes, edges) 
-    
-  })
    
-  
-  output$mModel <-  renderVisNetwork({
-    # customization adding more variables (see visNodes and visEdges)
-    nodes <- data.frame(id = 1:10, 
-                        label = paste("Node", 1:10),                                 # labels
-                        group = c("GrA", "GrB"),                                     # groups 
-                        value = 1:10,                                                # size 
-                        shape = c("square", "triangle", "box", "circle", "dot", "star",
-                                  "ellipse", "database", "text", "diamond"),         # shape
-                        title = paste0("<p><b>", 1:10,"</b><br>Node !</p>"),         # tooltip
-                        color = c("darkred", "grey", "orange", "darkblue", "purple"),# color
-                        shadow = c(FALSE, TRUE, FALSE, TRUE, TRUE))                  # shadow
+    visNetwork(nodes, edges, height = "500px", width = "100%") %>% 
+      visOptions(highlightNearest = list(enabled = TRUE, degree = 2, hover = TRUE), 
+                 nodesIdSelection = TRUE)  %>%
+      visEvents( selectNode = "function(properties) {
+                 Shiny.onInputChange('var_SB', properties.nodes);
+                 Shiny.onInputChange('dynamicTB', properties.nodes);}",
+                 doubleClick  = "function(properties) {
+                 var number = Math.random();  
+                 Shiny.onInputChange('switchTB', number);}",
+                 click  = "function(properties) {
+                 var number = Math.random();  
+                 Shiny.onInputChange('switchSB', number);}")%>% 
+      visHierarchicalLayout(direction = "RL", levelSeparation = 250)
+  })
     
-    edges <- data.frame(from = sample(1:10,8), to = sample(1:10, 8),
-                        label = paste("Edge", 1:8),                                 # labels
-                        length = c(100,500),                                        # length
-                        arrows = c("to", "from", "middle", "middle;to"),            # arrows
-                        dashes = c(TRUE, FALSE),                                    # dashes
-                        title = paste("Edge", 1:8),                                 # tooltip
-                        smooth = c(FALSE, TRUE),                                    # smooth
-                        shadow = c(FALSE, TRUE, FALSE, TRUE))                       # shadow
-    
-    visNetwork(nodes, edges) 
-    
+  observeEvent(input$switchSB, {
+    updateTabItems(session, "tabs", "sb")
   })
   
-  
-  
+  observeEvent(input$switchTB, {
+    updateTabItems(session, "tabs", "tb")
+  })  
   
   
   
@@ -141,8 +110,6 @@ shinyServer(function(input, output, session) {
   #Sorting out the Variables
   
   varName <- initialSim$dict$descriptions 
-  
-  
   
   time_invariant_vars <- attr(initialSim$simframe, "time_invariant_vars")
   
@@ -168,7 +135,8 @@ shinyServer(function(input, output, session) {
   
   var_SB <- names(env.base$cat.adjustments)
 
-  var_SB_New <- unlist(sapply(var_SB, function(x) rev(varList$Var[grep(x, varList$Var)])[1]))
+  var_SB_New <- sapply(strip_lvl_suffix(var_SB), 
+                              function(x) varList$Var[ strip_lvl_suffix(varList$Var) %in% x])
 
   varName_SB <-  data.frame(old =var_SB,
                             Var =var_SB_New, 
@@ -198,39 +166,17 @@ shinyServer(function(input, output, session) {
   
   output$uiSB <- renderUI({  
     
-    selectInput("var_SB", "Select Variable to Examine",
+    selectInput("var_SB", "Select Variable to Examine", selected = input$var_SB,
                 choices = varName_SB$Name)    
   })
   
- 
-  # hotable
-  output$hotable <- renderRHandsontable({
- 
-    catAdj <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
-    
-    tbl <-
-    if(nrow(catAdj) == 1){	
-      temp = cbind(Rowname = colnames(catAdj),  as.data.frame(apply(catAdj,2, as.numeric)))
-      colnames(temp) <- c("Level",  input$var_SB)
-      
-      temp
-    }else {
-      cbind(Rowname = rownames(catAdj), as.data.frame(apply(catAdj,2, as.numeric), 
-                                                      stringsAsFactors = FALSE))
-      }
-    
-    rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>% 
-      hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE)
-  })
-  
-
   output$uiExprSB <- renderUI({
     selectInput("subGrp_SB", "Select Subgroup for subgroup formula:",
-                choices = c(None='',  c(varList$Name)))
+                choices = c(None='None',  c(varList$Name)))
   })
   
   output$uiExprSB1 <- renderUI({
-    if(input$subGrp_SB == '')
+    if(input$subGrp_SB == 'None')
       return()
     else  
       choice <- names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_SB]]])
@@ -285,13 +231,13 @@ shinyServer(function(input, output, session) {
     rv$finalFormulaSB <- NULL
   })
   
-
+  
   output$uilogisetexprSB <- renderUI({  
     textareaInput("logisetexprSB",  "Subgroup formula:", value = rv$finalFormulaSB)
   })
   
   
-  baseOutputSB <- eventReactive(input$preview_SB, { 
+  baseOutputSB <- reactive({ 
     
     print(as.character(varName_SB$Var[varName_SB$Name==input$var_SB]))
     
@@ -299,8 +245,18 @@ shinyServer(function(input, output, session) {
                                dict = env.base$dict,
                                variableName = as.character(varName_SB$Var[varName_SB$Name==input$var_SB]),
                                grpbyName = "", 
-                               logisetexpr=trimws(input$logisetexprSB))
-
+                               logisetexpr=trimws(input$logisetexprSB), digits = 5)
+  
+    if("Var" %in% names(results) )
+      temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
+    else 
+      temp <- results  %>% distinct( Mean, Lower, Upper, .keep_all = TRUE)
+    
+    if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
+      results <- temp %>% filter(Year == 1)
+    } else if((nrow(temp) != nrow(results))){
+      results <- temp
+    }
     
     temp <- results %>% select(Var, Year, Mean) %>% spread(Var, Mean) 
     
@@ -308,51 +264,98 @@ shinyServer(function(input, output, session) {
   })
   
   output$previewSB  <- DT::renderDataTable({
-       
-    results <- baseOutputSB()
     
+    results <- baseOutputSB()
+   
     if(nrow(results) == 1){
-
+      
       rownames(results) <- results$Year
       results <- t(results[,-1])
       colnames(results) <- isolate(input$var_SB)
-      
-      datatable(results, class = 'table-condensed', 
+
+      datatable(results, class = 'table-condensed',  extensions = 'Scroller',
                 options = list(pageLength = 21, dom = 't',
-                               scrollX = TRUE, scrollY = TRUE,
+                               scrollX = TRUE, scrollY =  600,
+                               scrollCollapse = TRUE,
                                fixedColumns = list(leftColumns = 2)), 
-                rownames = TRUE)
+                rownames = TRUE) %>% formatRound(1 ,digits = 1)
     } else{
-      datatable(results, class = 'table-condensed', 
-               options = list(pageLength = 21, dom = 't',
-                              scrollX = TRUE, scrollY = TRUE,
-                                fixedColumns = list(leftColumns = 2)), 
-                    rownames = FALSE)
+
+      datatable(results, class = 'table-condensed',  extensions = 'Scroller',
+                options = list(pageLength = 21, dom = 't',
+                               scrollX = TRUE, scrollY = 600,
+                               scrollCollapse = TRUE,
+                               fixedColumns = list(leftColumns = 2)), 
+                rownames = FALSE) %>% formatRound(-1 ,digits = 1)
     }
   })
   
   
-  output$resultSB  <- renderPrint({
+  # hotable
+  output$hotable <- renderRHandsontable({
+ 
+    catAdj <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
     
+    baseResults <- baseOutputSB()
+    
+    catAdj <- catAdj[baseResults$Year, ]
+    
+    
+    
+    tbl <-
+    if(!is.matrix(catAdj)){	
+      catAdj <- t(catAdj)
+      
+      temp = cbind(Rowname = colnames(catAdj),  as.data.frame(apply(catAdj,2, as.numeric)))
+      
+      if( baseResults$Year == 1)
+        colnames(temp) <- c("Level",  input$var_SB)
+      else 
+        colnames(temp) <- c("Level",  paste0("Year ",baseResults$Year))
+      
+      temp
+    }else {
+      
+      cbind(Rowname =  rownames(catAdj), as.data.frame(apply(catAdj,2, as.numeric), 
+                                                      stringsAsFactors = FALSE))
+      }
+   
+    
+    
+    rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>% 
+      hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE)
+  })
+  
+  
+  
+  output$resultSB  <- renderPrint({
     observeEvent(input$newSB ,{ 
       rv$env.scenario <- createSimenv( input$nameSB, 
                                        initialSim$simframe, 
                                        initialSim$dict, "years1_21")  
-      
     })
     
     
     observeEvent( input$actionAddSB, {
-      catAdj <-t(t(hot_to_r( input$hotable)))[,-1] 
+     
+      catAdj  <- t(t(hot_to_r( input$hotable)))[,-1]
       
+      
+      baseResults <- baseOutputSB()
+        
       if(is.matrix(catAdj)){
-        catAdj = apply(catAdj, 2, function(x) as.numeric(x)/100)
+
+        catAdjFinal <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
+        catAdjFinal[baseResults$Year,] <- catAdj
+        
+        catAdj <- apply(catAdjFinal, 2, function(x) as.numeric(x)/100)
         
         for(i in 1:nrow(catAdj))
           rv$env.scenario$cat.adjustments[[
             as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][i,] <- catAdj[i,]		   
         
       } else {
+        
         rv$env.scenario$cat.adjustments[[
           as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][1,] <- as.numeric(catAdj)/100	
       }
@@ -366,8 +369,8 @@ shinyServer(function(input, output, session) {
         rv$env.scenario <- setGlobalSubgroupFilterExpression( rv$env.scenario, 
                                                               input$uilogisetexprSB)
       
-      
-      rv$env.scenario <- simulateSimario(rv$env.scenario, 10)
+      #Simulation for the new scenario is here. 
+      rv$env.scenario <- simulateSimario(rv$env.scenario, 10, simulateKnowLab)
       
       
       index <- 
@@ -438,9 +441,9 @@ shinyServer(function(input, output, session) {
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
     switch(input$input_type_TB,
-           "Percentage" = selectInput("dynamicTB", "Variable",choices = sort(freqList$Name)),
-           "Means" = selectInput("dynamicTB", "Variable", choices =  sort(meansList$Name)),
-           "Quantiles" = selectInput("dynamicTB", "Variable", choices =  sort(quantilesList$Name))
+           "Percentage" = selectInput("dynamicTB", "Variable",choices = sort(freqList$Name), selected = input$dynamicTB),
+           "Means" = selectInput("dynamicTB", "Variable", choices =  sort(meansList$Name), selected = input$dynamicTB),
+           "Quantiles" = selectInput("dynamicTB", "Variable", choices =  sort(quantilesList$Name), selected = input$dynamicTB)
     )
   })
   
@@ -449,8 +452,8 @@ shinyServer(function(input, output, session) {
     input$input_type_TB
     rv$finalFormulaSB<- NULL
 
-    selectInput("subGrp_TB", "Select ByGroup:",
-                choices = c(None='',  sort(freqList$Name)))
+    selectInput("subGrp_TB", "Select ByGroup:", 
+                choices = c(None='None',  sort(freqList$Name)))
   })
   
   
@@ -458,13 +461,13 @@ shinyServer(function(input, output, session) {
     input$input_type_TB
     
     selectInput("subGrp_TB1", "Select Subgroup for subgroup formula:",
-                choices = c(None='',  varList$Name ))
+                choices = c(None='None',  varList$Name ))
   })
    
   output$uiExprTB1 <- renderUI({
   
     #print(names(env.base$dict$codings[[names(which(varName == input$subGrp_TB1))]]))
-    if(input$subGrp_TB1 == "")
+    if(input$subGrp_TB1 == "None")
       return()
     else  
       choice <- names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]])
@@ -551,18 +554,18 @@ shinyServer(function(input, output, session) {
     
     names(inputType) = c("Percentage", "Means","Quantiles" )
     
+
     grpbyName = varList$Var[varList$Name==input$subGrp_TB] 
     
     print(grpbyName)
     
     if(length(grpbyName) == 0) grpbyName = ""
- 
+  
     results <- tableBuilderNew(env.base, 
-                 statistic = inputType[input$input_type_TB], 
-                 variableName = varList$Var[varList$Name==input$dynamicTB],
-                 grpbyName = grpbyName, CI = input$ci, 
-                 logisetexpr = trimws(input$logisetexprTB))
-    
+                               statistic = inputType[input$input_type_TB], 
+                               variableName = varList$Var[varList$Name==input$dynamicTB][1],
+                               grpbyName = grpbyName, CI = input$ci, 
+                               logisetexpr = trimws(input$logisetexprTB), digits = 5)
     
     
     if("Var" %in% names(results) )
@@ -584,11 +587,18 @@ shinyServer(function(input, output, session) {
   
   tableResult <<- list()
   
+  output$uiVar <- renderUI({
+    if(length(unique(summaryOutputTB()$Year))!=1)
+      selectInput("Var_TB", "Select a level to compare in plot:",  
+                  selected = unique(summaryOutputTB()$Var)[2], 
+                  choices = unique(summaryOutputTB()$Var))
+  })
+  
+  
   output$resultTB  <- DT::renderDataTable({
 
     results <- summaryOutputTB()
   
-   
     
     if(length(unique(results$Year))==1 ){
       
@@ -599,15 +609,26 @@ shinyServer(function(input, output, session) {
       
     } else if(input$input_type_TB == "Percentage" &  "groupByData" %in% names(results) ){
       
+      if(length(unique(results$Var)) == 2)
+        results <- results[results$Var==input$Var_TB, ]
+      
+      
       results <- dcast(melt(results, id.vars = c("Var", "groupByData", "Year")), 
             Year~groupByData + Var + variable)
       
     }else if(input$input_type_TB == "Percentage"){
+      if(length(unique(results$Var)) == 2)
+        results <- results[results$Var==input$Var_TB, ]
+      
       results <- dcast(melt(results, id.vars = c("Var", "Year")), 
                        Year~Var + variable)
 
     } else if(input$input_type_TB %in% c("Means", "Quantiles") & 
               "groupByData" %in% names(results) ){
+      
+      if(length(unique(results$Var)) == 2)
+        results <- results[results$Var==input$Var_TB, ]
+      
       results <- dcast(melt(results, id.vars = c("groupByData", "Year")), 
                        Year ~ groupByData + variable)
       
@@ -615,6 +636,8 @@ shinyServer(function(input, output, session) {
               "Var" %in% names(results)){
       return(NULL)
     }    
+    
+       
     
     index <- c(grep("Lower", colnames(results)), grep("Upper", colnames(results)))
     
@@ -632,10 +655,10 @@ shinyServer(function(input, output, session) {
               options = list(pageLength = 9999999, dom = 't',
                              scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
                              scrollCollapse = TRUE))  %>%
-      formatStyle(1:ncol(results), 'font-size' = '20px')
+      formatStyle(1:ncol(results), 'font-size' = '20px') %>% formatRound(-1 ,digits = 1)
   })
   
-  
+
   SBTB <<- NULL
   
   summaryOutputSBTB <- eventReactive( input$actionTB, {
@@ -650,13 +673,24 @@ shinyServer(function(input, output, session) {
     
     if(length(grpbyName) == 0) grpbyName = ""
 
-    results <-tableBuilderNew(rv$savedScenario[[input$selSB]], 
-          statistic = inputType[input$input_type_TB], 
-          variableName = varList$Var[varList$Name==input$dynamicTB],
-          grpbyName = grpbyName, CI = input$ci, 
-          logisetexpr = trimws(input$logisetexprTB),
-          envBase = env.base)
 
+    if(input$basePop == "Base population (Before scenario testing)"){
+      results <-tableBuilderNew(rv$savedScenario[[input$selSB]], 
+                                statistic = inputType[input$input_type_TB], 
+                                variableName = varList$Var[varList$Name==input$dynamicTB],
+                                grpbyName = grpbyName, CI = input$ci, 
+                                logisetexpr = trimws(input$logisetexprTB),
+                                envBase = env.base, basePop = TRUE, digits = 5) 
+    } else {
+      results <-tableBuilderNew(rv$savedScenario[[input$selSB]], 
+                                statistic = inputType[input$input_type_TB], 
+                                variableName = varList$Var[varList$Name==input$dynamicTB],
+                                grpbyName = grpbyName, CI = input$ci, 
+                                logisetexpr = trimws(input$logisetexprTB),
+                                envBase = env.base, digits = 5)
+    }
+    
+    
     
     if("Var" %in% names(results) )
       temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
@@ -686,16 +720,26 @@ shinyServer(function(input, output, session) {
         results$Year <- "Childhood"
       
     } else if(input$input_type_TB == "Percentage" &  "groupByData" %in% names(results) ){
+      if(length(unique(results$Var)) == 2)
+        results <- results[results$Var==input$Var_TB, ]
       
       results <- dcast(melt(results, id.vars = c("Var", "groupByData", "Year")), 
                        Year~groupByData + Var + variable)
       
     }else if(input$input_type_TB == "Percentage"){
+      
+      if(length(unique(results$Var)) == 2)
+        results <- results[results$Var==input$Var_TB, ]
+      
       results <- dcast(melt(results, id.vars = c("Var", "Year")), 
                        Year~Var + variable)
       
     } else if(input$input_type_TB %in% c("Means", "Quantiles") & 
               "groupByData" %in% names(results) ){
+      
+      if(length(unique(results$Var)) == 2)
+        results <- results[results$Var==input$Var_TB, ]
+      
       results <- dcast(melt(results, id.vars = c("groupByData", "Year")), 
                        Year ~ groupByData + variable)
       
@@ -720,8 +764,7 @@ shinyServer(function(input, output, session) {
                   options = list(pageLength = 9999999, dom = 't',
                                  scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
                                  scrollCollapse = TRUE))  %>%
-      formatStyle(1:ncol(results), 'font-size' = '20px')
-  
+      formatStyle(1:ncol(results), 'font-size' = '20px') %>% formatRound(-1 ,digits = 1)
     
   })
   
@@ -744,11 +787,8 @@ shinyServer(function(input, output, session) {
       if(!is.null(rv$finalFormulaSB))
         temp$SubgroupFormula = rv$finalFormulaSB
     
-      
       tableResult$info <- t(temp)
-      
       write.xlsx(tableResult, con)
-      
       tableResult <<- list()
     }
   )
@@ -770,12 +810,7 @@ shinyServer(function(input, output, session) {
     combineResults
   })
   
-  output$uiVar <- renderUI({
-    selectInput("Var_TB", "Select a level to compare:",  
-                selected = unique(combineResults()$Var)[2], 
-                choices = unique(combineResults()$Var))
-  })
-  
+
   output$barchartBase<- renderPlotly({
     
     tables.list <- combineResults()

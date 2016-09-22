@@ -1,0 +1,47 @@
+from,to,label,length,arrows,dahses ,title,shadow,font.size
+SES at birth,Being Bullied,,500,to,FALSE,,TRUE,30
+SES at birth,Alcohol abuse,,500,to,FALSE,,TRUE,30
+Has ADHD,Alcohol abuse,,500,to,FALSE,,TRUE,30
+Parental Alcohol Abuse,Alcohol abuse,,500,to,FALSE,,TRUE,30
+Being Bullied,Depression,,500,to,FALSE,,TRUE,30
+Maternal punitiveness - Yes,Depression,,500,to,FALSE,,TRUE,30
+Maternal emotional responsiveness - Yes,Depression,,500,to,FALSE,,TRUE,30
+Parental Depression,Depression,,500,to,FALSE,,TRUE,30
+SES at birth,Overweight in childhood,,500,to,FALSE,,TRUE,30
+Breastfeeding (months),Overweight in childhood,,500,to,FALSE,,TRUE,30
+Sleep Duration,Overweight in childhood,,500,to,FALSE,,TRUE,30
+Breakfast consumption,Overweight in childhood,,500,to,FALSE,,TRUE,30
+Mother's BMI,Overweight in childhood,,500,to,FALSE,,TRUE,30
+Caesarean delivery,Overweight in childhood,,500,to,FALSE,,TRUE,30
+Cigarettes smoked per day during pregnancy,Overweight in childhood,,500,to,FALSE,,TRUE,30
+Gestational age (weeks),IQ,,500,to,FALSE,,TRUE,30
+Birth weight,IQ,,500,to,FALSE,,TRUE,30
+Maternal Diabetes,IQ,,500,to,FALSE,,TRUE,30
+Otitis media,IQ,,500,to,FALSE,,TRUE,30
+Print Exposure,IQ,,500,to,FALSE,,TRUE,30
+Drinks per week during pregnancy,IQ,,500,to,FALSE,,TRUE,30
+Breastfeeding (months),IQ,,500,to,FALSE,,TRUE,30
+SES at birth,NCEA Attain,,500,to,FALSE,,TRUE,30
+SES at birth,NCEA Fail,,500,to,FALSE,,TRUE,30
+SES at birth,NCEA Dropout,,500,to,FALSE,,TRUE,30
+Highest eduction level between parents,NCEA Attain,,500,to,FALSE,,TRUE,30
+Highest eduction level between parents,NCEA Fail,,500,to,FALSE,,TRUE,30
+Highest eduction level between parents,NCEA Dropout,,500,to,FALSE,,TRUE,30
+Print Exposure,NCEA Attain,,500,to,FALSE,,TRUE,30
+Print Exposure,NCEA Fail,,500,to,FALSE,,TRUE,30
+Print Exposure,NCEA Dropout,,500,to,FALSE,,TRUE,30
+Early Childhood Education,NCEA Attain,,500,to,FALSE,,TRUE,30
+Early Childhood Education,NCEA Fail,,500,to,FALSE,,TRUE,30
+Early Childhood Education,NCEA Dropout,,500,to,FALSE,,TRUE,30
+Has ADHD,NCEA Attain,,500,to,FALSE,,TRUE,30
+Has ADHD,NCEA Fail,,500,to,FALSE,,TRUE,30
+Has ADHD,NCEA Dropout,,500,to,FALSE,,TRUE,30
+Reading Books to Baby,NCEA Attain,,500,to,FALSE,,TRUE,30
+Reading Books to Baby,NCEA Fail,,500,to,FALSE,,TRUE,30
+Reading Books to Baby,NCEA Dropout,,500,to,FALSE,,TRUE,30
+IQ,NCEA Attain,,500,to,FALSE,,TRUE,30
+IQ,NCEA Fail,,500,to,FALSE,,TRUE,30
+IQ,NCEA Dropout,,500,to,FALSE,,TRUE,30
+NCEA Attain,"Not in employment, education, or training",,500,to,FALSE,,TRUE,30
+NCEA Fail,"Not in employment, education, or training",,500,to,FALSE,,TRUE,30
+NCEA Dropout,"Not in employment, education, or training",,500,to,FALSE,,TRUE,30

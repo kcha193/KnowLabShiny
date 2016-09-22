@@ -1,0 +1,31 @@
+id,label,group,value,shape,title,color,shadow,font.size
+SES at birth,SES at birth,,1,ellipse,,orange,TRUE,30
+Maternal punitiveness - Yes,Maternal punitiveness,,1,ellipse,,orange,TRUE,30
+Maternal emotional responsiveness - Yes,Maternal emotional responsiveness,,1,ellipse,,orange,TRUE,30
+Being Bullied,Being Bullied,,1,ellipse,,lightblue,TRUE,30
+Has ADHD,Has ADHD,,1,ellipse,,orange,TRUE,30
+Parental Alcohol Abuse,Parental Alcohol Abuse,,1,ellipse,,orange,TRUE,30
+Parental Depression,Parental Depression,,1,ellipse,,orange,TRUE,30
+Alcohol abuse,Alcohol abuse,,1,ellipse,,lightblue,TRUE,30
+Depression,Depression,,1,ellipse,,lightblue,TRUE,30
+Overweight in childhood,Overweight in childhood,,1,ellipse,,lightblue,TRUE,30
+Breastfeeding (months),Breastfeeding (months),,1,ellipse,,orange,TRUE,30
+Sleep Duration,Sleep Duration,,1,ellipse,,orange,TRUE,30
+Breakfast consumption,Breakfast consumption,,1,ellipse,,orange,TRUE,30
+Mother's BMI,Mother's BMI,,1,ellipse,,orange,TRUE,30
+Caesarean delivery,Caesarean delivery,,1,ellipse,,orange,TRUE,30
+Cigarettes smoked per day during pregnancy,Smoked during pregnancy,,1,ellipse,,orange,TRUE,30
+Otitis media,Otitis media,,1,ellipse,,orange,TRUE,30
+IQ,IQ,,1,ellipse,,lightblue,TRUE,30
+Gestational age (weeks),Gestational age,,1,ellipse,,orange,TRUE,30
+Birth weight,Birth weight,,1,ellipse,,orange,TRUE,30
+Maternal Diabetes,Maternal Diabetes,,1,ellipse,,orange,TRUE,30
+Print Exposure,Print Exposure,,1,ellipse,,orange,TRUE,30
+Drinks per week during pregnancy,Drinks during pregnancy,,1,ellipse,,orange,TRUE,30
+NCEA Attain,NCEA Attain,,1,ellipse,,lightblue,TRUE,30
+NCEA Fail,NCEA Fail,,1,ellipse,,lightblue,TRUE,30
+NCEA Dropout,NCEA Dropout,,1,ellipse,,lightblue,TRUE,30
+Early Childhood Education,Early Childhood Education,,1,ellipse,,orange,TRUE,30
+Highest eduction level between parents,Parental Education,,1,ellipse,,orange,TRUE,30
+Reading Books to Baby,Reading Books to Baby,,1,ellipse,,orange,TRUE,30
+"Not in employment, education, or training",NEET,,1,ellipse,,lightblue,TRUE,30

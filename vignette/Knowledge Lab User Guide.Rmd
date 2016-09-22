@@ -1,0 +1,41 @@
+---
+title: "Knowledge Lab User Guide"
+author: "COMPASS Research Centre"
+date: "September 2016"
+output:
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+institute: The University of Auckland
+---
+
+
+Introduction
+---------------
+This is a guide for the ‘Modelling The Early Life-Course’ (MEL-C) micro-simulation model using our Java Microsimulation (JAMSIM) software tool. ‘Beta’ versions of the tool and model were produced, and underwent testing within four New Zealand Government Departments in June–July 2013 – our thanks to those involved. The next deployment version is now ready.
+
+###Modelling the Early Life-Course (MEL-C)
+MEL-C uses microsimulation to build an accurate model of early life-course development (birth to age 13) in New Zealand. Microsimulation relies on data from the real world to create an artificial one that mimics the original but upon which virtual experiments can be carried out (Gilbert and Troitzsch 2005). Each individual unit has a set of associated attributes as a starting point, and a set of rules is then applied in a stochastic manner to the units to simulate changes in state or behaviour over time. This dynamic micro-simulation model (Rutter, et al. 2011; Spielauer 2007) essentially generates a set of diverse synthetic histories for a population of individuals. Modifications of influential factors can then be carried out to test hypothetical ‘what if’ scenarios on key down-stream outcomes of policy interest.
+
+MEL-C is a discrete-time cohort microsimulation in that the simulated units (children) are aged year-by-year from a fixed starting point (birth). No new individuals enter as the simulation progresses through time and individual attributes are updated in annual steps. The conceptual framework for MEL-C comprises a series of causal pathways, following a framework based on the social determinants of health (Solar and Irwin 2010) where structural elements related to social disadvantage fundamentally determine intermediate parental and family factors and final outcomes.  This is shown in the figure below.
+
+
+Header 2
+---------------
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+summary(cars)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+### Header 3
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+

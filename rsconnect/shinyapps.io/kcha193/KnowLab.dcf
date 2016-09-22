@@ -1,0 +1,10 @@
+name: KnowLab
+account: kcha193
+server: shinyapps.io
+appId: 118829
+bundleId: 525989
+url: https://kcha193.shinyapps.io/KnowLab/
+when: 1470571451.50885
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: conceptualDiagram.R
