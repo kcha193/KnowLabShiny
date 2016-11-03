@@ -2,6 +2,7 @@
 
 #devtools::install_github("kcha193/simarioV2")
 
+library(RColorBrewer)
 library(shiny)
 library(shinydashboard)
 library(DT)
@@ -50,7 +51,7 @@ shinyServer(function(input, output, session) {
   #     showModal(dataModal(failed = TRUE))
   #   }
   # })
-  
+
   
   source("SimmoduleMELC1_21.R")
   
@@ -75,44 +76,7 @@ shinyServer(function(input, output, session) {
                        currSB = "NULL", 
                        tableResult = list())
   
-  #############################################################################################
-  
-  
-  output$oModel <- renderVisNetwork({
-    # customization adding more variables (see visNodes and visEdges)
-    
-    nodes <- read.csv("base/nodes.csv")
-    edges  <- read.csv("base/edges.csv")
-    
-   
-    visNetwork(nodes, edges, height = "500px", width = "100%") %>% 
-      visOptions(highlightNearest = list(enabled = TRUE, degree = 2, hover = TRUE), 
-                 nodesIdSelection = TRUE)  %>%
-      visEvents( selectNode = "function(properties) {
-                 Shiny.onInputChange('var_SB', properties.nodes);
-                 Shiny.onInputChange('dynamicTB', properties.nodes);}")%>%
-      visHierarchicalLayout(direction = "RL", levelSeparation = 250)
-    
-      # visEvents( selectNode = "function(properties) {
-      #            Shiny.onInputChange('var_SB', properties.nodes);
-      #            Shiny.onInputChange('dynamicTB', properties.nodes);}",
-      #            doubleClick  = "function(properties) {
-      #            var number = Math.random();
-      #            Shiny.onInputChange('switchTB', number);}",
-      #            click  = "function(properties) {
-      #            var number = Math.random();
-      #            Shiny.onInputChange('switchSB', number);}")%>%
-      # visHierarchicalLayout(direction = "RL", levelSeparation = 250)
-  })
-    
-  observeEvent(input$switchSB, {
-    updateTabItems(session, "tabs", "sb")
-  })
-  
-  observeEvent(input$switchTB, {
-    updateTabItems(session, "tabs", "tb")
-  })  
-  
+ 
   
   
   
@@ -160,6 +124,38 @@ shinyServer(function(input, output, session) {
   meansList <- meansList[order(meansList$Name),]  
  
   freqList <- freqList[order(freqList$Name),]  
+  
+  #############################################################################################
+  
+  
+  output$oModel <- renderVisNetwork({
+    # customization adding more variables (see visNodes and visEdges)
+    
+    nodes <- read.csv("base/nodes.csv")
+    
+    
+    edges  <- read.csv("base/edges.csv")
+    
+    
+    visNetwork(nodes, edges, height = "500px", width = "100%") %>% 
+      visOptions(highlightNearest = list(enabled = TRUE, degree = 2, hover = TRUE), 
+                 nodesIdSelection = TRUE)  %>%
+      visEvents( selectNode = "function(properties) {
+                 Shiny.onInputChange('var_SB', properties.nodes);
+                 Shiny.onInputChange('dynamicTB', properties.nodes);}")%>%
+      visHierarchicalLayout(direction = "RL", levelSeparation = 250)
+  
+
+})
+  
+  observeEvent(input$switchSB, {
+    updateTabItems(session, "tabs", "sb")
+  })
+  
+  observeEvent(input$switchTB, {
+    updateTabItems(session, "tabs", "tb")
+  })  
+  
   
   ################################################################################
   #Scenario Builder
@@ -423,7 +419,7 @@ shinyServer(function(input, output, session) {
       
       
       rv$message <- 
-        if(is.null(rv$message) | !grepl(message, rv$message))
+        if(rv$message == "Choose a Variable to Examine." | grepl(message, rv$message))
           paste(message)
         else 
           paste(rv$message, message, sep = "<br/>" )
@@ -439,17 +435,28 @@ shinyServer(function(input, output, session) {
       
       #Simulation for the new scenario is here. 
       
+      showModal(modalDialog(
+        title = "Simulation in progress",
+        "This may take a while...",
+        footer = NULL
+      ))
+
+    
+      rv$env.scenario <- simulateSimario(rv$env.scenario, 10, simulateKnowLab)
       
-      withProgress(message = 'Simulation in progress',
-                   detail = 'This may take a while...', value = 0, {
-                     for (i in 1:15) {
-                       incProgress(1/15)
-                       Sys.sleep(0.25)
-                     }
-                     
-        rv$env.scenario <- simulateSimario(rv$env.scenario, 10, simulateKnowLab)            
-                     
-      })
+      # withProgress(message = 'Simulation in progress', style = "old",
+      #              detail = 'This may take a while...', value = 0, {
+      #                for (i in 1:15) {
+      #                  incProgress(1/15)
+      #                  Sys.sleep(0.25)
+      #                }
+      #                
+      #   rv$env.scenario <- simulateSimario(rv$env.scenario, 10, simulateKnowLab)            
+      #                
+      # })
+      
+      removeModal()
+
       
       index <- 
         mapply(all.equal, env.base$modules$run_results$run1, 
@@ -467,14 +474,14 @@ shinyServer(function(input, output, session) {
       }
       
       rv$env.scenario <- NULL
-      rv$message <- "Simulation is Fisnished!"
+      rv$message <- "Simulation is Finished!"
       rv$currSB <- "NULL"
     })
   
   
   output$StartSim <-renderUI({
    
-      return(HTML(rv$message))
+      return(HTML(paste("<font color=\"red\">",rv$message, "</font>")))
   })
   
   
@@ -500,6 +507,18 @@ shinyServer(function(input, output, session) {
                 choices = c(names(rv$savedScenario )))
     
   })
+  
+  output$saveWrkspace <- downloadHandler(
+    filename = function() { 
+      paste(input$wrkSpaceName,".RData", sep = "") 
+    },
+    content = function(file) {
+      savedScenario <- rv$savedScenario
+      
+      save(savedScenario, file = file)
+    }
+  )
+  
   
 ###################################################################################
 #Table builder
@@ -646,6 +665,7 @@ shinyServer(function(input, output, session) {
                                logisetexpr = trimws(input$logisetexprTB), digits = 5)
     
     
+    
     if("Var" %in% names(results) )
       temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
     else if("Mean" %in% names(results) )
@@ -653,6 +673,9 @@ shinyServer(function(input, output, session) {
     else 
       temp <- results  %>% distinct(Min, X10th, X25th, X50th, 
                                     X75th, X90th, Max, .keep_all = TRUE)
+    
+    if(length(unique(temp$Year)) > 1)
+      temp <- results[results$Year >= range(temp$Year)[1] & results$Year <= range(temp$Year)[2],]
     
     if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
       results <- temp %>% filter(Year == 1)
@@ -669,7 +692,7 @@ shinyServer(function(input, output, session) {
 
   
   output$uiVar <- renderUI({
-    if(length(unique(summaryOutputTB()$Year))!=1)
+   # if(length(unique(summaryOutputTB()$Year))!=1)
       selectInput("Var_TB", "Select a level to compare in plot:",  
                   selected = unique(summaryOutputTB()$Var)[2], 
                   choices = unique(summaryOutputTB()$Var))
@@ -782,6 +805,8 @@ shinyServer(function(input, output, session) {
     else 
       temp <- results  %>% distinct(Min, X10th, X25th, X50th, X75th, X90th, Max, .keep_all = TRUE)
     
+    if(length(unique(temp$Year)) > 1)
+      temp <- results[results$Year >= range(temp$Year)[1] & results$Year <= range(temp$Year)[2],]
     
     if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
       results <- temp %>% filter(Year == 1)
@@ -924,6 +949,8 @@ shinyServer(function(input, output, session) {
       geom_bar(position="dodge", stat = "identity") + 
       theme(text = element_text(size = 15))
     
+    if(input$input_type_TB == "Percentage")
+     p  <-  p + ylab("Percentage")
     
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
@@ -956,6 +983,9 @@ shinyServer(function(input, output, session) {
       geom_bar(position="dodge", stat = "identity") + 
       theme(text = element_text(size = 15))
     
+    
+    if(input$input_type_TB == "Percentage")
+     p  <-  p + ylab("Percentage")
     
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
@@ -991,6 +1021,10 @@ shinyServer(function(input, output, session) {
       theme(text = element_text(size = 15))
     
     
+    if(input$input_type_TB == "Percentage")
+     p  <-  p + ylab("Percentage")
+
+    
     if(any(grepl("Lower", colname)))
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
     
@@ -1020,7 +1054,10 @@ shinyServer(function(input, output, session) {
     
     p  <- p + ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path() + 
       theme(text = element_text(size = 15))
-                                                            
+   
+    if(input$input_type_TB == "Percentage")
+     p  <-  p + ylab("Percentage")
+                                                         
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, width=0.2)
     
@@ -1049,6 +1086,9 @@ shinyServer(function(input, output, session) {
     p  <- p+  ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path() + 
       theme(text = element_text(size = 15))
     
+    if(input$input_type_TB == "Percentage")
+     p  <-  p + ylab("Percentage")
+
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, width=0.2)
     
@@ -1075,6 +1115,10 @@ shinyServer(function(input, output, session) {
       geom_path(aes(linetype = Scenario)) + 
       theme(text = element_text(size = 15))
 
+    if(input$input_type_TB == "Percentage")
+     p  <-  p + ylab("Percentage")
+
+    
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, width=0.2)
     
@@ -1149,6 +1193,96 @@ shinyServer(function(input, output, session) {
     
   })
   
+  # nz1 <- getData("GADM", country = "NZ", level = 1)
+  # nz1 <- spTransform(nz1, CRS("+init=epsg:2135"))
+  # 
+  # ## Extract polygon corners and merge with shapefile data
+  # nz1@data$id <- rownames(nz1@data)
+  # nz1.ff <- fortify(nz1)
+  # nz1.df <- merge(nz1@data, nz1.ff, by = "id", all.y = TRUE)
+  # rm(nz1.ff)
+  # rm(nz1)
+  # 
+  # nz1.df <- nz1.df[c("long", "lat", "group", "NAME_1")]
+  # 
+  # toRemove <- which(nz1.df$NAME_1 == "Chatham Islands")
+  # 
+  # nz1.df <- nz1.df[-toRemove,]
+  # 
+  # 
+  # output$uiYear <- renderUI({
+  #   selectInput("year", "Select Year:", unique(combineResults()$Year))
+  # })
+  # 
+  # 
+  # output$map<- renderPlotly({
+  #   
+  #   tables.list <- combineResults()
+  #   
+  #   if(input$input_type_TB == "Percentage")
+  #     tables.list <- tables.list[tables.list$Var==input$Var_TB, ] 
+  #     
+  #   if(length(unique(tables.list$Year)) != 1)
+  #     tables.list <- tables.list[tables.list$Year == input$year, ] 
+  #   
+  #   
+  #   if( length(unique(tables.list$Scenario))==2){
+  #     nz1.df <- data.frame(Scenario = rep(c("Base", "Scenario"), 
+  #                                         each = nrow(nz1.df)), 
+  #                                         rbind(nz1.df, nz1.df))
+  #     
+  #     nz1.df$Outcome <- as.factor(nz1.df$NAME_1)
+  #     
+  #     tables.list$Mean[tables.list$Scenario == "Base" & tables.list$groupByData == "NEL"] <- 
+  #       mean(c(tables.list$Mean[tables.list$Scenario == "Base" & tables.list$groupByData == "NEL"], 
+  #              tables.list$Mean[tables.list$Scenario == "Base" & tables.list$groupByData == "TAS"]))
+  #     
+  #     tables.list$Mean[tables.list$Scenario == "Scenario" & tables.list$groupByData == "NEL"] <- 
+  #       mean(c(tables.list$Mean[tables.list$Scenario == "Scenario" & tables.list$groupByData == "NEL"], 
+  #              tables.list$Mean[tables.list$Scenario == "Scenario" & tables.list$groupByData == "TAS"]))
+  #     
+  #     tables.list <- tables.list[tables.list$groupByData != "TAS", ]
+  #     
+  #     levels(nz1.df$Outcome ) <- tables.list$Mean
+  #     
+  #     
+  #     nz1.df$Outcome <- as.numeric(as.character(nz1.df$Outcome))
+  #     
+  #     
+  #   }else{ 
+  # 
+  #     nz1.df <- data.frame(Scenario = rep(c("Base"),each = nrow(nz1.df)), 
+  #                          nz1.df)
+  #   
+  #     nz1.df$Outcome <- as.factor(nz1.df$NAME_1)
+  #     
+  #     tables.list$Mean[tables.list$groupByData == "NEL"] <- 
+  #       mean(c(tables.list$Mean[tables.list$groupByData == "NEL"], 
+  #              tables.list$Mean[tables.list$groupByData == "TAS"]))
+  #     
+  #     tables.list <- tables.list[tables.list$groupByData != "TAS", ]
+  #     
+  #     levels(nz1.df$Outcome ) <- tables.list$Mean
+  #       
+  #     
+  #     nz1.df$Outcome <- as.numeric(as.character(nz1.df$Outcome))
+  #     
+  #   }
+  #   
+  #   ## Plot map
+  #   g <- ggplot(data = nz1.df, aes(x = long, y = lat, group = group, 
+  #                                  fill = Outcome, text = NAME_1)) + 
+  #     geom_polygon(show.legend = TRUE) + 
+  #     scale_fill_gradientn(colours = brewer.pal(6, "RdYlBu")) +
+  #     theme_bw() + facet_wrap(~Scenario)+
+  #     theme(axis.title=element_blank(),
+  #           axis.text=element_blank(),
+  #           axis.ticks=element_blank())
+  #   
+  #   ggplotly(g, tooltip = c("text", "fill"))
+  # })
+
+  
   output$downloadPlot <- downloadHandler(
     
     
@@ -1171,17 +1305,7 @@ shinyServer(function(input, output, session) {
     }
   )
   
-  output$saveWrkspace <- downloadHandler(
-    filename = function() { 
-      paste(input$wrkSpaceName,".RData", sep = "") 
-    },
-    content = function(file) {
-      savedScenario <- rv$savedScenario
-      
-      save(savedScenario, file = file)
-    }
-  )
-  
+
 
   
   

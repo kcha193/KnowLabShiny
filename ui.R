@@ -6,6 +6,7 @@ library(DT)
 library(rhandsontable)
 library(plotly)
 library(visNetwork)
+library(rdrop2)
 
 options(shiny.maxRequestSize=10000*1024^2)
 
@@ -109,8 +110,8 @@ tabItem("sb",
               actionButton("actionAddSB", label = "Add Scenario"),
               selectInput("nRun", "Number of Runs:", c(1:10), selected = 10),
               actionButton("actionSB", label = "Run Scenario"),
-              h3("Scenario simulation log:"),
-              htmlOutput('StartSim')),
+              h4("Scenario simulation log:"),
+              h4(strong(htmlOutput('StartSim')))),
           # Show a plot of the generated distribution
           box(title ="Setting the Scenario", status = "warning", solidHeader = TRUE,
               box (title = "Variable Adjustment", status = "success", solidHeader = TRUE,
@@ -153,17 +154,17 @@ tabItem("tb",
                  tabPanel(title = "Base", dataTableOutput('resultTB')),
                  tabPanel(title = "Scenario",  dataTableOutput('resultSBTB')),
                  navbarMenu("Barchart (Percentage and Mean only)" ,
-                            tabPanel("Base only", plotlyOutput("barchartBase", width = "100%", height = "700px")),  
-                            tabPanel("Scenario only", plotlyOutput("barchartSC", width = "100%", height = "700px")),
-                            tabPanel("Base versus Scenario", plotlyOutput("barchart", width = "100%", height = "700px"))),
+                            tabPanel("Base only", plotlyOutput("barchartBase", width = "90%", height = "700px")),  
+                            tabPanel("Scenario only", plotlyOutput("barchartSC", width = "90%", height = "700px")),
+                            tabPanel("Base versus Scenario", plotlyOutput("barchart", width = "90%", height = "700px"))),
                  navbarMenu("Line plot (Percentage and Mean only)" ,
-                            tabPanel("Base only", plotlyOutput("linePlotBase", width = "100%", height = "700px")),  
-                            tabPanel("Scenario only", plotlyOutput("linePlotSC", width = "100%", height = "700px")),
-                            tabPanel("Base versus Scenario", plotlyOutput("linePlot", width = "100%", height = "700px"))),
+                            tabPanel("Base only", plotlyOutput("linePlotBase", width = "90%", height = "700px")),  
+                            tabPanel("Scenario only", plotlyOutput("linePlotSC", width = "90%", height = "700px")),
+                            tabPanel("Base versus Scenario", plotlyOutput("linePlot", width = "90%", height = "700px"))),
                   navbarMenu("Box plot (Quantile only)" ,
-                             tabPanel("Base only", plotOutput("boxPlotBase", width = "100%", height = "700px")),  
-                             tabPanel("Scenario only", plotOutput("boxPlotSC", width = "100%", height = "700px")),
-                             tabPanel("Base versus Scenario", plotOutput("boxPlot", width = "100%", height = "700px")))
+                             tabPanel("Base only", plotOutput("boxPlotBase", width = "90%", height = "700px")),  
+                             tabPanel("Scenario only", plotOutput("boxPlotSC", width = "90%", height = "700px")),
+                             tabPanel("Base versus Scenario", plotOutput("boxPlot", width = "90%", height = "700px")))
                         
           )))
 )))
