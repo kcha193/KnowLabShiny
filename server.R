@@ -161,12 +161,24 @@ shinyServer(function(input, output, session) {
   #Scenario Builder
   
   
+  output$uiNameSB <- renderUI({
+    
+    textInput("nameSB", "Name of your scenario", value = "Scenario1")
+  })
+  
   observe({ 
     rv$env.scenario <- createSimenv(input$nameSB, 
                                   initialSim$simframe, 
                                   initialSim$dict, "years1_21")
     rv$finalFormulaSB<- NULL
-    rv$message <- "Choose a Variable to Examine."
+    rv$currSB <- "NULL"
+    rv$finalFormulaSB<- NULL
+    
+    if(length(rv$savedScenario) > 0 )
+      rv$message <- "Simulation is Finished! <br> Choose another Variable to Examine for next Scenario."
+    
+    else 
+      rv$message <- "Choose a Variable to Examine."
     
   })
   
@@ -309,8 +321,19 @@ shinyServer(function(input, output, session) {
   # hotable
   output$hotable <- renderRHandsontable({
  
-   
-    if(is.null(input$hotable) | (isolate(rv$currSB) != input$var_SB)){
+    newDim <- dim(baseOutputSB())
+    
+    if(is.null(input$hotable))
+      oldDim <- c(0,0)
+    else 
+      oldDim <- dim(hot_to_r(input$hotable))
+    
+    
+    if(nrow(baseOutputSB()) == 1)
+      newDim = oldDim
+    
+    
+    if(is.null(input$hotable) | (isolate(rv$currSB) != input$var_SB) | any(newDim != oldDim)){
       
       catAdj <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
     
@@ -474,8 +497,10 @@ shinyServer(function(input, output, session) {
       }
       
       rv$env.scenario <- NULL
-      rv$message <- "Simulation is Finished!"
-      rv$currSB <- "NULL"
+
+      updateTextInput(session, "nameSB", "Name of your scenario", 
+                      value = paste0("Scenario", length(rv$savedScenario) + 1) )
+      
     })
   
   
@@ -645,7 +670,7 @@ shinyServer(function(input, output, session) {
   
   baseTB <<- NULL 
   
-  summaryOutputTB <- eventReactive( input$actionTB, { 
+  summaryOutputTB <- reactive( { 
     
     inputType = c("frequencies", "means", "quantiles")
     
@@ -768,7 +793,7 @@ shinyServer(function(input, output, session) {
 
   SBTB <<- NULL
   
-  summaryOutputSBTB <- eventReactive( input$actionTB, {
+  summaryOutputSBTB <- reactive({
     
     inputType = c("frequencies", "means", "quantiles")
     

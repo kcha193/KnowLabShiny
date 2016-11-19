@@ -17,8 +17,7 @@ Caesarean delivery,Caesarean delivery,,1,ellipse,"""No""=0 <br> ""Yes""=1",orang
 Cigarettes smoked per day during pregnancy,Smoked during pregnancy,,1,ellipse,"""0"" <br> ""1-5"" <br> ""6-10"" <br> ""11-20"" <br> "">20""",orange,TRUE,30
 Otitis media,Otitis media,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
 IQ,IQ,,1,ellipse,,lightblue,TRUE,30
-Gestational age (weeks),Gestational age,,1,ellipse,"""<2500"" <br>""2500-2999"" <br>""3000-3499"" <br>""3500-3999"" <br>""4000+"" ",orange,TRUE,30
-Birth weight,Birth weight,,1,ellipse,(range 1.5-5.0),orange,TRUE,30
+Birth weight,Birth weight,,1,ellipse,"""<2500"" <br>""2500-2999"" <br>""3000-3499"" <br>""3500-3999"" <br>""4000+"" ",orange,TRUE,30
 Maternal Diabetes,Maternal Diabetes,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
 Print Exposure,Print Exposure,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
 Drinks per week during pregnancy,Drinks during pregnancy,,1,ellipse,"""0""  <br>""1"" <br>""2"" <br>""3"" <br>""4"" <br>""5"" <br>""6"" <br>""7"" <br>""8+""",orange,TRUE,30
