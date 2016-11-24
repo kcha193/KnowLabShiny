@@ -552,6 +552,7 @@ shinyServer(function(input, output, session) {
     
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
+
     switch(input$input_type_TB,
            "Percentage" = selectInput("dynamicTB", "Variable",choices = sort(freqList$Name), 
                                       selected = input$dynamicTB),
@@ -1059,7 +1060,7 @@ shinyServer(function(input, output, session) {
   
   
   output$linePlotBase<- renderPlotly({
-    
+
     tables.list <- combineResults()
     
     tables.list <- tables.list %>% filter(Scenario == "Base")
