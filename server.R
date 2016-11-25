@@ -23,8 +23,6 @@ shinyServer(function(input, output, session) {
       tags$style(type="text/css", "textarea {width:100%; margin-top: 5px;}"),
       tags$textarea(id = inputId, placeholder = placeholder, rows = rows, value))
   }
-  
-  
   # dataModal <- function(failed = FALSE) {
   #   modalDialog(
   #     passwordInput("pwd", "Enter password" ),
