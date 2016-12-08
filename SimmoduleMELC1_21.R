@@ -1200,12 +1200,21 @@ simulateKnowLab <- function(run, simenv) {
     
     if(iteration>=2 ) {			
       
-      z1OverweightLvl1 <<- 
-        predSimBinom(models[[paste("z1OverweightA", iteration, sep = "")]])	   
+      z1OverweightLvl1 <- 
+        predSimBinom(models[[paste("z1OverweightA", iteration, sep = "")]])
       
+      z1ObeseLvl1<- rep(0, 5000)
+      
+      z1ObeseLvl1[z1OverweightLvl1 == 1] <- 
+        predSimBinom(models[[paste("z1ObeseA", iteration, sep = "")]], set = z1OverweightLvl1 == 1)	   
+      
+      z1OverweightLvl1 <<- z1OverweightLvl1
+      
+      z1ObeseLvl1 <<- z1ObeseLvl1
     } else {		
       z1OverweightLvl1 <<- NAs     
       
+      z1ObeseLvl1 <<- NAs     
     }	
     
     #browser()
@@ -1250,12 +1259,10 @@ simulateKnowLab <- function(run, simenv) {
   }
   
   
-
-  
-  
   simulate_IQ <- function() {	 	
     
-    z1GALvl1 <- as.integer(ga<37)
+    z1GALvl1 <<- as.integer(ga<37)
+    z1DrinkLvl1 <<-ifelse(pregalc > 5, 1, 0)
     
     if(iteration == 2){
       IQ <- predSimNorm(models$IQA2)	
@@ -1342,7 +1349,7 @@ simulateKnowLab <- function(run, simenv) {
       IQ <- predSimNorm(models$IQA10)
       IQ <<- scale(IQ)* runif(1,14.5,15.5) + mean(IQ)		
       
-    }		  else if(iteration < 17 ) {	
+    } else if(iteration < 17 ) {	
       
       IQ_previous8 <<- outcomes$IQ[,iteration-8]			
       IQ_previous7 <<- outcomes$IQ[,iteration-7]			
@@ -1368,19 +1375,55 @@ simulateKnowLab <- function(run, simenv) {
       
       currectScore <- NAs
       
-      currectScore[r1stchildethn != 2] <- predSimNorm(models$ScoreA17, 
-                                                      set = r1stchildethn != 2)	 
+      #currectScore[r1stchildethn != 2] <- predSimNorm(models$ScoreA17, set = r1stchildethn != 2)	 
+      currectScore[r1stchildethn == 4 & z1genderLvl1 == 0] <- 
+        predSimNorm(models$ScoreA17Gender0Ethn4, set = r1stchildethn == 4 & z1genderLvl1 == 0)	 	
+      currectScore[r1stchildethn == 4 & z1genderLvl1 == 1] <-
+        predSimNorm(models$ScoreA17Gender1Ethn4, set = r1stchildethn == 4 & z1genderLvl1 == 1)
       
-      currectScore[r1stchildethn == 2] <- predSimNorm(models$ScoreA17Ethn2,
-                                                      set = r1stchildethn == 2)	 		
+      currectScore[r1stchildethn == 3 & z1genderLvl1 == 0] <- 
+        predSimNorm(models$ScoreA17Gender0Ethn3, set = r1stchildethn == 3 & z1genderLvl1 == 0)	 	
+      currectScore[r1stchildethn == 3 & z1genderLvl1 == 1] <-
+        predSimNorm(models$ScoreA17Gender1Ethn3, set = r1stchildethn == 3 & z1genderLvl1 == 1)
       
-      Score <<- currectScore
+      currectScore[r1stchildethn == 2 & z1genderLvl1 == 0] <- 
+        predSimNorm(models$ScoreA17Gender0Ethn2, set = r1stchildethn == 2 & z1genderLvl1 == 0)	 	
+      currectScore[r1stchildethn == 2 & z1genderLvl1 == 1] <-
+        predSimNorm(models$ScoreA17Gender1Ethn2, set = r1stchildethn == 2 & z1genderLvl1 == 1)
       
-      z1ScoreLvl1 <<- ifelse(currectScore > 88, 1,0)
+      currectScore[r1stchildethn == 1 & z1genderLvl1 == 0] <- 
+        predSimNorm(models$ScoreA17Gender0Ethn1, set = r1stchildethn == 1 & z1genderLvl1 == 0)	 	
+      currectScore[r1stchildethn == 1 & z1genderLvl1 == 1] <- 
+        predSimNorm(models$ScoreA17Gender1Ethn1, set = r1stchildethn == 1 & z1genderLvl1 == 1)	 		
       
-      z1FailLvl1 <<- ifelse(currectScore <= 78.5, 1,0)
       
-      z1DropLvl1 <<- ifelse(currectScore > 78.5 & currectScore <= 88, 1,0)
+      #currectScore <-  adjustContVar(currectScore, "Score", 
+      #                        simenv = simenv, iteration = iteration)
+      
+      z1ScoreLvl1 <- ifelse(currectScore > 87, 1,0)
+      
+      z1DropLvl1 <- ifelse(currectScore <= 80, 1,0)
+      
+      z1FailLvl1 <- ifelse(currectScore > 80 & currectScore <= 87, 1, 0)
+     
+      #generate propensities for scenario testing
+      z1ScoreLvl1model <- PropensityModels[["z1Score"]]
+      z1ScoreLvl1Propensities <- predLogistic(z1ScoreLvl1model[[1]])
+
+      #add some random variation to the propensity scores so that each run the units changed can differ
+      #give each unit it's own standard deviation according to a binomial distribution
+      z1ScoreLvl1Propensities <- rnorm(length(z1ScoreLvl1Propensities), 
+                                       z1ScoreLvl1Propensities, 
+                                       sqrt(z1ScoreLvl1Propensities*(1 - z1ScoreLvl1Propensities)))
+      
+      z1ScoreLvl1 <<- adjustCatVar(z1ScoreLvl1, "z1ScoreLvl1", propens = z1ScoreLvl1Propensities,
+                                           simenv = simenv, iteration = iteration)
+      
+      z1FailLvl1 <<- adjustCatVar(z1FailLvl1, "z1FailLvl1", 
+                                   simenv = simenv, iteration = iteration)
+      z1DropLvl1 <<- adjustCatVar(z1DropLvl1, "z1DropLvl1", 
+                                   simenv = simenv, iteration = iteration)
+      
       
     } 
   }
@@ -1388,12 +1431,15 @@ simulateKnowLab <- function(run, simenv) {
   
   simulate_NEET <- function() {	 		 
     
+    
     if(iteration >=16 & iteration <= 21){
-      
+
       z1NEETLvl1[z1genderLvl1 == 0] <<- 
-        predSimBinom(models[[paste("z1NEETGender0A", iteration, sep = "")]], set = z1genderLvl1 == 0)	   
+        predSimBinom(models[[paste("z1NEETGender0A", iteration, sep = "")]], 
+                     set = z1genderLvl1 == 0)	   
       z1NEETLvl1[z1genderLvl1 == 1] <<- 
-        predSimBinom(models[[paste("z1NEETGender1A", iteration, sep = "")]], set = z1genderLvl1 == 1)	
+        predSimBinom(models[[paste("z1NEETGender1A", iteration, sep = "")]], 
+                     set = z1genderLvl1 == 1)	
       
     } else {
       z1NEETLvl1 <<- NAs
@@ -1629,24 +1675,37 @@ simulateKnowLab <- function(run, simenv) {
     school <- apply(transition_probabilities$r1School, 1, function(x) sample(1:100, 1, prob = x))
     
     
-    r1SchoolFunding <<-
-      c(2, 2, 0, 2, 2, 2, 2, 0, 1, 2, 0, 2, 2, 1, 2, 0, 2, 2, 2, 
-        2, 0, 2, 2, 0, 2, 2, 2, 2, 2, 0, 2, 2, 1, 2, 2, 1, 2,
-        2, 2, 2, 2, 2 ,2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-        2, 1, 2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 2, 1,
-        2, 2, 2, 2, 2, 2, 0, 2 ,2, 2, 2, 2, 2, 2, 2, 0, 2, 1, 2, 
-        1, 2, 1, 2, 1, 1, 2)[school]
+    r1SchoolFunding <-
+      c(2, 2, 0, 2, 2, 2, 2, 0, 1, 2, 0, 2, 2, 1, 2, 0, 2, 2, 2, 2,
+        0, 2, 2, 0, 2, 2, 2, 2, 2, 0, 2, 2, 1, 2, 2, 1, 2, 2, 2, 2, 
+        2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 
+        2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 
+        2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 1)[school]
     
+
     r1SchoolFundingLvl1 <<- ifelse(r1SchoolFunding == 1, 1,0)
     r1SchoolFundingLvl2 <<- ifelse(r1SchoolFunding == 2, 1,0)
+    
+    r1SchoolFunding <<-  r1SchoolFunding 
+    
+    r1SchoolGender <-
+       c(0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 1, 0, 0, 2, 0, 0,
+         0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 
+         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 
+         0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 
+         2, 2, 0, 2, 1)[school]
+    
+    r1SchoolGenderLvl1 <<- ifelse(r1SchoolGender == 1, 1,0)
+    r1SchoolGenderLvl2 <<- ifelse(r1SchoolGender == 2, 1,0)
+ 
+    r1SchoolGender <<-  r1SchoolGender 
     
     
     r1School <<- school
     
 
     z1WatchTVLvl1 <<- ifelse(rpois(5000, 1.52) >= 2, 1,0)
-    
-    
     
   }
   
@@ -1701,9 +1760,11 @@ simulateKnowLab <- function(run, simenv) {
     #KNOWLAB models		  
     simulate_Sleep()	
     
-    simulate_BMI()
+    simulate_childrenOverweight()	
     
-    simulate_childrenOverweight()		
+    #simulate_BMI()
+    
+	
     
     simulate_IQ()	  
     # simulate_childrenObese()     

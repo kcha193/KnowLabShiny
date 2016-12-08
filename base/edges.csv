@@ -1,47 +1,90 @@
-from,to,label,length,arrows,dahses ,title,shadow,font.size
-SES at birth,Being Bullied,,500,to,FALSE,,TRUE,30
-SES at birth,Alcohol abuse,,500,to,FALSE,OR=1.54 (Most deprived vs least deprived),TRUE,30
-ADHD,Alcohol abuse,,500,to,FALSE,,TRUE,30
-Parental Alcohol Abuse,Alcohol abuse,,500,to,FALSE,,TRUE,30
-Being Bullied,Depression,,500,to,FALSE,,TRUE,30
-Maternal punitiveness,Depression,,500,to,FALSE,,TRUE,30
-Maternal emotional responsiveness,Depression,,500,to,FALSE,,TRUE,30
-Parental Depression,Depression,,500,to,FALSE,,TRUE,30
-SES at birth,Overweight,,500,to,FALSE,,TRUE,30
-Breastfeeding (months),Overweight,,500,to,FALSE,,TRUE,30
-Sleep Duration,Overweight,,500,to,FALSE,,TRUE,30
-Breakfast consumption,Overweight,,500,to,FALSE,,TRUE,30
-Mother's BMI,Overweight,,500,to,FALSE,,TRUE,30
-Caesarean delivery,Overweight,,500,to,FALSE,,TRUE,30
-Cigarettes smoked per day during pregnancy,Overweight,,500,to,FALSE,,TRUE,30
-Gestational age (weeks),IQ,,500,to,FALSE,,TRUE,30
-Birth weight,IQ,,500,to,FALSE,,TRUE,30
-Maternal Diabetes,IQ,,500,to,FALSE,,TRUE,30
-Otitis media,IQ,,500,to,FALSE,,TRUE,30
-Print Exposure,IQ,,500,to,FALSE,,TRUE,30
-Drinks per week during pregnancy,IQ,,500,to,FALSE,,TRUE,30
-Breastfeeding (months),IQ,,500,to,FALSE,,TRUE,30
-SES at birth,NCEA Attain,,500,to,FALSE,,TRUE,30
-SES at birth,NCEA Fail,,500,to,FALSE,,TRUE,30
-SES at birth,NCEA Dropout,,500,to,FALSE,,TRUE,30
-Highest eduction level between parents,NCEA Attain,,500,to,FALSE,,TRUE,30
-Highest eduction level between parents,NCEA Fail,,500,to,FALSE,,TRUE,30
-Highest eduction level between parents,NCEA Dropout,,500,to,FALSE,,TRUE,30
-Print Exposure,NCEA Attain,,500,to,FALSE,,TRUE,30
-Print Exposure,NCEA Fail,,500,to,FALSE,,TRUE,30
-Print Exposure,NCEA Dropout,,500,to,FALSE,,TRUE,30
-Early Childhood Education,NCEA Attain,,500,to,FALSE,,TRUE,30
-Early Childhood Education,NCEA Fail,,500,to,FALSE,,TRUE,30
-Early Childhood Education,NCEA Dropout,,500,to,FALSE,,TRUE,30
-ADHD,NCEA Attain,,500,to,FALSE,,TRUE,30
-ADHD,NCEA Fail,,500,to,FALSE,,TRUE,30
-ADHD,NCEA Dropout,,500,to,FALSE,,TRUE,30
-Reading Books to Baby,NCEA Attain,,500,to,FALSE,,TRUE,30
-Reading Books to Baby,NCEA Fail,,500,to,FALSE,,TRUE,30
-Reading Books to Baby,NCEA Dropout,,500,to,FALSE,,TRUE,30
-IQ,NCEA Attain,,500,to,FALSE,,TRUE,30
-IQ,NCEA Fail,,500,to,FALSE,,TRUE,30
-IQ,NCEA Dropout,,500,to,FALSE,,TRUE,30
-NCEA Attain,"Not in employment, education, or training",,500,to,FALSE,,TRUE,30
-NCEA Fail,"Not in employment, education, or training",,500,to,FALSE,,TRUE,30
-NCEA Dropout,"Not in employment, education, or training",,500,to,FALSE,,TRUE,30
+from,to,arrows,title,id
+SES at birth,Being Bullied,to,"OR=1.38 (Most deprived vs least deprived) <br>
+OR=1.38 (Most deprived vs middle level)",a
+SES at birth,Alcohol abuse,to,OR=1.54 (Most deprived vs least deprived) <br>,b
+ADHD,Alcohol abuse,to,"OR=1.74 (ADHD vs None) <br>
+Lee et al, 2011",https://www.ncbi.nlm.nih.gov/pubmed/21382538
+Parental Alcohol Abuse,Alcohol abuse,to,"OR=1.47 (Parental alcohol abuse vs None) Age 12 to 21<br>
+Bergen et al, 2007",https://www.ncbi.nlm.nih.gov/pubmed/17564500
+Being Bullied,Depression,to,"OR=1.74 (Being bullied vs Not being bullied) Age 10 to 21<br>
+Ttofi et al, 2011",http://www.emeraldinsight.com/doi/full/10.1108/17596591111132873
+Maternal punitiveness,Depression,to,"OR=1.54 (Maternal punitiveness vs None) <br>
+Norman et al, 2012",https://www.ncbi.nlm.nih.gov/pubmed/23209385
+Maternal emotional responsiveness,Depression,to,"OR=0.47 (Maternal emotional responsiveness vs None) Age 12 to 18<br>
+Yap et al, 2014",http://www.sciencedirect.com/science/article/pii/S0165032713008057
+Parental Depression,Depression,to,"OR=2.67 (Parental Depression vs None) Age 4 to 21 <br>
+Micco et al, 2009",https://www.ncbi.nlm.nih.gov/pubmed/19709850
+SES at birth,Overweight,to,"OR=1.58 (Most deprived vs least deprived) Age 1 to 15<br>
+Wu et al, 2014",i
+Breastfeeding (months),Overweight,to,"OR=0.85 (Breastfed vs Not breastfed) Age 2 to 14<br>
+Weng et al, 2012",http://adc.bmj.com/content/97/12/1019.short
+Sleep Duration,Overweight,to,"OR=0.43 (Normal sleep vs Short sleep) Age 0.5 to 18<br>
+OR=0.68 (Long sleep vs Short sleep) Age 0.5 to 18<br> 
+Fatima et al, 2015",https://www.ncbi.nlm.nih.gov/pubmed/25589359
+Breakfast consumption,Overweight,to,"OR=0.57 (Has breakfast vs No breakfast) Age 5 to 18<br>
+OR=0.52 (Has breakfast vs No breakfast) Age 19+<br>
+Horikawa et al, 2011",https://www.ncbi.nlm.nih.gov/pubmed/21925535
+Mother's BMI,Overweight,to,"OR=0.46 (Underweight vs Normal) Age 2 to 12<br>
+OR=1.04 (Overweight vs Normal) Age 2 to 3<br>
+OR=1.40 (Overweight vs Normal) Age 4 to 5<br>
+OR=2.11 (Overweight vs Normal) Age 6 to 7<br>
+OR=1.37 (Obese vs Normal) Age 2 to 3<br>
+OR=1.69 (Obese vs Normal) Age 5 to 5<br>
+OR=2.91 (Obese vs Normal) Age 6 to 9<br>
+Yu et al, 2013",https://www.ncbi.nlm.nih.gov/pubmed/23613888
+Caesarean delivery,Overweight,to,"OR=1.32 (Caesarean delivery vs Vaginal delivery) Age 3 to 25<br>
+Li et al, 2013",https://www.ncbi.nlm.nih.gov/pubmed/23207407
+Cigarettes smoked per day during pregnancy,Overweight,to,"OR=1.47 (Smoking in pregnancy vs No smoking in pregnancy) <br>
+Weng et al, 2012",https://www.ncbi.nlm.nih.gov/pubmed/23109090
+Gestational age (weeks),IQ,to,"Coeff=-11.94 (Preterm birth vs None) Age 3 to 16<br>
+Kerr-Wilson et al, 2013",https://www.ncbi.nlm.nih.gov/pubmed/21393308
+Birth weight,IQ,to,"Coeff=-4.98 (Birthweight < 2500g vs Birthweight >= 2500g) Age 13 to 21 <br>
+Kormos et al, 2014",https://www.ncbi.nlm.nih.gov/pubmed/23896861
+Maternal Diabetes,IQ,to,"Coeff=-11.70 (Maternal diabetes vs None) Age 3 to 12 <br>
+Robles et al, 2015",https://www.ncbi.nlm.nih.gov/pubmed/26566144
+Otitis media,IQ,to,"Coeff=-6.30 (Otitis media vs None) Age 1 to 5 <br>
+Roberts et al, 2004",https://www.ncbi.nlm.nih.gov/pubmed/14993583
+Print Exposure,IQ,to,"Coeff=5.58 (Print exposure vs None) Age 6 to 21 <br>
+Mol & Bus, 2011",https://www.ncbi.nlm.nih.gov/pubmed/21219054
+Drinks per week during pregnancy,IQ,to,"Coeff=-1.95 (Drinks more than 4 times per weeks vs Drinks less than 5 times per weeks) Age 0.5 to 14 <br>
+Flak et al, 2013",https://www.ncbi.nlm.nih.gov/pubmed/23905882
+Breastfeeding (months),IQ,to,"Coeff=0.02 (BreastFeeding 1 month vs None) Age 0.5 to 15<br>
+Coeff=1.68 (BreastFeeding 2 month vs None) Age 0.5 to 15<br>
+Coeff=2.15 (BreastFeeding 3-4 month vs None) Age 0.5 to 15<br>
+Coeff=2.78 (BreastFeeding 5-6 month vs None) Age 0.5 to 15 <br>
+Coeff=2.91 (BreastFeeding 7 month or more vs None) Age 0.5 to 15 <br>
+Anderson et al, 1999",http://ajcn.nutrition.org/content/70/4/525.full
+SES at birth,NCEA Attain,to,"Coeff=-4.19 (Most deprived vs least deprived) School-Aged Children <br>
+Sirin, 2005",http://rer.sagepub.com/content/75/3/417.abstract
+SES at birth,NCEA Fail,to,"Coeff=-4.19 (Most deprived vs least deprived) School-Aged Children <br>
+Sirin, 2005",https://goo.gl/K3V9EK
+SES at birth,NCEA Dropout,to,"Coeff=-4.19 (Most deprived vs least deprived) School-Aged Children <br>
+Sirin, 2005",https://goo.gl/m5ajZh
+Highest eduction level between parents,NCEA Attain,to,Coeff=-4.65 (No formal qualification vs Tertiary),z
+Highest eduction level between parents,NCEA Fail,to,Coeff=-4.65 (No formal qualification vs Tertiary),aa
+Highest eduction level between parents,NCEA Dropout,to,Coeff=-4.65 (No formal qualification vs Tertiary),bb
+Print Exposure,NCEA Attain,to,"Coeff=10.23 (Print exposure vs None) Age 21 <br>
+Mol & Bus, 2011",http://psycnet.apa.org/journals/bul/137/2/267
+Print Exposure,NCEA Fail,to,"Coeff=10.23 (Print exposure vs None) Age 21 <br>
+Mol & Bus, 2011",https://goo.gl/6tZsU3
+Print Exposure,NCEA Dropout,to,"Coeff=10.23 (Print exposure vs None) Age 21 <br>
+Mol & Bus, 2011",https://goo.gl/c1TVkG
+Early Childhood Education,NCEA Attain,to,"Coeff=2.12 (Early Childhood Education vs None) Age 3 to 10+ <br>
+Camilli et al, 2010",http://eric.ed.gov/?id=EJ888457
+Early Childhood Education,NCEA Fail,to,"Coeff=2.12 (Early Childhood Education vs None) Age 3 to 10+ <br>
+Camilli et al, 2010",https://goo.gl/XCrM89
+Early Childhood Education,NCEA Dropout,to,"Coeff=2.12 (Early Childhood Education vs None) Age 3 to 10+ <br>
+Camilli et al, 2010",https://goo.gl/uPpoZb
+ADHD,NCEA Attain,to,"Coeff=-11.06 (ADHD vs None) <br>
+Frazier et al 2007",http://ldx.sagepub.com/content/40/1/49.abstract
+ADHD,NCEA Fail,to,"Coeff=-11.06 (ADHD vs None) <br>
+Frazier et al 2007",https://goo.gl/e32KVF
+ADHD,NCEA Dropout,to,"Coeff=-11.06 (ADHD vs None) <br>
+Frazier et al 2007",https://goo.gl/a5zvVX
+Reading Books to Baby,NCEA Attain,to,Coeff=5.43 (Reading Books to Baby vs None),ll
+Reading Books to Baby,NCEA Fail,to,Coeff=5.43 (Reading Books to Baby vs None),mm
+Reading Books to Baby,NCEA Dropout,to,Coeff=5.43 (Reading Books to Baby vs None),nn
+IQ,NCEA Attain,to,Coeff=0.60,oo
+IQ,NCEA Fail,to,Coeff=0.60,pp
+IQ,NCEA Dropout,to,Coeff=0.60,qq
+NCEA Attain,"Not in employment, education, or training",to,OR=2.58 (Passed vs None) Age 17-21,rr

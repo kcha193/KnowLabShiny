@@ -1,30 +1,30 @@
-id,label,group,value,shape,title,color,shadow,font.size
-SES at birth,SES at birth,,1,ellipse,"""Professional""=1 <br> ""Clerical""=2 <br> ""Semi-skilled""=3 ",orange,TRUE,30
-Maternal punitiveness,Maternal punitiveness,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-Maternal emotional responsiveness,Maternal emotional responsiveness,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-Being Bullied,Being Bullied,,1,ellipse,"""""Not been Bullied""=0 <br> ""Been Bullied""=1",lightblue,TRUE,30
-ADHD,ADHD,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-Parental Alcohol Abuse,Parental Alcohol Abuse,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-Parental Depression,Parental Depression,,1,ellipse,"""No""=0 <br> ""Alcohol abuse""=1",orange,TRUE,30
-Alcohol abuse,Alcohol abuse,,1,ellipse,"""No""=0 <br> ""Yes""=1",lightblue,TRUE,30
-Depression,Depression,,1,ellipse,"""No""=0 <br> ""Yes""=1",lightblue,TRUE,30
-Overweight,Overweight,,1,ellipse,"""No""=0 <br> ""Yes""=1",lightblue,TRUE,30
-Breastfeeding (months),Breastfeeding (months),,1,ellipse,"""0"" <br>""1"" <br>""2"" <br>""3"" <br>""4"" <br>""5"" <br>""6"" <br>""7"" <br>""8"" <br>""9"" <br>""10"" <br>""11"" <br>""12+""",orange,TRUE,30
-Sleep Duration,Sleep Duration,,1,ellipse,"""Short""=1 <br> ""Normal""=2 <br> ""Long""=3",orange,TRUE,30
-Breakfast consumption,Breakfast consumption,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-Mother's BMI,Mother's BMI,,1,ellipse,"""Normal"" = 0 <br> ""Underweight""=1 <br> ""Overweight""=2 <br> ""Obese""=3",orange,TRUE,30
-Caesarean delivery,Caesarean delivery,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-Cigarettes smoked per day during pregnancy,Smoked during pregnancy,,1,ellipse,"""0"" <br> ""1-5"" <br> ""6-10"" <br> ""11-20"" <br> "">20""",orange,TRUE,30
-Otitis media,Otitis media,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-IQ,IQ,,1,ellipse,,lightblue,TRUE,30
-Birth weight,Birth weight,,1,ellipse,"""<2500"" <br>""2500-2999"" <br>""3000-3499"" <br>""3500-3999"" <br>""4000+"" ",orange,TRUE,30
-Maternal Diabetes,Maternal Diabetes,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-Print Exposure,Print Exposure,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-Drinks per week during pregnancy,Drinks during pregnancy,,1,ellipse,"""0""  <br>""1"" <br>""2"" <br>""3"" <br>""4"" <br>""5"" <br>""6"" <br>""7"" <br>""8+""",orange,TRUE,30
-NCEA Attain,NCEA Attain,,1,ellipse,"""No""=0 <br> ""Yes""=1",lightblue,TRUE,30
-NCEA Fail,NCEA Fail,,1,ellipse,"""No""=0 <br> ""Yes""=1",lightblue,TRUE,30
-NCEA Dropout,NCEA Dropout,,1,ellipse,"""No""=0 <br> ""Yes""=1",lightblue,TRUE,30
-Early Childhood Education,Early Childhood Education,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-Highest eduction level between parents,Parental Education,,1,ellipse,"""Tertiary""=1 <br> ""Secondary""=2 <br> ""No formal qualifications""=3",orange,TRUE,30
-Reading Books to Baby,Reading Books to Baby,,1,ellipse,"""No""=0 <br> ""Yes""=1",orange,TRUE,30
-"Not in employment, education, or training",NEET,,1,ellipse,"""No""=0 <br> ""Yes""=1",lightblue,TRUE,30
+id,label,group,shape,title,color
+SES at birth,SES at birth,,ellipse,"""Professional""=1 <br> ""Clerical""=2 <br> ""Semi-skilled""=3 ",orange
+Maternal punitiveness,Maternal punitiveness,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Maternal emotional responsiveness,Maternal emotional responsiveness,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Being Bullied,Being Bullied,,ellipse,"""""Not been Bullied""=0 <br> ""Been Bullied""=1",lightblue
+ADHD,ADHD,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Parental Alcohol Abuse,Parental Alcohol Abuse,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Parental Depression,Parental Depression,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Alcohol abuse,Alcohol abuse,,ellipse,"""None""=0 <br> ""Alcohol abuse""=1",lightblue
+Depression,Depression,,ellipse,"""None""=0 <br> ""Depression""=1",lightblue
+Overweight,Overweight,,ellipse,"""No""=0 <br> ""Overweight""=1",lightblue
+Breastfeeding (months),Breastfeeding (months),,ellipse,"""0"" <br>""1"" <br>""2"" <br>""3"" <br>""4"" <br>""5"" <br>""6"" <br>""7"" <br>""8"" <br>""9"" <br>""10"" <br>""11"" <br>""12+""",orange
+Sleep Duration,Sleep Duration,,ellipse,"""Short""=1 <br> ""Normal""=2 <br> ""Long""=3",orange
+Breakfast consumption,Breakfast consumption,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Mother's BMI,Mother's BMI,,ellipse,"""Normal"" = 0 <br> ""Underweight""=1 <br> ""Overweight""=2 <br> ""Obese""=3",orange
+Caesarean delivery,Caesarean delivery,,ellipse,"""Vaginal delivery""=0 <br> ""Caesarean delivery""=1",orange
+Cigarettes smoked per day during pregnancy,Smoked during pregnancy,,ellipse,"""0"" <br> ""1-5"" <br> ""6-10"" <br> ""11-20"" <br> "">20""",orange
+Otitis media,Otitis media,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+IQ,IQ,,ellipse,,lightblue
+Birth weight,Birth weight,,ellipse,"""<2500"" <br>""2500-2999"" <br>""3000-3499"" <br>""3500-3999"" <br>""4000+"" ",orange
+Maternal Diabetes,Maternal Diabetes,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Print Exposure,Print Exposure,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Drinks per week during pregnancy,Drinks during pregnancy,,ellipse,"""0""  <br>""1"" <br>""2"" <br>""3"" <br>""4"" <br>""5"" <br>""6"" <br>""7"" <br>""8+""",orange
+NCEA Attain,NCEA Attain,,ellipse,"""No""=0 <br> ""Attained""=1",lightblue
+NCEA Fail,NCEA Fail,,ellipse,"""No""=0 <br> ""Failed""=1",lightblue
+NCEA Dropout,NCEA Dropout,,ellipse,"""No""=0 <br> ""Dropped Out""=1",lightblue
+Early Childhood Education,Early Childhood Education,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Highest eduction level between parents,Parental Education,,ellipse,"""Tertiary""=1 <br> ""Secondary""=2 <br> ""No formal qualifications""=3",orange
+Reading Books to Baby,Reading Books to Baby,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+"Not in employment, education, or training",NEET,,ellipse,"""Not NEET""=0 <br> ""NEET""=1",lightblue
