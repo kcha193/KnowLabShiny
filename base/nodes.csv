@@ -28,3 +28,4 @@ Early Childhood Education,Early Childhood Education,,ellipse,"""No""=0 <br> ""Ye
 Highest eduction level between parents,Parental Education,,ellipse,"""Tertiary""=1 <br> ""Secondary""=2 <br> ""No formal qualifications""=3",orange
 Reading Books to Baby,Reading Books to Baby,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 "Not in employment, education, or training",NEET,,ellipse,"""Not NEET""=0 <br> ""NEET""=1",lightblue
+Obesity,Obesity,,ellipse,"""No""=0 <br> ""Obese""=1",lightblue

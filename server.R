@@ -74,8 +74,6 @@ shinyServer(function(input, output, session) {
                        currSB = "NULL", 
                        tableResult = list())
   
- 
-  
   
   
   #############################################################################################
@@ -136,18 +134,17 @@ shinyServer(function(input, output, session) {
 
 
     visNetwork(nodes, edges, height = "500px", width = "100%") %>% 
-      visNodes(value=1, shadow=FALSE,	font=list(size=30)) %>% 
-      visEdges(width=6, shadow=FALSE,	font=list(size=30), 
-               dashes=FALSE, length = 100, smooth=FALSE) %>% 
+      visNodes(value=1, shadow=FALSE,	font=list(size=15)) %>% 
+      visEdges(width=5, shadow=FALSE,	font=list(size=30), 
+               dashes=FALSE, length = 150, smooth=TRUE) %>% 
       visOptions(highlightNearest = list(enabled = TRUE, degree = 2, hover = TRUE), 
                  nodesIdSelection = TRUE)  %>%
-      visEvents( selectNode = "function(properties) {
+      visEvents( selectEdge = "function(properties) {
+                 window.open(properties.edges);}", 
+                 selectNode = "function(properties) {
                  Shiny.onInputChange('var_SB', properties.nodes);
-                 Shiny.onInputChange('dynamicTB', properties.nodes);}",
-                 selectEdge = "function(properties) {
-                 window.open(properties.edges);}")%>%
-      visPhysics(solver="forceAtlas2Based", forceAtlas2Based=list(avoidOverlap = 0.9), 
-                 maxVelocity = 120, minVelocity =120)
+                 Shiny.onInputChange('dynamicTB', properties.nodes);}") %>%
+      visLayout(randomSeed = 11122016)
    }) 
   
   observeEvent(input$switchSB, {

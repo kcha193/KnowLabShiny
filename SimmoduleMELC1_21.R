@@ -1220,45 +1220,6 @@ simulateKnowLab <- function(run, simenv) {
     #browser()
   }
   
-  
-  simulate_BMI <- function(){
-    
-    bmiSD <- apply(children[,c( names(children)[grep("^BMI", names(children))])], 2, function(x) 
-      tapply(x, children$z1gender, sd)) 
-    
-    bmiInter <- bmiSD * 0.81 * 0.4456
-    
-    z1WatchTVLvl1 <<- adjustCatVar(z1WatchTVLvl1, "z1WatchTVLvl1", simenv = simenv, iteration = iteration)
-    
-    # if( iteration >=3 & iteration <=12){
-    #   BMI <<- apply(cbind(children[,c(paste0("BMI", iteration), "z1gender") ], z1WatchTVLvl1) , 1,
-    #                 function(x)  ifelse(x[2]==1,
-    #rnorm(1, mean = bmiInter[2, iteration-1] + x[1] - bmiSD[2, iteration-1]*0.81 * x[3], sd = sdBMI[iteration-1, 1]/100),
-    #rnorm(1, mean = bmiInter[1, iteration-1] + x[1] - bmiSD[1, iteration-1]*0.81 * x[3], sd = sdBMI[iteration-1, 2]/100)))
-    #   
-    # }else { 
-      BMI <<- apply(children[,c(paste0("BMI", iteration), "z1gender") ], 1,
-                    function(x)  ifelse(x[2]==1,
-                                        rnorm(1, mean = x[1], sd = sdBMI[iteration-1, 1]),
-                                        rnorm(1, mean = x[1], sd = sdBMI[iteration-1, 2])))
-    # }
-    
-    z1OverweightBMILvl1 <<- numeric(5000) 
-    z1ObeseLvl1 <<- numeric(5000) 
-    
-    z1OverweightBMILvl1[children$z1gender==1] <<- 
-      ifelse(BMI[children$z1gender==1] >= overweightCutoff[iteration-1, 1],1,0)
-    z1OverweightBMILvl1[children$z1gender==0] <<- 
-      ifelse(BMI[children$z1gender==0] >= overweightCutoff[iteration-1, 2],1,0)
-    
-    z1ObeseLvl1[children$z1gender==1] <<- 
-      ifelse(BMI[children$z1gender==1] >= obeseCutoff[iteration-1, 1],1,0)
-    z1ObeseLvl1[children$z1gender==0] <<- 
-      ifelse(BMI[children$z1gender==0] >= obeseCutoff[iteration-1, 2],1,0)
-    
-  }
-  
-  
   simulate_IQ <- function() {	 	
     
     z1GALvl1 <<- as.integer(ga<37)
@@ -1638,39 +1599,7 @@ simulateKnowLab <- function(run, simenv) {
     mage_years <<- MAGE + 1
     #when look at collated means - can see the effect from y2 onwards but doesn't show effect for y1
     
-    sdBMI <<-  matrix(c( 2.318561061,	2.207931975,
-                         2.116476357,	2.066416278,
-                         2.057399303,	2.1583464,
-                         2.33275033,	2.496312829,
-                         2.636535808,	2.725100429,
-                         3.116483382,	3.141235808,
-                         3.564080752,	3.635437662,
-                         4.02828569,	4.222055377,
-                         4.405528134,	4.741941784,
-                         4.763114459,	5.269560519,
-                         4.962362565,	5.514722333,
-                         5.342412979,	5.929690456,
-                         5.428023871,	6.013529644,
-                         5.670758792,	6.221955633,
-                         5.771324301,	6.284254227,
-                         5.683160601,	6.219164444,
-                         5.708957279,	6.37075478,
-                         5.779369385,	6.584913605,
-                         5.627971777,	6.502829121,
-                         5.453944955,	6.38980461), ncol = 2, byrow = TRUE)
-    
-    
-    overweightCutoff <<-
-      matrix(
-        c(c(18.4, 17.9, 17.6, 17.4, 17.6, 17.9, 18.4, 19.1, 19.8, 20.6, 21.2, 21.9, 22.6, 23.3, 23.9, 24.5, rep(25, 4)),
-          c(18, 17.6, 17.3, 17.1, 17.3, 17.8, 18.3, 19.1, 19.9, 20.7, 21.7, 22.6, 23.3, 23.9, 24.4, 24.7, rep(25, 4))),
-        ncol = 2)
-
-    obeseCutoff <<-
-      matrix(c(20.1, 19.6, 19.3, 19.3, 19.8, 20.6, 21.6, 22.8, 24, 25.1, 26, 26.8, 27.6, 28.3, 28.9, 29.4, rep(30, 4)),
-             c(20.1, 19.4, 19.1, 19.2, 19.7, 20.5, 21.6, 22.8, 24.1, 25.4, 26.7, 27.8, 28.6, 29.1, 29.4, 29.7, rep(30, 4)),
-             ncol = 2)
-    
+   
     
     school <- apply(transition_probabilities$r1School, 1, function(x) sample(1:100, 1, prob = x))
     
@@ -1756,18 +1685,11 @@ simulateKnowLab <- function(run, simenv) {
     age_minus1Lvl2 <- as.integer(age_minus1 == 2)
     age_minus1Lvl3 <- as.integer(age_minus1 == 3)
     
-    
     #KNOWLAB models		  
     simulate_Sleep()	
-    
     simulate_childrenOverweight()	
     
-    #simulate_BMI()
-    
-	
-    
     simulate_IQ()	  
-    # simulate_childrenObese()     
     
     simulate_Score()
     simulate_NEET()
