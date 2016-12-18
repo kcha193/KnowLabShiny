@@ -23,6 +23,7 @@ shinyServer(function(input, output, session) {
       tags$style(type="text/css", "textarea {width:100%; margin-top: 5px;}"),
       tags$textarea(id = inputId, placeholder = placeholder, rows = rows, value))
   }
+  
   # dataModal <- function(failed = FALSE) {
   #   modalDialog(
   #     passwordInput("pwd", "Enter password" ),
@@ -136,15 +137,18 @@ shinyServer(function(input, output, session) {
     visNetwork(nodes, edges, height = "500px", width = "100%") %>% 
       visNodes(value=1, shadow=FALSE,	font=list(size=15)) %>% 
       visEdges(width=5, shadow=FALSE,	font=list(size=30), 
-               dashes=FALSE, length = 150, smooth=TRUE) %>% 
+               dashes=FALSE, length = 130, smooth=TRUE) %>% 
       visOptions(highlightNearest = list(enabled = TRUE, degree = 2, hover = TRUE), 
                  nodesIdSelection = TRUE)  %>%
       visEvents( selectEdge = "function(properties) {
-                 window.open(properties.edges);}", 
+                if(properties.nodes == ''){
+                    window.open(properties.edges);
+                }
+                 }", 
                  selectNode = "function(properties) {
                  Shiny.onInputChange('var_SB', properties.nodes);
                  Shiny.onInputChange('dynamicTB', properties.nodes);}") %>%
-      visLayout(randomSeed = 11122016)
+      visLayout(randomSeed = 16012017)
    }) 
   
   observeEvent(input$switchSB, {
@@ -175,7 +179,6 @@ shinyServer(function(input, output, session) {
     
     if(length(rv$savedScenario) > 0 )
       rv$message <- "Simulation is Finished! <br> Choose another Variable to Examine for next Scenario."
-    
     else 
       rv$message <- "Choose a Variable to Examine."
     
@@ -272,86 +275,62 @@ shinyServer(function(input, output, session) {
                                variableName = as.character(varName_SB$Var[varName_SB$Name==input$var_SB]),
                                grpbyName = "", 
                                logisetexpr=trimws(input$logisetexprSB), digits = 5)
-  
-    if("Var" %in% names(results) )
-      temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
-    else 
-      temp <- results  %>% distinct( Mean, Lower, Upper, .keep_all = TRUE)
     
-    if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
-      results <- temp %>% filter(Year == 1)
-    } else if((nrow(temp) != nrow(results))){
-      results <- temp
-    }
+    if(results$Year[1]=="Childhood" | results$Year[1]=="At birth")
+      return(results %>% select(Var, Year, Mean))
     
-    temp <- results %>% select(Var, Year, Mean) %>% spread(Var, Mean) 
-    
-    temp[, c("Year", unique(results$Var))]
+    results %>% select(Var, Year, Mean) %>% spread(Var, Mean) 
   })
   
   output$previewSB  <- DT::renderDataTable({
     
     results <- baseOutputSB()
-   
-    if(nrow(results) == 1){
-      
-      rownames(results) <- results$Year
-      results <- t(results[,-1])
-      colnames(results) <- isolate(input$var_SB)
 
-      datatable(results, class = 'table-condensed',  extensions = 'Scroller',
-                options = list(pageLength = 21, dom = 't',
-                               scrollX = TRUE, scrollY =  600,
-                               scrollCollapse = TRUE,
-                               fixedColumns = list(leftColumns = 2)), 
-                rownames = TRUE) %>% formatRound(1 ,digits = 1)
-    } else{
-
-      datatable(results, class = 'table-condensed',  extensions = 'Scroller',
-                options = list(pageLength = 21, dom = 't',
-                               scrollX = TRUE, scrollY = 600,
-                               scrollCollapse = TRUE,
-                               fixedColumns = list(leftColumns = 2)), 
-                rownames = FALSE) %>% formatRound(-1 ,digits = 1)
-    }
+    
+    datatable(results, class = 'table-condensed',  extensions = 'Scroller',
+              options = list(pageLength = 21, dom = 't',
+                             scrollX = TRUE, scrollY = 600,
+                             scrollCollapse = TRUE,
+                             fixedColumns = list(leftColumns = 2)), 
+              rownames = FALSE) %>% formatRound(-1 ,digits = 1)
   })
   
   
   # hotable
   output$hotable <- renderRHandsontable({
- 
-    newDim <- dim(baseOutputSB())
-    
-    if(is.null(input$hotable))
-      oldDim <- c(0,0)
-    else 
-      oldDim <- dim(hot_to_r(input$hotable))
-    
-    
-    if(nrow(baseOutputSB()) == 1)
-      newDim = oldDim
-    
-    
-    if(is.null(input$hotable) | (isolate(rv$currSB) != input$var_SB) | any(newDim != oldDim)){
+
+  
+    if(is.null(input$hotable) | (isolate(rv$currSB) != input$var_SB)){
       
       catAdj <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
     
       rv$currSB <- input$var_SB
+     
+      ageRange <- strsplit(dict$age[as.character(varName_SB$Var[varName_SB$Name==input$var_SB])], "--")[[1]]
+
+  
+      if(ageRange[1] == "Childhood" | ageRange[1] == "At birth"){
+        catAdj <- catAdj
+      }else {
+        ageRange <- as.numeric(ageRange)
+        if(length(ageRange) == 2)
+          catAdj <- catAdj[ageRange[1]:ageRange[2], ]
+        else 
+          catAdj <- catAdj[ageRange, , drop=FALSE]
+      }
       
-      baseResults <- baseOutputSB()
-      
-      catAdj <- catAdj[baseResults$Year, ]
-      
+          
       tbl <-
-      if(!is.matrix(catAdj)){	
+      if(nrow(catAdj) == 1){	
+   
         catAdj <- t(catAdj)
+   
+        temp = cbind(Rowname = rownames(catAdj),  as.data.frame(apply(catAdj,2, as.numeric)))
         
-        temp = cbind(Rowname = colnames(catAdj),  as.data.frame(apply(catAdj,2, as.numeric)))
-        
-        if( baseResults$Year == 1)
+        if(ageRange == "Childhood" | ageRange == "At birth")
           colnames(temp) <- c("Level",  input$var_SB)
         else 
-          colnames(temp) <- c("Level",  paste0("Year ",baseResults$Year))
+          colnames(temp) <- c("Level",  paste0("Year ",ageRange))
         
         temp
       }else {
@@ -362,25 +341,34 @@ shinyServer(function(input, output, session) {
  
     }else {
       tbl <- hot_to_r(input$hotable)
-
+      
       if(ncol(tbl) != 2){
         index <- which(apply(tbl, 1, function(x) sum(is.na(x)) == 1))
         
-         if(length(index) == 0)
-           return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>% 
+        if(length(index) == 0)
+           return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%  hot_cols(colWidths = 130) %>% 
              hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
          
-        temp <- tbl[index,-1]
+        #browser()
         
-        temp[is.na(temp)] <- 100 - sum(temp, na.rm = TRUE)
+         temp <- 
+          t(sapply(index, function(x) {
+            temp <- tbl[x,-1];
+            temp[is.na(temp)] <- 100 - sum(temp, na.rm = TRUE);
+            temp
+          } ))
+         
+        if(nrow(temp) > 1)
+          tbl[index,-1] <- unlist(temp)
+        else 
+          tbl[index,-1] <- temp
         
-        tbl[index,-1] <- temp
-       
       } else {
+
         temp <- tbl[,2]
         
         if(sum(is.na(temp)) != 1)
-          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%
+          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%  hot_cols(colWidths = 130) %>%
                    hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
         
         temp[is.na(temp)] <- 100 - sum(temp, na.rm = TRUE)
@@ -390,32 +378,33 @@ shinyServer(function(input, output, session) {
       }
     }
     
-    return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>% 
+    return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%  hot_cols(colWidths = 130) %>% 
       hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
   })
     
     observeEvent( input$actionAddSB, {
-      
+
       catAdj  <- hot_to_r( isolate(input$hotable))[,-1]
       
+      ageRange <- strsplit(dict$age[as.character(varName_SB$Var[varName_SB$Name==input$var_SB])], "--")[[1]]
      
-      baseResults <- baseOutputSB()
-        
+      
+      
       if(is.data.frame(catAdj)){
         
         index <- which(apply(catAdj, 1, function(x) sum(is.na(x)) == 1))
 
-        if(length(index) > 0){
-          temp <- catAdj[index,, drop = FALSE]
-          temp  <- t(apply(temp, 1, function(x){ 
-            x[is.na(x)]<-100 - sum(x, na.rm = TRUE)
-            return(x)
-            } ))
-          catAdj[index,] <- temp
-        }
-        
+        # if(length(index) > 0){
+        #   temp <- catAdj[index,, drop = FALSE]
+        #   temp  <- t(apply(temp, 1, function(x){ 
+        #     x[is.na(x)]<-100 - sum(x, na.rm = TRUE)
+        #     return(x)
+        #     } ))
+        #   catAdj[index,] <- temp
+        # }
+        ageRange <- as.numeric(ageRange)
         catAdjFinal <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
-        catAdjFinal[baseResults$Year,] <- as.matrix(catAdj)
+        catAdjFinal[ageRange[1]:ageRange[2],] <- as.matrix(catAdj)
         
         catAdj <- apply(catAdjFinal, 2, function(x) as.numeric(x)/100)
         
@@ -425,20 +414,22 @@ shinyServer(function(input, output, session) {
         
       } else {
         
-        if(any(is.na(catAdj)))
-          catAdj[is.na(catAdj)] <- 100 - sum(catAdj, na.rm = TRUE)
+        # if(any(is.na(catAdj)))
+        #   catAdj[is.na(catAdj)] <- 100 - sum(catAdj, na.rm = TRUE)
         
-        if(baseResults$Year != 1)
-          rv$env.scenario$cat.adjustments[[
-            as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][baseResults$Year,] <-
-            as.numeric(catAdj)/100	
-        else 
+        if(ageRange[1] == "Childhood" | ageRange[1] == "At birth")
           rv$env.scenario$cat.adjustments[[
             as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][1,] <- as.numeric(catAdj)/100	
+        else                 
+          rv$env.scenario$cat.adjustments[[
+            as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][as.numeric(ageRange),] <-
+            as.numeric(catAdj)/100	
       }
       
-      message <-  paste(input$var_SB, "is inserted in the scenario!")
       
+      
+      
+      message <-  paste(input$var_SB, "is inserted in the scenario!")
       
       rv$message <- 
         if(rv$message == "Choose a Variable to Examine." | grepl(message, rv$message))
@@ -460,25 +451,14 @@ shinyServer(function(input, output, session) {
       showModal(modalDialog(
         title = "Simulation in progress",
         "This may take a while...",
+        size = "l",
         footer = NULL
       ))
 
     
       rv$env.scenario <- simulateSimario(rv$env.scenario, 10, simulateKnowLab)
       
-      # withProgress(message = 'Simulation in progress', style = "old",
-      #              detail = 'This may take a while...', value = 0, {
-      #                for (i in 1:15) {
-      #                  incProgress(1/15)
-      #                  Sys.sleep(0.25)
-      #                }
-      #                
-      #   rv$env.scenario <- simulateSimario(rv$env.scenario, 10, simulateKnowLab)            
-      #                
-      # })
-      
       removeModal()
-
       
       index <- 
         mapply(all.equal, env.base$modules$run_results$run1, 
@@ -493,6 +473,10 @@ shinyServer(function(input, output, session) {
         rv$savedScenario$XxxX <-  rv$env.scenario
         
         names(rv$savedScenario)[length(rv$savedScenario)] <-rv$env.scenario$name
+        
+        
+        rv$savedScenario <- rv$savedScenario[length(rv$savedScenario):1] 
+        
       }
       
       rv$env.scenario <- NULL
@@ -689,24 +673,23 @@ shinyServer(function(input, output, session) {
                                grpbyName = grpbyName, CI = input$ci, 
                                logisetexpr = trimws(input$logisetexprTB), digits = 5)
     
-    
-    
-    if("Var" %in% names(results) )
-      temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
-    else if("Mean" %in% names(results) )
-      temp <- results  %>% distinct( Mean, Lower, Upper, .keep_all = TRUE)
-    else 
-      temp <- results  %>% distinct(Min, X10th, X25th, X50th, 
-                                    X75th, X90th, Max, .keep_all = TRUE)
-    
-    if(length(unique(temp$Year)) > 1)
-      temp <- results[results$Year >= range(temp$Year)[1] & results$Year <= range(temp$Year)[2],]
-    
-    if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
-      results <- temp %>% filter(Year == 1)
-    } else if((nrow(temp) != nrow(results))){
-      results <- temp
-    }
+      
+    # if("Var" %in% names(results) )
+    #   temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
+    # else if("Mean" %in% names(results) )
+    #   temp <- results  %>% distinct( Mean, Lower, Upper, .keep_all = TRUE)
+    # else 
+    #   temp <- results  %>% distinct(Min, X10th, X25th, X50th, 
+    #                                 X75th, X90th, Max, .keep_all = TRUE)
+    # 
+    # if(length(unique(temp$Year)) > 1)
+    #   temp <- results[results$Year >= range(temp$Year)[1] & results$Year <= range(temp$Year)[2],]
+    # 
+    # if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
+    #   results <- temp %>% filter(Year == 1)
+    # } else if((nrow(temp) != nrow(results))){
+    #   results <- temp
+    # }
       
       
     baseTB <<- results
@@ -727,20 +710,15 @@ shinyServer(function(input, output, session) {
   output$resultTB  <- DT::renderDataTable({
 
     results <- summaryOutputTB()
-  
+
     
-    if(length(unique(results$Year))==1 ){
+    if(results$Year[1] ==  "Childhood" | results$Year[1] ==  "At birth"){
       
-      if(results$Year[1] == 1)
-        results$Year <- "Childhood"
-      
-      colnames(results)[1] <- ""
       
     } else if(input$input_type_TB == "Percentage" &  "groupByData" %in% names(results) ){
       
       if(length(unique(results$Var)) == 2)
         results <- results[results$Var==input$Var_TB, ]
-      
       
       results <- dcast(melt(results, id.vars = c("Var", "groupByData", "Year")), 
             Year~groupByData + Var + variable)
@@ -821,23 +799,21 @@ shinyServer(function(input, output, session) {
                                 envBase = env.base, digits = 5)
     }
     
-    
-    
-    if("Var" %in% names(results) )
-      temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
-    else if("Mean" %in% names(results) )
-      temp <- results  %>% distinct( Mean, Lower, Upper, .keep_all = TRUE)
-    else 
-      temp <- results  %>% distinct(Min, X10th, X25th, X50th, X75th, X90th, Max, .keep_all = TRUE)
-    
-    if(length(unique(temp$Year)) > 1)
-      temp <- results[results$Year >= range(temp$Year)[1] & results$Year <= range(temp$Year)[2],]
-    
-    if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
-      results <- temp %>% filter(Year == 1)
-    } else if((nrow(temp) != nrow(results))){
-      results <- temp
-    }
+    # if("Var" %in% names(results) )
+    #   temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
+    # else if("Mean" %in% names(results) )
+    #   temp <- results  %>% distinct( Mean, Lower, Upper, .keep_all = TRUE)
+    # else 
+    #   temp <- results  %>% distinct(Min, X10th, X25th, X50th, X75th, X90th, Max, .keep_all = TRUE)
+    # 
+    # if(length(unique(temp$Year)) > 1)
+    #   temp <- results[results$Year >= range(temp$Year)[1] & results$Year <= range(temp$Year)[2],]
+    # 
+    # if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
+    #   results <- temp %>% filter(Year == 1)
+    # } else if((nrow(temp) != nrow(results))){
+    #   results <- temp
+    # }
     
     SBTB <<-results
     
@@ -848,12 +824,9 @@ shinyServer(function(input, output, session) {
 
     results <- summaryOutputSBTB()
     
-    if(length(unique(results$Year))==1 ){
+
+    if(results$Year[1] ==  "Childhood" | results$Year[1] ==  "At birth"){
       
-      colnames(results)[1] <- ""
-      
-      if(results$Year[1] == 1)
-        results$Year <- "Childhood"
       
     } else if(input$input_type_TB == "Percentage" &  "groupByData" %in% names(results) ){
       if(length(unique(results$Var)) == 2)
@@ -1038,11 +1011,10 @@ shinyServer(function(input, output, session) {
     else 
       ggplot(tables.list, aes(fill=Scenario, y = Mean, x = Year)) 
     
-    
     p <- 
       p +  
       ggtitle(varList$Name[varList$Name==input$dynamicTB]) + 
-      geom_bar(position="dodge", stat = "identity") + 
+      geom_bar(position=dodge, stat = "identity") + 
       theme(text = element_text(size = 15))
     
     
@@ -1077,7 +1049,8 @@ shinyServer(function(input, output, session) {
     else 
       ggplot(tables.list, aes(y = Mean, x = Year)) 
     
-    p  <- p + ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path() + 
+    p  <- p + ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path() +
+      geom_point(size = 2)+ 
       theme(text = element_text(size = 15))
    
     if(input$input_type_TB == "Percentage")
@@ -1090,7 +1063,6 @@ shinyServer(function(input, output, session) {
   })
   
   output$linePlotSC<- renderPlotly({
-    
     
     tables.list <- combineResults()
     
@@ -1108,8 +1080,8 @@ shinyServer(function(input, output, session) {
     else 
       ggplot(tables.list, aes(y = Mean, x = Year)) 
     
-    p  <- p+  ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path() + 
-      theme(text = element_text(size = 15))
+    p  <- p+  ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path() +
+      geom_point(size = 2)+ theme(text = element_text(size = 15))
     
     if(input$input_type_TB == "Percentage")
      p  <-  p + ylab("Percentage")
@@ -1124,7 +1096,7 @@ shinyServer(function(input, output, session) {
   output$linePlot<- renderPlotly({
     
     tables.list <- combineResults()
-    
+ 
     limitsGGplot <- aes(ymax = Upper, ymin=Lower)
     dodge <- position_dodge(width=0.9)
     
@@ -1132,21 +1104,22 @@ shinyServer(function(input, output, session) {
       tables.list <- tables.list[tables.list$Var==input$Var_TB, ] 
     
     p <- if("groupByData" %in% names(tables.list))
-      ggplot(tables.list, aes(colour=groupByData, y = Mean, x = Year))
+      ggplot(tables.list, aes(y = Mean, x = Year, colour=Scenario)) + facet_wrap(~groupByData)
     else 
-      ggplot(tables.list, aes(y = Mean, x = Year)) 
+      ggplot(tables.list, aes(y = Mean, x = Year, colour=Scenario)) 
+    
     
     p <- p +  ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  
-      geom_path(aes(linetype = Scenario)) + 
+      geom_path(position = dodge)+
+      geom_point(size = 2, position = dodge) + 
       theme(text = element_text(size = 15))
 
     if(input$input_type_TB == "Percentage")
      p  <-  p + ylab("Percentage")
-
     
     if(isolate(input$ci))
-      p <- p + geom_errorbar(limitsGGplot, width=0.2)
-    
+      p <- p + geom_errorbar(limitsGGplot, width=0.25, 
+                             position = dodge)
     
     ggplotly(p)
   })
