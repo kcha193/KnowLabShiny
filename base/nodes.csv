@@ -16,17 +16,16 @@ Mother's BMI,Mother's BMI,,ellipse,"""Normal"" = 0 <br> ""Underweight""=1 <br> "
 Caesarean delivery,Caesarean delivery,,ellipse,"""Vaginal delivery""=0 <br> ""Caesarean delivery""=1",orange
 Cigarettes smoked per day during pregnancy,Smoked during pregnancy,,ellipse,"""0"" <br> ""1-5"" <br> ""6-10"" <br> ""11-20"" <br> "">20""",orange
 Otitis media,Otitis media,,ellipse,"""No""=0 <br> ""Yes""=1",orange
-IQ,IQ,,ellipse,,lightblue
+IQ,IQ,,ellipse,Continuous variable <br> mean = 100 <br> sd = 10,lightblue
 Birth weight,Birth weight,,ellipse,"""<2500"" <br>""2500-2999"" <br>""3000-3499"" <br>""3500-3999"" <br>""4000+"" ",orange
 Maternal Diabetes,Maternal Diabetes,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Print Exposure,Print Exposure,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Drinks per week during pregnancy,Drinks during pregnancy,,ellipse,"""0""  <br>""1"" <br>""2"" <br>""3"" <br>""4"" <br>""5"" <br>""6"" <br>""7"" <br>""8+""",orange
-NCEA Attain,NCEA Attain,,ellipse,"""No""=0 <br> ""Attained""=1",lightblue
-NCEA Fail,NCEA Fail,,ellipse,"""No""=0 <br> ""Failed""=1",lightblue
-NCEA Dropout,NCEA Dropout,,ellipse,"""No""=0 <br> ""Dropped Out""=1",lightblue
+NCEA,NCEA,,ellipse,"""Attained""=1 <br> ""Failed""=2 <br> ""Dropout""=3",lightblue
 Early Childhood Education,Early Childhood Education,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Highest eduction level between parents,Parental Education,,ellipse,"""Tertiary""=1 <br> ""Secondary""=2 <br> ""No formal qualifications""=3",orange
 Reading Books to Baby,Reading Books to Baby,,ellipse,"""No""=0 <br> ""Yes""=1",orange
-"Not in employment, education, or training",NEET,,ellipse,"""Not NEET""=0 <br> ""NEET""=1",lightblue
+"Not in employment, education, or training (NEET)",NEET,,ellipse,"""Not NEET""=0 <br> ""NEET""=1",lightblue
 Obesity,Obesity,,ellipse,"""No""=0 <br> ""Obese""=1",lightblue
-TV hours,Watch TV for more than 2 hours,,ellipse,"""No""=0 <br> ""Obese""=1",orange
+TV hours,Watch TV for more than 2 hours,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Preterm Birth,Preterm Birth with less than 37 weeks,,ellipse,"""No""=0 <br> ""Yes""=1",orange

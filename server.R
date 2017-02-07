@@ -50,9 +50,21 @@ shinyServer(function(input, output, session) {
   #     showModal(dataModal(failed = TRUE))
   #   }
   # })
-
   
-  source("SimmoduleMELC1_21.R")
+  observeEvent(input$switchMI, {
+    updateTabItems(session, "tabs", "mi")
+  })
+  observeEvent(input$switchSB, {
+    updateTabItems(session, "tabs", "sb")
+  })
+  
+  observeEvent(input$switchTB, {
+    updateTabItems(session, "tabs", "tb")
+  })  
+  
+  
+  #source("SimmoduleMELC1_21.R")
+  source("simulateKnowLab.R")
   
   initialSim <<- readRDS("base/initialSim.rds")
   env.base  <<- readRDS("base/FullBaseRun.rds")
@@ -84,16 +96,27 @@ shinyServer(function(input, output, session) {
   
   time_invariant_vars <- attr(initialSim$simframe, "time_invariant_vars")
   
-  catvars <- unique(c(time_invariant_vars$Varname[time_invariant_vars$Outcome_type=="categorical"], 
-                      getOutcomeVars(initialSim$simframe, "categorical"),  names(binbreaks)))
+  # catvars <- unique(c(time_invariant_vars$Varname[time_invariant_vars$Outcome_type=="categorical"], 
+  #                     getOutcomeVars(initialSim$simframe, "categorical"),  names(binbreaks)))
   
-  contvars <- unique(c(getOutcomeVars(initialSim$simframe, "continuous"), 
-                time_invariant_vars$Varname[time_invariant_vars$Outcome_type=="continuous"]))
+  catvars <- c( "r1stchildethn", "SESBTH", "z1genderLvl1", "z1CaesareanLvl1", "z1BreakfastLvl1", "r1mBMI", 
+                "r1ParentEduc", "z1GALvl1", "z1stmDiabeteLvl1", "z1HearingLvl1", "z1ECELvl1", "z1PrintExpLvl1", 
+                "z1ADHDLvl1", "z1ParentInvolveLvl1", "r1Region", "z1OverweightLvl1", "z1ObeseLvl1", "r1Sleep",
+                "r1Score", "z1NEETLvl1", "z1BullyLvl1", "r1SchoolFunding", 
+                "r1SchoolGender", "z1AlcAbuseLvl1", "z1DepressLvl1", "z1PUNISHLvl1", "z1INTERACTLvl1", 
+                "z1ParentAlcLvl1", "z1ParentDepressLvl1", "z1WatchTVLvl1", "pregalc", "pregsmk", "bwkg", 
+                "BREAST", "IQ")
+  
+  
+  #contvars <- unique(c(getOutcomeVars(initialSim$simframe, "continuous"), 
+  #              time_invariant_vars$Varname[time_invariant_vars$Outcome_type=="continuous"]))
+  
+  contvars <- c( "IQ", "BREAST", "bwkg",  "pregalc", "pregsmk")
   
   freqList <-  data.frame(Var =catvars, 
                           Name = as.character(trimws(varName[catvars])), 
                           stringsAsFactors = FALSE)
-
+  
   meansList <-  quantilesList <-data.frame(Var = contvars, 
                                            Name = as.character(trimws(varName[contvars])), 
                                            stringsAsFactors = FALSE)
@@ -104,11 +127,18 @@ shinyServer(function(input, output, session) {
                        Name = as.character(trimws(varName[unique(c(catvars, contvars))])), 
                        stringsAsFactors = FALSE)
   
-  var_SB <- names(env.base$cat.adjustments)
-
+  #var_SB <- names(env.base$cat.adjustments)
+  
+  var_SB <- c("z1Overweight", "z1Obese", "r1Sleep", "r1Score", "z1Bully", 
+              "r1SchoolFunding", "r1SchoolGender",  "z1AlcAbuse", "z1Depress", "z1PUNISH","z1INTERACT",          
+              "z1ParentAlc", "z1ParentDepress", "z1WatchTV", "BREAST", "bwkg", 
+              "pregalc", "pregsmk", "r1stchildethn", "SESBTH", "z1genderLvl1", "z1CaesareanLvl1", 
+              "z1BreakfastLvl1", "r1mBMI",  "r1ParentEduc", "z1GALvl1", "z1stmDiabeteLvl1", "z1HearingLvl1",      
+              "z1ECELvl1", "z1PrintExpLvl1", "z1ADHDLvl1", "z1ParentInvolveLvl1")
+  
   var_SB_New <- sapply(strip_lvl_suffix(var_SB), 
-                              function(x) varList$Var[ strip_lvl_suffix(varList$Var) %in% x])
-
+                       function(x) varList$Var[ strip_lvl_suffix(varList$Var) %in% x])
+  
   varName_SB <-  data.frame(old =var_SB,
                             Var =var_SB_New, 
                             Name = trimws(varName[var_SB_New]), 
@@ -119,7 +149,7 @@ shinyServer(function(input, output, session) {
   varList <- varList[order(varList$Name),]  
   
   meansList <- meansList[order(meansList$Name),]  
- 
+  
   freqList <- freqList[order(freqList$Name),]  
   
   #############################################################################################
@@ -132,47 +162,38 @@ shinyServer(function(input, output, session) {
     
     
     edges  <- read.csv("base/edges.csv")
-
-
+    
+    
     visNetwork(nodes, edges, height = "500px", width = "100%") %>% 
       visNodes(value=1, shadow=FALSE,	font=list(size=15)) %>% 
       visEdges(width=5, shadow=FALSE,	font=list(size=30), 
                dashes=FALSE, length = 130, smooth=TRUE) %>% 
       visOptions(highlightNearest = list(enabled = TRUE, degree = 2, hover = TRUE), 
-                 nodesIdSelection = TRUE)  %>%
+                 nodesIdSelection = FALSE)  %>%
       visEvents( selectEdge = "function(properties) {
-                if(properties.nodes == ''){
-                    window.open(properties.edges);
-                }
-                 }", 
+                 if(properties.nodes == ''){
+                 window.open(properties.edges);
+                 }
+  }", 
                  selectNode = "function(properties) {
                  Shiny.onInputChange('var_SB', properties.nodes);
                  Shiny.onInputChange('dynamicTB', properties.nodes);}") %>%
-      visLayout(randomSeed = 16012017)
-   }) 
+      visLayout(randomSeed = 022017)
+    }) 
   
-  observeEvent(input$switchSB, {
-    updateTabItems(session, "tabs", "sb")
-  })
-  
-  observeEvent(input$switchTB, {
-    updateTabItems(session, "tabs", "tb")
-  })  
   
   
   ################################################################################
   #Scenario Builder
-  
-  
   output$uiNameSB <- renderUI({
     
-    textInput("nameSB", "Name of your scenario", value = "Scenario1")
+    textInput("nameSB", "Name your scenario", value = "Scenario1")
   })
   
   observe({ 
     rv$env.scenario <- createSimenv(input$nameSB, 
-                                  initialSim$simframe, 
-                                  initialSim$dict, "years1_21")
+                                    initialSim$simframe, 
+                                    initialSim$dict, "years1_21")
     rv$finalFormulaSB<- NULL
     rv$currSB <- "NULL"
     rv$finalFormulaSB<- NULL
@@ -285,7 +306,7 @@ shinyServer(function(input, output, session) {
   output$previewSB  <- DT::renderDataTable({
     
     results <- baseOutputSB()
-
+    
     
     datatable(results, class = 'table-condensed',  extensions = 'Scroller',
               options = list(pageLength = 21, dom = 't',
@@ -298,19 +319,20 @@ shinyServer(function(input, output, session) {
   
   # hotable
   output$hotable <- renderRHandsontable({
-
-  
+    
+    
     if(is.null(input$hotable) | (isolate(rv$currSB) != input$var_SB)){
       
       catAdj <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
-    
+      
       rv$currSB <- input$var_SB
-     
+      
       ageRange <- strsplit(dict$age[as.character(varName_SB$Var[varName_SB$Name==input$var_SB])], "--")[[1]]
-
-  
+      
+    
+      
       if(ageRange[1] == "Childhood" | ageRange[1] == "At birth"){
-        catAdj <- catAdj
+        catAdj <- catAdj[1, , drop=FALSE]
       }else {
         ageRange <- as.numeric(ageRange)
         if(length(ageRange) == 2)
@@ -319,26 +341,26 @@ shinyServer(function(input, output, session) {
           catAdj <- catAdj[ageRange, , drop=FALSE]
       }
       
-          
+      
       tbl <-
-      if(nrow(catAdj) == 1){	
-   
-        catAdj <- t(catAdj)
-   
-        temp = cbind(Rowname = rownames(catAdj),  as.data.frame(apply(catAdj,2, as.numeric)))
-        
-        if(ageRange == "Childhood" | ageRange == "At birth")
-          colnames(temp) <- c("Level",  input$var_SB)
-        else 
-          colnames(temp) <- c("Level",  paste0("Year ",ageRange))
-        
-        temp
-      }else {
-        
-        cbind(Rowname =  rownames(catAdj), as.data.frame(apply(catAdj,2, as.numeric), 
-                                                        stringsAsFactors = FALSE))
-      }
- 
+        if(nrow(catAdj) == 1){	
+          
+          catAdj <- t(catAdj)
+          
+          temp = cbind(Rowname = rownames(catAdj),  as.data.frame(apply(catAdj,2, as.numeric)))
+          
+          if(ageRange == "Childhood" | ageRange == "At birth")
+            colnames(temp) <- c("Level",  input$var_SB)
+          else 
+            colnames(temp) <- c("Level",  paste0("Year ",ageRange))
+          
+          temp
+        }else {
+          
+          cbind(Rowname =  rownames(catAdj), as.data.frame(apply(catAdj,2, as.numeric), 
+                                                           stringsAsFactors = FALSE))
+        }
+      
     }else {
       tbl <- hot_to_r(input$hotable)
       
@@ -346,25 +368,25 @@ shinyServer(function(input, output, session) {
         index <- which(apply(tbl, 1, function(x) sum(is.na(x)) == 1))
         
         if(length(index) == 0)
-           return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%  hot_cols(colWidths = 130) %>% 
-             hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
-         
+          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%  hot_cols(colWidths = 130) %>% 
+                   hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
+        
         #browser()
         
-         temp <- 
+        temp <- 
           t(sapply(index, function(x) {
             temp <- tbl[x,-1];
             temp[is.na(temp)] <- 100 - sum(temp, na.rm = TRUE);
             temp
           } ))
-         
+        
         if(nrow(temp) > 1)
           tbl[index,-1] <- unlist(temp)
         else 
           tbl[index,-1] <- temp
         
       } else {
-
+        
         temp <- tbl[,2]
         
         if(sum(is.na(temp)) != 1)
@@ -379,117 +401,114 @@ shinyServer(function(input, output, session) {
     }
     
     return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%  hot_cols(colWidths = 130) %>% 
-      hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
+             hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
   })
+  
+  observeEvent( input$actionAddSB, {
     
-    observeEvent( input$actionAddSB, {
-
-      catAdj  <- hot_to_r( isolate(input$hotable))[,-1]
-      
-      ageRange <- strsplit(dict$age[as.character(varName_SB$Var[varName_SB$Name==input$var_SB])], "--")[[1]]
-     
-      
-      
-      if(is.data.frame(catAdj)){
-        
-        index <- which(apply(catAdj, 1, function(x) sum(is.na(x)) == 1))
-
-        # if(length(index) > 0){
-        #   temp <- catAdj[index,, drop = FALSE]
-        #   temp  <- t(apply(temp, 1, function(x){ 
-        #     x[is.na(x)]<-100 - sum(x, na.rm = TRUE)
-        #     return(x)
-        #     } ))
-        #   catAdj[index,] <- temp
-        # }
-        ageRange <- as.numeric(ageRange)
-        catAdjFinal <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
-        catAdjFinal[ageRange[1]:ageRange[2],] <- as.matrix(catAdj)
-        
-        catAdj <- apply(catAdjFinal, 2, function(x) as.numeric(x)/100)
-        
-        for(i in 1:nrow(catAdj))
-          rv$env.scenario$cat.adjustments[[
-            as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][i,] <- catAdj[i,]		   
-        
-      } else {
-        
-        # if(any(is.na(catAdj)))
-        #   catAdj[is.na(catAdj)] <- 100 - sum(catAdj, na.rm = TRUE)
-        
-        if(ageRange[1] == "Childhood" | ageRange[1] == "At birth")
-          rv$env.scenario$cat.adjustments[[
-            as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][1,] <- as.numeric(catAdj)/100	
-        else                 
-          rv$env.scenario$cat.adjustments[[
-            as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][as.numeric(ageRange),] <-
-            as.numeric(catAdj)/100	
-      }
-      
-      
-      
-      
-      message <-  paste(input$var_SB, "is inserted in the scenario!")
-      
-      rv$message <- 
-        if(rv$message == "Choose a Variable to Examine." | grepl(message, rv$message))
-          paste(message)
-        else 
-          paste(rv$message, message, sep = "<br/>" )
-    })
+    catAdj  <- hot_to_r( isolate(input$hotable))[,-1]
     
-
+    ageRange <- strsplit(dict$age[as.character(varName_SB$Var[varName_SB$Name==input$var_SB])], "--")[[1]]
     
-    observeEvent(input$actionSB, { 
+    if(is.data.frame(catAdj)){
       
-      if(!is.null(input$uilogisetexprSB))
-        rv$env.scenario <- setGlobalSubgroupFilterExpression( rv$env.scenario, 
-                                                              input$uilogisetexprSB)
+      index <- which(apply(catAdj, 1, function(x) sum(is.na(x)) == 1))
+      ageRange <- as.numeric(ageRange)
+      catAdjFinal <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
+      catAdjFinal[ageRange[1]:ageRange[2],] <- as.matrix(catAdj)
       
-      #Simulation for the new scenario is here. 
+      catAdj <- apply(catAdjFinal, 2, function(x) as.numeric(x)/100)
       
-      showModal(modalDialog(
-        title = "Simulation in progress",
-        "This may take a while...",
-        size = "l",
-        footer = NULL
-      ))
-
+      for(i in 1:nrow(catAdj))
+        rv$env.scenario$cat.adjustments[[
+          as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][i,] <- catAdj[i,]		   
+      
+    } else {
+      
+      if(ageRange[1] == "Childhood" | ageRange[1] == "At birth")
+        rv$env.scenario$cat.adjustments[[
+          as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][1,] <- as.numeric(catAdj)/100	
+      else                 
+        rv$env.scenario$cat.adjustments[[
+          as.character(varName_SB$old[varName_SB$Name==input$var_SB])]][as.numeric(ageRange),] <-
+          as.numeric(catAdj)/100	
+    }
     
-      rv$env.scenario <- simulateSimario(rv$env.scenario, 10, simulateKnowLab)
+    message <-  paste(input$var_SB, " has been added inserted in the scenario.")
+    
+    rv$message <- 
+      if(rv$message == "Choose a Variable to Examine." | grepl(message, rv$message))
+        paste(message)
+    else 
+      paste(rv$message, message, sep = "<br/>" )
+  })
+  
+  
+  
+  
+  observeEvent(input$actionSB, {
+    showModal(modalDialog(
+      title = HTML(paste("You have made changes: <br> ", rv$message)),
+      HTML("Is this everything you want to change for this scenario? <br>
+      NB., if variables are missing from above, it may be because you haven't clicked Add scenario after changing each variable"),
+      size = "l",
+      footer = tagList(
+        modalButton("No"),
+        actionButton("actionSB1", "Yes, Run Scenario")
+      )
+    ))
+  }) 
+  
+  observeEvent(input$actionSB1, { 
+    
+    if(!is.null(input$uilogisetexprSB))
+      rv$env.scenario <- setGlobalSubgroupFilterExpression( rv$env.scenario, 
+                                                            input$uilogisetexprSB)
+    
+    
+    #Simulation for the new scenario is here. 
+    showModal(modalDialog(
+      title = "Simulation in progress",
+      "This may take a while...",
+      size = "l",
+      footer = NULL
+    ))
+    
+    
+    rv$env.scenario <- simulateSimario(rv$env.scenario, isolate(input$nRun), simulateKnowLab)
+    
+    removeModal()
+    
+    index <- 
+      mapply(all.equal, env.base$modules$run_results$run1, 
+             rv$env.scenario$modules$run_results$run1) != "TRUE"
+    
+    rv$env.scenario$modules$run_results <- 
+      lapply(rv$env.scenario$modules$run_results, function(x) x[index])
+    
+    if(rv$env.scenario$name %in% names(rv$savedScenario)[length(rv$savedScenario)]  ){
+      rv$savedScenario[rv$env.scenario$name] <- rv$env.scenario
+    } else {
+      rv$savedScenario$XxxX <-  rv$env.scenario
       
-      removeModal()
+      names(rv$savedScenario)[length(rv$savedScenario)] <-rv$env.scenario$name
       
-      index <- 
-        mapply(all.equal, env.base$modules$run_results$run1, 
-               rv$env.scenario$modules$run_results$run1) != "TRUE"
       
-      rv$env.scenario$modules$run_results <- 
-        lapply(rv$env.scenario$modules$run_results, function(x) x[index])
+      rv$savedScenario <- rv$savedScenario[length(rv$savedScenario):1] 
       
-      if(rv$env.scenario$name %in% names(rv$savedScenario)[length(rv$savedScenario)]  ){
-        rv$savedScenario[rv$env.scenario$name] <- rv$env.scenario
-      } else {
-        rv$savedScenario$XxxX <-  rv$env.scenario
-        
-        names(rv$savedScenario)[length(rv$savedScenario)] <-rv$env.scenario$name
-        
-        
-        rv$savedScenario <- rv$savedScenario[length(rv$savedScenario):1] 
-        
-      }
-      
-      rv$env.scenario <- NULL
-
-      updateTextInput(session, "nameSB", "Name of your scenario", 
-                      value = paste0("Scenario", length(rv$savedScenario) + 1) )
-      
-    })
+    }
+    
+    rv$env.scenario <- NULL
+    
+    updateTextInput(session, "nameSB", "Name of your scenario", 
+                    value = paste0("Scenario", length(rv$savedScenario) + 1) )
+    
+  })
   
   
   output$StartSim <-renderUI({
-   
-      return(HTML(paste("<font color=\"red\">",rv$message, "</font>")))
+    
+    return(HTML(rv$message))
   })
   
   
@@ -510,7 +529,7 @@ shinyServer(function(input, output, session) {
   
   output$selectSB <- renderUI({
     
-
+    
     selectInput("selSB", "Select saved Scenario:",
                 choices = c(names(rv$savedScenario )))
     
@@ -528,14 +547,14 @@ shinyServer(function(input, output, session) {
   )
   
   
-###################################################################################
-#Table builder
-
+  ###################################################################################
+  #Table builder
+  
   output$uiTB <- renderUI({
     
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
-
+    
     switch(input$input_type_TB,
            "Percentage" = selectInput("dynamicTB", "Variable",choices = sort(freqList$Name), 
                                       selected = input$dynamicTB),
@@ -547,10 +566,10 @@ shinyServer(function(input, output, session) {
   })
   
   output$uiSubGrpTB <- renderUI({
-
+    
     input$input_type_TB
     rv$finalFormulaSB<- NULL
-
+    
     selectInput("subGrp_TB", "Select ByGroup:", 
                 choices = c(None='None',  sort(freqList$Name)))
   })
@@ -562,9 +581,9 @@ shinyServer(function(input, output, session) {
     selectInput("subGrp_TB1", "Select Subgroup for subgroup formula:",
                 choices = c(None='None',  varList$Name ))
   })
-   
-  output$uiExprTB1 <- renderUI({
   
+  output$uiExprTB1 <- renderUI({
+    
     #print(names(env.base$dict$codings[[names(which(varName == input$subGrp_TB1))]]))
     if(input$subGrp_TB1 == "None")
       return()
@@ -576,29 +595,29 @@ shinyServer(function(input, output, session) {
         inputPanel(
           selectInput("subGrp_TB2", input$subGrp_TB1, 
                       choices = c("Equals" = " == ",  "Less than" = " < ", 
-                                 "Greater than" = " > ", "Less than or equal to" = " <= ", 
-                                 "Greater than or equal to" = " >= ", "Not equals to " = " != "), 
+                                  "Greater than" = " > ", "Less than or equal to" = " <= ", 
+                                  "Greater than or equal to" = " >= ", "Not equals to " = " != "), 
                       selectize=FALSE),
           textInput("subGrpNum_TB2", "" )
         )
         
       } else {
-      selectInput("subGrp_TB2", input$subGrp_TB1,
-            choices = choice, 
-            selectize=FALSE)
+        selectInput("subGrp_TB2", input$subGrp_TB1,
+                    choices = choice, 
+                    selectize=FALSE)
       }
     )
   })
   
-
+  
   logisetexprTB <-eventReactive( input$completeTB, {
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
-  
+    
     index = env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]][
       (names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]])==
          input$subGrp_TB2)]
-
+    
     
     if(is.null(index)){
       paste(varList$Var[varList$Name == input$subGrp_TB1], 
@@ -606,7 +625,7 @@ shinyServer(function(input, output, session) {
     }else{
       paste(varList$Var[varList$Name == input$subGrp_TB1], index, sep = " == ")
     }
-
+    
   })
   
   logisetexprTB1 <-eventReactive(input$operatorTB, {
@@ -647,7 +666,7 @@ shinyServer(function(input, output, session) {
   observeEvent( input$resetTB, { 
     rv$finalFormulaSB <- NULL
   })
-    
+  
   output$uilogisetexprTB <- renderUI({  
     textareaInput("logisetexprTB",  "Subgroup formula:", value = rv$finalFormulaSB)
   })
@@ -660,20 +679,20 @@ shinyServer(function(input, output, session) {
     
     names(inputType) = c("Percentage", "Mean","Quantile" )
     
-
+    
     grpbyName = varList$Var[varList$Name==input$subGrp_TB] 
     
     print(grpbyName)
     
     if(length(grpbyName) == 0) grpbyName = ""
-  
+    
     results <- tableBuilderNew(env.base, 
                                statistic = inputType[input$input_type_TB], 
                                variableName = varList$Var[varList$Name==input$dynamicTB][1],
                                grpbyName = grpbyName, CI = input$ci, 
                                logisetexpr = trimws(input$logisetexprTB), digits = 5)
     
-      
+    
     # if("Var" %in% names(results) )
     #   temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
     # else if("Mean" %in% names(results) )
@@ -690,27 +709,27 @@ shinyServer(function(input, output, session) {
     # } else if((nrow(temp) != nrow(results))){
     #   results <- temp
     # }
-      
-      
+    
+    
     baseTB <<- results
     
     results
   })
   
-
+  
   
   output$uiVar <- renderUI({
-   # if(length(unique(summaryOutputTB()$Year))!=1)
-      selectInput("Var_TB", "Select a level to compare in plot:",  
-                  selected = unique(summaryOutputTB()$Var)[2], 
-                  choices = unique(summaryOutputTB()$Var))
+    # if(length(unique(summaryOutputTB()$Year))!=1)
+    selectInput("Var_TB", "Select a level to compare in plot:",  
+                selected = unique(summaryOutputTB()$Var)[2], 
+                choices = unique(summaryOutputTB()$Var))
   })
   
   
   output$resultTB  <- DT::renderDataTable({
-
+    
     results <- summaryOutputTB()
-
+    
     
     if(results$Year[1] ==  "Childhood" | results$Year[1] ==  "At birth"){
       
@@ -721,7 +740,7 @@ shinyServer(function(input, output, session) {
         results <- results[results$Var==input$Var_TB, ]
       
       results <- dcast(melt(results, id.vars = c("Var", "groupByData", "Year")), 
-            Year~groupByData + Var + variable)
+                       Year~groupByData + Var + variable)
       
     }else if(input$input_type_TB == "Percentage"){
       if(length(unique(results$Var)) == 2)
@@ -729,7 +748,7 @@ shinyServer(function(input, output, session) {
       
       results <- dcast(melt(results, id.vars = c("Var", "Year")), 
                        Year~Var + variable)
-
+      
     } else if(input$input_type_TB %in% c("Mean", "Quantile") & 
               "groupByData" %in% names(results) ){
       
@@ -744,7 +763,7 @@ shinyServer(function(input, output, session) {
       return(NULL)
     }    
     
-       
+    
     
     index <- c(grep("Lower", colnames(results)), grep("Upper", colnames(results)))
     
@@ -755,20 +774,20 @@ shinyServer(function(input, output, session) {
       colnames(results) <- gsub("Mean", "Percent", colnames(results))
     
     rv$tableResult$Base <- results
-      
+    
     colnames(results) <- 
       paste0('<span style="font-size:20px">',colnames(results),'</span>')
-      
+    
     
     
     DT::datatable(results, rownames = FALSE, extensions = 'Scroller', escape = FALSE,
-              options = list(pageLength = 9999999, dom = 't',
-                             scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
-                             scrollCollapse = TRUE))  %>%
+                  options = list(pageLength = 9999999, dom = 't',
+                                 scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
+                                 scrollCollapse = TRUE))  %>%
       formatStyle(1:ncol(results), 'font-size' = '20px') %>% formatRound(-1 ,digits = 1)
   })
   
-
+  
   SBTB <<- NULL
   
   summaryOutputSBTB <- reactive({
@@ -782,7 +801,7 @@ shinyServer(function(input, output, session) {
     print(input$selSB)
     
     if(length(grpbyName) == 0) grpbyName = ""
-
+    
     if(input$basePop == "Base population (Before scenario testing)"){
       results <-tableBuilderNew(rv$savedScenario[[input$selSB]], 
                                 statistic = inputType[input$input_type_TB], 
@@ -821,10 +840,10 @@ shinyServer(function(input, output, session) {
   })
   
   output$resultSBTB  <- DT::renderDataTable({
-
+    
     results <- summaryOutputSBTB()
     
-
+    
     if(results$Year[1] ==  "Childhood" | results$Year[1] ==  "At birth"){
       
       
@@ -865,7 +884,7 @@ shinyServer(function(input, output, session) {
     if(input$input_type_TB == "Percentage")
       colnames(results) <- gsub("Mean", "Percent", colnames(results))
     
-      
+    
     rv$tableResult$Scenario <- results
     
     colnames(results) <- 
@@ -879,12 +898,12 @@ shinyServer(function(input, output, session) {
     
   })
   
- 
+  
   output$downloadTable <- downloadHandler(
     filename = function() {
       paste('Table Result-',  input$input_type_TB, " ", 
-                              input$dynamicTB, " ", 
-                              input$selSB, '.xlsx', sep='')
+            input$dynamicTB, " ", 
+            input$selSB, '.xlsx', sep='')
     },
     content = function(con) {
       
@@ -897,7 +916,7 @@ shinyServer(function(input, output, session) {
       
       if(!is.null(rv$finalFormulaSB))
         temp$SubgroupFormula = rv$finalFormulaSB
-    
+      
       rv$tableResult$info <- t(temp)
       write.xlsx(rv$tableResult, con)
       rv$tableResult <- list()
@@ -907,7 +926,7 @@ shinyServer(function(input, output, session) {
   combineResults <- reactive({
     
     baseTB <-summaryOutputTB()
-  
+    
     SBTB <- try(summaryOutputSBTB(), silent = TRUE)
     if(class(SBTB) == "try-error") SBTB <- NULL
     
@@ -921,7 +940,7 @@ shinyServer(function(input, output, session) {
     combineResults
   })
   
-
+  
   output$barchartBase<- renderPlotly({
     
     tables.list <- combineResults()
@@ -937,7 +956,7 @@ shinyServer(function(input, output, session) {
       tables.list <- tables.list[tables.list$Var==input$Var_TB, ]
     
     tables.list$Year <- factor(tables.list$Year)
-   
+    
     p <- if("groupByData" %in% names(tables.list))
       ggplot(tables.list, aes(fill=groupByData, y = Mean, x = Year))
     else 
@@ -948,7 +967,7 @@ shinyServer(function(input, output, session) {
       theme(text = element_text(size = 15))
     
     if(input$input_type_TB == "Percentage")
-     p  <-  p + ylab("Percentage")
+      p  <-  p + ylab("Percentage")
     
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
@@ -971,7 +990,7 @@ shinyServer(function(input, output, session) {
       tables.list <- tables.list[tables.list$Var==input$Var_TB, ]
     
     tables.list$Year <- factor(tables.list$Year)
-   
+    
     p <- if("groupByData" %in% names(tables.list))
       ggplot(tables.list, aes(fill=groupByData, y = Mean, x = Year))
     else 
@@ -983,7 +1002,7 @@ shinyServer(function(input, output, session) {
     
     
     if(input$input_type_TB == "Percentage")
-     p  <-  p + ylab("Percentage")
+      p  <-  p + ylab("Percentage")
     
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
@@ -993,7 +1012,7 @@ shinyServer(function(input, output, session) {
   
   
   output$barchart<- renderPlotly({
-   
+    
     tables.list <- combineResults()
     
     colname <- names(summaryOutputTB())
@@ -1019,8 +1038,8 @@ shinyServer(function(input, output, session) {
     
     
     if(input$input_type_TB == "Percentage")
-     p  <-  p + ylab("Percentage")
-
+      p  <-  p + ylab("Percentage")
+    
     
     if(any(grepl("Lower", colname)))
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
@@ -1031,7 +1050,7 @@ shinyServer(function(input, output, session) {
   
   
   output$linePlotBase<- renderPlotly({
-
+    
     tables.list <- combineResults()
     
     tables.list <- tables.list %>% filter(Scenario == "Base")
@@ -1039,7 +1058,7 @@ shinyServer(function(input, output, session) {
     colname <- names(summaryOutputTB())
     limitsGGplot <- aes(ymax = Upper, ymin=Lower)
     dodge <- position_dodge(width=0.9)
-  
+    
     
     if(input$input_type_TB == "Percentage")
       tables.list <- tables.list[tables.list$Var==input$Var_TB, ] 
@@ -1052,10 +1071,10 @@ shinyServer(function(input, output, session) {
     p  <- p + ggtitle(varList$Name[varList$Name==input$dynamicTB]) +  geom_path() +
       geom_point(size = 2)+ 
       theme(text = element_text(size = 15))
-   
+    
     if(input$input_type_TB == "Percentage")
-     p  <-  p + ylab("Percentage")
-                                                         
+      p  <-  p + ylab("Percentage")
+    
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, width=0.2)
     
@@ -1084,8 +1103,8 @@ shinyServer(function(input, output, session) {
       geom_point(size = 2)+ theme(text = element_text(size = 15))
     
     if(input$input_type_TB == "Percentage")
-     p  <-  p + ylab("Percentage")
-
+      p  <-  p + ylab("Percentage")
+    
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, width=0.2)
     
@@ -1096,7 +1115,7 @@ shinyServer(function(input, output, session) {
   output$linePlot<- renderPlotly({
     
     tables.list <- combineResults()
- 
+    
     limitsGGplot <- aes(ymax = Upper, ymin=Lower)
     dodge <- position_dodge(width=0.9)
     
@@ -1113,9 +1132,9 @@ shinyServer(function(input, output, session) {
       geom_path(position = dodge)+
       geom_point(size = 2, position = dodge) + 
       theme(text = element_text(size = 15))
-
+    
     if(input$input_type_TB == "Percentage")
-     p  <-  p + ylab("Percentage")
+      p  <-  p + ylab("Percentage")
     
     if(isolate(input$ci))
       p <- p + geom_errorbar(limitsGGplot, width=0.25, 
@@ -1132,7 +1151,7 @@ shinyServer(function(input, output, session) {
     tables.list <- tables.list %>% filter(Scenario == "Base")
     
     colname <- names(summaryOutputTB())
-
+    
     p <- if("groupByData" %in% names(tables.list))
       ggplot(tables.list, aes(fill =groupByData, x = Year,  ymin = `Min`, lower = `X25th`, 
                               middle = `X50th`, upper = `X75th`, ymax = `Max`)) 
@@ -1142,7 +1161,7 @@ shinyServer(function(input, output, session) {
     
     p  <- p + ggtitle(varList$Name[varList$Name==input$dynamicTB]) + 
       geom_boxplot(stat = "identity") + theme(text = element_text(size = 15))
-  
+    
     p
   })
   
@@ -1167,7 +1186,7 @@ shinyServer(function(input, output, session) {
       geom_boxplot(stat = "identity") + theme(text = element_text(size = 15))
     
     p
-   
+    
   })
   
   output$boxPlot<- renderPlot({
@@ -1279,13 +1298,13 @@ shinyServer(function(input, output, session) {
   #   
   #   ggplotly(g, tooltip = c("text", "fill"))
   # })
-
+  
   
   output$downloadPlot <- downloadHandler(
     
     
     filename = function() {
-
+      
       if(input$input_type_TB == "Quantile"){
         type <- "Box"
       }else{   
@@ -1303,8 +1322,4 @@ shinyServer(function(input, output, session) {
     }
   )
   
-
-
-  
-  
-})  
+  })  

@@ -10,6 +10,7 @@ library(rdrop2)
 
 options(shiny.maxRequestSize=10000*1024^2)
 
+
 dashboardPage(skin = "red", title = "Knowledge Lab",
               dashboardHeader(title = "Knowledge Lab" ),
               # Application title
@@ -21,17 +22,17 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                   menuItem("Scenario Builder", tabName = "sb", icon = icon("refresh")),
                   menuItem("Table Builder", tabName = "tb", icon = icon("table")),
                   br(),
-                  box(title ="Project upload", background ="black", status = "primary",solidHeader = TRUE, 
+                  box(title ="Project upload", background ="black", status = "danger",solidHeader = TRUE, 
                       fileInput('file1', 'Choose Project File', accept=c('.RData')),  
                       width = 12),
                   br(),
-                  box(title ="Saved Scenarios", background ="black",  status = "primary",solidHeader = TRUE, 
+                  box(title ="Saved Scenarios", background ="black",  status = "danger",solidHeader = TRUE, 
                       uiOutput("selectSB"), width = 12),
                   br(),
                   box(textInput("wrkSpaceName", label = "Name the Project:"),
                       downloadButton('saveWrkspace', "Save Project") ,
                       h3("Latest Update:"),
-                      h4("2016-12-15"),
+                      h4("2017-02-03"),
                       h3("Contact email:"), 
                       a("k.chang@auckland.ac.nz", 
                         href= "mailto:k.chang@auckland.ac.nz"), 
@@ -48,7 +49,14 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                 tabItems( 
                   tabItem("fb", 
                           fluidRow(
-                            box( width = 6, 
+                            column(width = 6,
+                            box(title ="Quick Link", width = 12,
+                                status = "primary",solidHeader = TRUE, 
+                                p(actionButton("switchMI", "Model input"), "Visualising the Conceptual framework."), 
+                                p(actionButton("switchSB", "Scenario Builder"), "Simulation with a new Scenario"), 
+                                p(actionButton("switchTB", "Table Builder"), "Tabulate and/or plot the simulated outcome and compare to original.")
+                                ),
+                            box( width = 12, 
                                  h3("KNOWLEDGE LAB (A knowledge laboratory of the early life-course)"),
                                  p("Knowledge Lab is a microsimulation model of New Zealand children’s development 
                                    from birth to age 21. Micro-simulation is a technique that creates a virtual world 
@@ -83,20 +91,31 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                                  p(""),
                                  a(href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass.html",
                                    img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
-                                       width = 200)))  #, 
+                                       width = 200))))   
                             #box( width = 6,  includeHTML("ppt.html"))
                                  )),
-                  tabItem("mi", "Hover to the line to examine the coefficients or the odds ratio of the models. 
-                          Click on the line to open a new webpage of the citiation. 
-                          Hover to the eclipse to examine the levels of the variables.
-                          Click on the eclipse to select the variable for the scenario builder or the table builder.", 
-                          visNetworkOutput('oModel', width = "100%", height = "800px")),
+                    tabItem("mi", 
+                          fluidRow(
+                            box(title ="Instruction", width = 3,
+                               status = "primary",solidHeader = TRUE, 
+                    HTML("<li> <b> HOVER OVER </b> an arrow to see the coefficient and citation for that path. </li> <br> <br>
+                          <li> <b> CLICK ON </b> an arrow to open the citation for that coefficient.  </li> <br> <br>
+                          <li> <b> HOVER OVER </b> a bubble to see the levels of that variable. </li> <br> <br>
+                          <li> <b> CLICK ON </b> a bubble to highlight all paths for models involving that variable.  
+                                  NB., clicking on a variable will pre-load this variable in scenario builder and 
+                                  table builder – click on scenario builder or table builder to go there. </li> ")), 
+                          box(title ="Conceptual Framework", width = 9,
+                              status = "success",solidHeader = TRUE,
+                          visNetworkOutput('oModel', width = "100%", height = "800px")))),
                   tabItem("sb",
                           fluidRow(
                             box(title ="Variable", width = 3,
                                 status = "primary",solidHeader = TRUE,
+                                h4(strong("Step 1:")),
                                 uiOutput("uiNameSB"),
+                                h4(strong("Step 2:")),
                                 uiOutput("uiSB"),
+                                h4(strong("Option Step 4:")),
                                 uiOutput("uiSubGrpSB"),
                                 uiOutput("uiExprSB"),
                                 uiOutput("uiExprSB1"),
@@ -108,13 +127,15 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                                 actionButton("resetSB", "Reset"),
                                 uiOutput("uilogisetexprSB"),
                                 # actionButton("preview_SB", label = "Preview"),
+                                h4(strong("Step 5:")),
                                 actionButton("actionAddSB", label = "Add Scenario"),
                                 selectInput("nRun", "Number of Runs:", c(1:10), selected = 10),
-                                actionButton("actionSB", label = "Run Scenario"),
                                 h4("Scenario simulation log:"),
-                                h4(strong(htmlOutput('StartSim')))),
+                                h4(strong(htmlOutput('StartSim'))),
+                                h4(strong("Step 6:")),
+                                actionButton("actionSB", label = "Run Scenario")),
                             # Show a plot of the generated distribution
-                            box(title ="Setting the Scenario", status = "warning", solidHeader = TRUE,
+                            box(title ="Step 3: Setting the Scenario", status = "warning", solidHeader = TRUE,
                                 box (title = "Variable Adjustment", status = "success", solidHeader = TRUE,
                                      rHandsontableOutput("hotable"), width = 6, height = 600),
                                 box (title = "Base value", status = "info", solidHeader = TRUE, 
@@ -124,10 +145,13 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                           fluidRow(
                             box(title ="Variable",  width = 3,
                                 status = "primary",solidHeader = TRUE,
+                                h4(strong("Step 1:")),
                                 selectInput("input_type_TB", "Select Summary Measure",
                                             c("Percentage", "Mean","Quantile" )),
+                                h4(strong("Step 2:")),
                                 uiOutput("uiTB"),
                                 uiOutput("uiVar"),
+                                h4(strong("Option Step 3:")),
                                 uiOutput("uiSubGrpTB"),
                                 uiOutput("uiExprTB"),
                                 uiOutput("uiExprTB1"),
@@ -138,14 +162,17 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                                 actionButton("orTB", "Or"),
                                 actionButton("resetTB", "Reset"),
                                 uiOutput("uilogisetexprTB"),
+                                h4(strong("Option Step 4:")),
                                 selectInput("basePop", "Apply subgroup to:", 
                                             c("Base population (Before scenario testing)", 
                                               "Scenario population (After scenario testing)"), 
                                             selected = "Scenario population (After scenario testing)"),
+                                h4(strong("Option Step 5:")),
                                 checkboxInput("ci", label = "Confidence Interval", value = TRUE),
                                 #actionButton("reset", label = "Reset"),
                                 #actionButton("actionTB", label = "Show"),
                                 br(),
+                                h4(strong("Option Step 6:")),
                                 downloadButton('downloadTable', 'Download Table'),
                                 br(),
                                 downloadButton('downloadPlot', 'Download Plot')

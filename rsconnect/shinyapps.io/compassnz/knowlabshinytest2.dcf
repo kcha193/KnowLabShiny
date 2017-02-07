@@ -1,0 +1,10 @@
+name: knowlabshinytest2
+title: KnowLabShiny
+account: compassnz
+server: shinyapps.io
+appId: 154430
+bundleId: 698055
+url: https://compassnz.shinyapps.io/knowlabshinytest2/
+when: 1486001382.39272
+asMultiple: FALSE
+asStatic: FALSE
