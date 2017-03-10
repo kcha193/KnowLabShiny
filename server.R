@@ -51,16 +51,17 @@ shinyServer(function(input, output, session) {
   #   }
   # })
   
-  observeEvent(input$switchMI, {
-    updateTabItems(session, "tabs", "mi")
-  })
-  observeEvent(input$switchSB, {
-    updateTabItems(session, "tabs", "sb")
-  })
+  # observeEvent(input$switchMI, {
+  #   updateTabItems(session, "tabs", "mi")
+  # })
+  # observeEvent(input$switchSB, {
+  #   updateTabItems(session, "tabs", "sb")
+  # })
+  # 
+  # observeEvent(input$switchTB, {
+  #   updateTabItems(session, "tabs", "tb")
+  # })  
   
-  observeEvent(input$switchTB, {
-    updateTabItems(session, "tabs", "tb")
-  })  
   
   
   #source("SimmoduleMELC1_21.R")
@@ -154,6 +155,16 @@ shinyServer(function(input, output, session) {
   
   #############################################################################################
   
+  output$menu <- renderMenu({
+    sidebarMenu(
+     
+      menuItem("Model input", tabName = "mi", icon = icon("line-chart")),
+      menuItem("Scenario Builder", tabName = "sb", icon = icon("refresh")),
+      menuItem("Table Builder", tabName = "tb", icon = icon("table"))
+    )
+  })
+  #############################################################################################
+  
   
   output$oModel <- renderVisNetwork({
     # customization adding more variables (see visNodes and visEdges)
@@ -187,7 +198,7 @@ shinyServer(function(input, output, session) {
   #Scenario Builder
   output$uiNameSB <- renderUI({
     
-    textInput("nameSB", "Name your scenario", value = "Scenario1")
+    textInput("nameSB", HTML("<font size=\"4\">STEP 1: </font>Name your scenario"), value = "Scenario1")
   })
   
   observe({ 
@@ -201,18 +212,19 @@ shinyServer(function(input, output, session) {
     if(length(rv$savedScenario) > 0 )
       rv$message <- "Simulation is Finished! <br> Choose another Variable to Examine for next Scenario."
     else 
-      rv$message <- "Choose a Variable to Examine."
+      rv$message <- ""
     
   })
   
   output$uiSB <- renderUI({  
     
-    selectInput("var_SB", "Select Variable to Examine", selected = input$var_SB,
+    selectInput("var_SB", HTML("<font size=\"4\">STEP 2: </font>Select Variable to Examine"),
+                selected = input$var_SB,
                 choices = varName_SB$Name)    
   })
   
   output$uiExprSB <- renderUI({
-    selectInput("subGrp_SB", "Select Subgroup for subgroup formula:",
+    selectInput("subGrp_SB", HTML("<font size=\"4\">STEP 4 (optional): </font>Select Subgroup for subgroup formula:"),
                 choices = c(None='None',  c(varList$Name)))
   })
   
@@ -301,6 +313,10 @@ shinyServer(function(input, output, session) {
       return(results %>% select(Var, Year, Mean))
     
     results %>% select(Var, Year, Mean) %>% spread(Var, Mean) 
+  })
+  
+  output$SBvar <- renderUI({
+    HTML(paste("<font size = \"4\"> <b>", input$var_SB, "</b> </font>")) 
   })
   
   output$previewSB  <- DT::renderDataTable({
@@ -404,6 +420,13 @@ shinyServer(function(input, output, session) {
              hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
   })
   
+  output$actionAddSBUI <- renderUI({
+    tagList(
+      HTML("<b> <font size=\"4\">STEP 5: </font></b> Click after every variable adjusment"),
+      actionButton("actionAddSB", label = "Add Scenario")
+    )
+  })
+  
   observeEvent( input$actionAddSB, {
     
     catAdj  <- hot_to_r( isolate(input$hotable))[,-1]
@@ -434,7 +457,7 @@ shinyServer(function(input, output, session) {
           as.numeric(catAdj)/100	
     }
     
-    message <-  paste(input$var_SB, " has been added inserted in the scenario.")
+    message <-  paste(input$var_SB, "has been added inserted in the scenario.")
     
     rv$message <- 
       if(rv$message == "Choose a Variable to Examine." | grepl(message, rv$message))
@@ -443,8 +466,15 @@ shinyServer(function(input, output, session) {
       paste(rv$message, message, sep = "<br/>" )
   })
   
+
   
   
+  output$actionSBUI <- renderUI({
+    tagList(
+      h4(strong("Step 7:")),
+      actionButton("actionSB", label = "Run Scenario")
+    )
+  })
   
   observeEvent(input$actionSB, {
     showModal(modalDialog(
@@ -530,7 +560,7 @@ shinyServer(function(input, output, session) {
   output$selectSB <- renderUI({
     
     
-    selectInput("selSB", "Select saved Scenario:",
+    selectInput("selSB", "Select Scenario for comparison:",
                 choices = c(names(rv$savedScenario )))
     
   })
@@ -554,13 +584,14 @@ shinyServer(function(input, output, session) {
     
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
+    temp <- HTML("<b> <font size=\"4\">STEP 2: </font></b> Choose variable:")
     
     switch(input$input_type_TB,
-           "Percentage" = selectInput("dynamicTB", "Variable",choices = sort(freqList$Name), 
+           "Percentage" = selectInput("dynamicTB", temp,choices = sort(freqList$Name), 
                                       selected = input$dynamicTB),
-           "Mean" = selectInput("dynamicTB", "Variable", choices =  sort(meansList$Name),
+           "Mean" = selectInput("dynamicTB", temp, choices =  sort(meansList$Name),
                                 selected = input$dynamicTB),
-           "Quantile" = selectInput("dynamicTB", "Variable", choices =  sort(quantilesList$Name),
+           "Quantile" = selectInput("dynamicTB", temp, choices =  sort(quantilesList$Name),
                                     selected = input$dynamicTB)
     )
   })
@@ -570,7 +601,7 @@ shinyServer(function(input, output, session) {
     input$input_type_TB
     rv$finalFormulaSB<- NULL
     
-    selectInput("subGrp_TB", "Select ByGroup:", 
+    selectInput("subGrp_TB", HTML("<b> <font size=\"4\">STEP 3 (optional): </font></b> Select ByGroup:"), 
                 choices = c(None='None',  sort(freqList$Name)))
   })
   
@@ -578,7 +609,7 @@ shinyServer(function(input, output, session) {
   output$uiExprTB <- renderUI({
     input$input_type_TB
     
-    selectInput("subGrp_TB1", "Select Subgroup for subgroup formula:",
+    selectInput("subGrp_TB1", HTML("<b> <font size=\"4\">STEP 4 (optional): </font></b> Select Subgroup for subgroup formula:"),
                 choices = c(None='None',  varList$Name ))
   })
   
@@ -593,12 +624,13 @@ shinyServer(function(input, output, session) {
     isolate(
       if(is.null(choice)){
         inputPanel(
+          div( class = "ui-hide-label", style="float:left",
           selectInput("subGrp_TB2", input$subGrp_TB1, 
                       choices = c("Equals" = " == ",  "Less than" = " < ", 
                                   "Greater than" = " > ", "Less than or equal to" = " <= ", 
                                   "Greater than or equal to" = " >= ", "Not equals to " = " != "), 
-                      selectize=FALSE),
-          textInput("subGrpNum_TB2", "" )
+                      selectize=FALSE)),
+          div( class = "ui-hide-label", style="float:left", textInput("subGrpNum_TB2", ""))
         )
         
       } else {
@@ -617,7 +649,6 @@ shinyServer(function(input, output, session) {
     index = env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]][
       (names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]])==
          input$subGrp_TB2)]
-    
     
     if(is.null(index)){
       paste(varList$Var[varList$Name == input$subGrp_TB1], 
@@ -639,7 +670,6 @@ shinyServer(function(input, output, session) {
     }else{
       paste(input$subGrp_TB1, index, sep = " == ")
     }
-    
   })
   
   observeEvent( input$leftBrackTB, { 
@@ -762,8 +792,9 @@ shinyServer(function(input, output, session) {
               "Var" %in% names(results)){
       return(NULL)
     }    
-    
-    
+
+
+    results[, (ncol(results)-2):ncol(results)] <- format(round(results[, (ncol(results)-2):ncol(results)],1), nsmall = 1)
     
     index <- c(grep("Lower", colnames(results)), grep("Upper", colnames(results)))
     
@@ -779,12 +810,11 @@ shinyServer(function(input, output, session) {
       paste0('<span style="font-size:20px">',colnames(results),'</span>')
     
     
-    
     DT::datatable(results, rownames = FALSE, extensions = 'Scroller', escape = FALSE,
                   options = list(pageLength = 9999999, dom = 't',
                                  scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
                                  scrollCollapse = TRUE))  %>%
-      formatStyle(1:ncol(results), 'font-size' = '20px') %>% formatRound(-1 ,digits = 1)
+      formatStyle(1:ncol(results), 'font-size' = '20px')
   })
   
   
@@ -817,7 +847,7 @@ shinyServer(function(input, output, session) {
                                 logisetexpr = trimws(input$logisetexprTB),
                                 envBase = env.base, digits = 5)
     }
-    
+ 
     # if("Var" %in% names(results) )
     #   temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
     # else if("Mean" %in% names(results) )
@@ -876,6 +906,8 @@ shinyServer(function(input, output, session) {
       return(NULL)
     }    
     
+    results[, (ncol(results)-2):ncol(results)] <- format(round(results[, (ncol(results)-2):ncol(results)],1), nsmall = 1)
+    
     index <- c(grep("Lower", colnames(results)), grep("Upper", colnames(results)))
     
     if(!input$ci)
@@ -894,10 +926,26 @@ shinyServer(function(input, output, session) {
                   options = list(pageLength = 9999999, dom = 't',
                                  scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
                                  scrollCollapse = TRUE))  %>%
-      formatStyle(1:ncol(results), 'font-size' = '20px') %>% formatRound(-1 ,digits = 1)
+      formatStyle(1:ncol(results), 'font-size' = '20px') 
     
   })
   
+  output$ciUI <- 
+    renderUI({
+      tagList(
+        h4(strong("STEP 6 (optional):")),
+        checkboxInput("ci", label = "Confidence Interval", value = TRUE)
+      )
+    })
+  
+  output$downloadUI <- 
+    renderUI({
+      tagList(
+        h4(strong("STEP 7 (optional):")),
+        downloadButton('downloadTable', 'Download Table'),
+        downloadButton('downloadPlot', 'Download Plot')
+      )
+    })
   
   output$downloadTable <- downloadHandler(
     filename = function() {

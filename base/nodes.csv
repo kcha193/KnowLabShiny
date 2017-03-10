@@ -14,16 +14,16 @@ Sleep Duration,Sleep Duration,,ellipse,"""Short""=1 <br> ""Normal""=2 <br> ""Lon
 Breakfast consumption,Breakfast consumption,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Mother's BMI,Mother's BMI,,ellipse,"""Normal"" = 0 <br> ""Underweight""=1 <br> ""Overweight""=2 <br> ""Obese""=3",orange
 Caesarean delivery,Caesarean delivery,,ellipse,"""Vaginal delivery""=0 <br> ""Caesarean delivery""=1",orange
-Cigarettes smoked per day during pregnancy,Smoked during pregnancy,,ellipse,"""0"" <br> ""1-5"" <br> ""6-10"" <br> ""11-20"" <br> "">20""",orange
+Smoking during pregnancy (cigarettes per day),Smoked during pregnancy,,ellipse,"""0"" <br> ""1-5"" <br> ""6-10"" <br> ""11-20"" <br> "">20""",orange
 Otitis media,Otitis media,,ellipse,"""No""=0 <br> ""Yes""=1",orange
-IQ,IQ,,ellipse,Continuous variable <br> mean = 100 <br> sd = 10,lightblue
-Birth weight,Birth weight,,ellipse,"""<2500"" <br>""2500-2999"" <br>""3000-3499"" <br>""3500-3999"" <br>""4000+"" ",orange
+IQ,IQ,,ellipse,Continuous variable <br> mean = 100 <br> sd = 15,lightblue
+Birth weight (kg),Birth weight,,ellipse,"""<2.5kg"" <br>""2.5kg-2.999kg"" <br>""3.0kg-3.499kg"" <br>""3.5kg-3.999kg"" <br>""4.0kg+"" ",orange
 Maternal Diabetes,Maternal Diabetes,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Print Exposure,Print Exposure,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Drinks per week during pregnancy,Drinks during pregnancy,,ellipse,"""0""  <br>""1"" <br>""2"" <br>""3"" <br>""4"" <br>""5"" <br>""6"" <br>""7"" <br>""8+""",orange
 NCEA,NCEA,,ellipse,"""Attained""=1 <br> ""Failed""=2 <br> ""Dropout""=3",lightblue
 Early Childhood Education,Early Childhood Education,,ellipse,"""No""=0 <br> ""Yes""=1",orange
-Highest eduction level between parents,Parental Education,,ellipse,"""Tertiary""=1 <br> ""Secondary""=2 <br> ""No formal qualifications""=3",orange
+Highest education level between parents,Parental Education,,ellipse,"""Tertiary""=1 <br> ""Secondary""=2 <br> ""No formal qualifications""=3",orange
 Reading Books to Baby,Reading Books to Baby,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 "Not in employment, education, or training (NEET)",NEET,,ellipse,"""Not NEET""=0 <br> ""NEET""=1",lightblue
 Obesity,Obesity,,ellipse,"""No""=0 <br> ""Obese""=1",lightblue
