@@ -40,9 +40,9 @@ SES at birth,NCEA,to,"Coeff=-4.19 (Most deprived vs least deprived) School-Aged 
 Sirin 2005",http://rer.sagepub.com/content/75/3/417.abstract
 Highest education level between parents,NCEA,to,"Coeff=-4.65 (No formal qualification vs Tertiary) <br>
 Sirin 2005",https://goo.gl/S0dgq5
-Print Exposure,NCEA,to,"Coeff=10.23 (Print exposure vs None) Age 21 <br>
+Print Exposure,NCEA,to,"Coeff=10.23 (Print exposure vs None) <br>
 Mol & Bus, 2011",http://psycnet.apa.org/journals/bul/137/2/267
-Early Childhood Education,NCEA,to,"Coeff=2.12 (Early Childhood Education vs None) Age 3 to 10+ <br>
+Early Childhood Education,NCEA,to,"Coeff=2.12 (Early Childhood Education vs None) <br>
 Camilli et al, 2010",http://eric.ed.gov/?id=EJ888457
 ADHD,NCEA,to,"Coeff=-11.06 (ADHD vs None) <br>
 Frazier et al 2007",http://ldx.sagepub.com/content/40/1/49.abstract
@@ -50,7 +50,7 @@ Reading Books to Baby,NCEA,to,"Coeff=5.43 (Reading Books to Baby vs None) <br>
 Jeynes, 2012",http://uex.sagepub.com/content/47/4/706.abstract
 IQ,NCEA,to,"Coeff=0.57 <br> 
 Strenze, 2007",http://www.sciencedirect.com/science/article/pii/S0160289606001127
-NCEA,"Not in employment, education, or training (NEET)",to,"OR=2.58 (Passed vs None) Age 17-21 <br>
+NCEA,"Not in employment, education, or training (NEET)",to,"OR=2.58 (Passed vs None) Age 17 to 21 <br>
 Pacheco and van der Westhuizen, 2016",http://foundation.vodafone.co.nz/wp-content/uploads/2016/10/YNEET-REASEARCH.pdf
 TV hours,Obesity,to,"OR=4.57 (Yes vs No) <br>
 Wu et al, 2015",https://goo.gl/0XzuvU
@@ -62,7 +62,7 @@ Breastfeeding (months),Obesity,to,"OR=0.78 (Breastfed vs Not breastfed) Age 2 to
 Yan et al, 2014",http://bmcpublichealth.biomedcentral.com/articles/10.1186/1471-2458-14-1267
 Sleep Duration,Obesity,to,"OR=1.89 (Not Short Sleep vs Short sleep) Age 0.5 to 18<br>
 Cappuccio et al, 2008",https://www.google.co.nz/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwj9u9et0enQAhWDJ8AKHTrnBGcQFggfMAA&url=https%3A%2F%2Fwww.ncbi.nlm.nih.gov%2Fpmc%2Farticles%2FPMC2398753%2F&usg=AFQjCNFRnfOG1AShq8RtydmK8u5w4lDkpw&sig2=T5jSR-tZOvkckVnjZhokxg
-Caesarean delivery,Obesity,to,"OR=1.37 (Caesarean delivery vs Vaginal delivery) Age 3 to 25<br>
+Caesarean delivery,Obesity,to,"OR=1.37 (Caesarean delivery vs Vaginal delivery) Age 3 to 21<br>
 Li et al, 2013",https://goo.gl/7e9iUL
 Smoking during pregnancy (cigarettes per day),Obesity,to,"OR=1.52 (Smoking in pregnancy vs No smoking in pregnancy) <br>
 Weng et al, 2012",https://www.google.co.nz/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjGl7fn0enQAhUlJMAKHSvaC04QFggdMAA&url=https%3A%2F%2Fwww.ncbi.nlm.nih.gov%2Fpubmed%2F19400912&usg=AFQjCNGEb9zswPkoqPLAxgSLBnz6miB3fA&sig2=nWY4_Zhxpvsvb5nrVBC2MA
@@ -74,7 +74,7 @@ Sleep Duration,Overweight,to,"OR=0.43 (Normal sleep vs Short sleep) Age 0.5 to 1
 OR=0.68 (Long sleep vs Short sleep) Age 0.5 to 18<br> 
 Fatima et al, 2015",https://www.ncbi.nlm.nih.gov/pubmed/25589359
 Breakfast consumption,Overweight,to,"OR=0.57 (Has breakfast vs No breakfast) Age 5 to 18<br>
-OR=0.52 (Has breakfast vs No breakfast) Age 19+<br>
+OR=0.52 (Has breakfast vs No breakfast) Age 19 to 21<br>
 Horikawa et al, 2011",https://www.ncbi.nlm.nih.gov/pubmed/21925535
 Mother's BMI,Overweight,to,"OR=0.46 (Underweight vs Normal) Age 2 to 12<br>
 OR=1.04 (Overweight vs Normal) Age 2 to 3<br>
@@ -88,7 +88,7 @@ Caesarean delivery,Overweight,to,"OR=1.32 (Caesarean delivery vs Vaginal deliver
 Li et al, 2013",https://www.ncbi.nlm.nih.gov/pubmed/23207407
 Smoking during pregnancy (cigarettes per day),Overweight,to,"OR=1.47 (Smoking in pregnancy vs No smoking in pregnancy) <br>
 Weng et al, 2012",https://www.ncbi.nlm.nih.gov/pubmed/23109090
-Highest eduction level between parents,Overweight,to,"OR=1.16 (No formal qualification vs Tertiary) <br>
+Parental Education,Overweight,to,"OR=1.16 (No formal qualification vs Tertiary) <br>
 Wu et al, 2015",https://goo.gl/YNXpWS
-TV hours,Overweight,to,"OR=3.86 (Yes v.s. No) <br>
+TV hours (2 hours or more),Overweight,to,"OR=3.86 (Yes v.s. No) <br>
 Wu et al, 2015",https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3186735/

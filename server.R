@@ -86,7 +86,8 @@ shinyServer(function(input, output, session) {
                        savedScenario = list(),
                        message = "Choose a Variable to Examine.", 
                        currSB = "NULL", 
-                       tableResult = list())
+                       tableResult = list(),
+                       messageList = "")
   
   
   
@@ -132,7 +133,7 @@ shinyServer(function(input, output, session) {
   
   var_SB <- c("z1Overweight", "z1Obese", "r1Sleep", "r1Score", "z1Bully", 
               "r1SchoolFunding", "r1SchoolGender",  "z1AlcAbuse", "z1Depress", "z1PUNISH","z1INTERACT",          
-              "z1ParentAlc", "z1ParentDepress", "z1WatchTV", "BREAST", "bwkg", 
+              "z1ParentAlc", "z1ParentDepress", "z1WatchTVLvl1", "BREAST", "bwkg", 
               "pregalc", "pregsmk", "r1stchildethn", "SESBTH", "z1genderLvl1", "z1CaesareanLvl1", 
               "z1BreakfastLvl1", "r1mBMI",  "r1ParentEduc", "z1GALvl1", "z1stmDiabeteLvl1", "z1HearingLvl1",      
               "z1ECELvl1", "z1PrintExpLvl1", "z1ADHDLvl1", "z1ParentInvolveLvl1")
@@ -155,14 +156,16 @@ shinyServer(function(input, output, session) {
   
   #############################################################################################
   
-  output$menu <- renderMenu({
-    sidebarMenu(
-     
-      menuItem("Model input", tabName = "mi", icon = icon("line-chart")),
-      menuItem("Scenario Builder", tabName = "sb", icon = icon("refresh")),
-      menuItem("Table Builder", tabName = "tb", icon = icon("table"))
-    )
-  })
+  # output$menu <- renderMenu({
+  #   sidebarMenu(
+  #    
+  #     menuItem("Model input", tabName = "mi", icon = icon("line-chart")),
+  #     menuItem("Scenario Builder", tabName = "sb", icon = icon("refresh")),
+  #     menuItem("Table Builder", tabName = "tb", icon = icon("table"))
+  #   )
+  # })
+  
+
   #############################################################################################
   
   
@@ -210,7 +213,7 @@ shinyServer(function(input, output, session) {
     rv$finalFormulaSB<- NULL
     
     if(length(rv$savedScenario) > 0 )
-      rv$message <- "Simulation is Finished! <br> Choose another Variable to Examine for next Scenario."
+      rv$message <- ""
     else 
       rv$message <- ""
     
@@ -335,8 +338,7 @@ shinyServer(function(input, output, session) {
   
   # hotable
   output$hotable <- renderRHandsontable({
-    
-    
+   
     if(is.null(input$hotable) | (isolate(rv$currSB) != input$var_SB)){
       
       catAdj <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
@@ -384,7 +386,7 @@ shinyServer(function(input, output, session) {
         index <- which(apply(tbl, 1, function(x) sum(is.na(x)) == 1))
         
         if(length(index) == 0)
-          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%  hot_cols(colWidths = 130) %>% 
+          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL, contextMenu = FALSE) %>%  hot_cols(colWidths = 130) %>% 
                    hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
         
         #browser()
@@ -406,7 +408,7 @@ shinyServer(function(input, output, session) {
         temp <- tbl[,2]
         
         if(sum(is.na(temp)) != 1)
-          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%  hot_cols(colWidths = 130) %>%
+          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL, contextMenu = FALSE) %>%  hot_cols(colWidths = 130) %>%
                    hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
         
         temp[is.na(temp)] <- 100 - sum(temp, na.rm = TRUE)
@@ -416,8 +418,8 @@ shinyServer(function(input, output, session) {
       }
     }
     
-    return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL) %>%  hot_cols(colWidths = 130) %>% 
-             hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
+    return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL, contextMenu = FALSE) %>%  hot_cols(colWidths = 130) %>% 
+             hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE ))
   })
   
   output$actionAddSBUI <- renderUI({
@@ -457,7 +459,7 @@ shinyServer(function(input, output, session) {
           as.numeric(catAdj)/100	
     }
     
-    message <-  paste(input$var_SB, "has been added inserted in the scenario.")
+    message <-  paste(input$var_SB, "has been added in the scenario.")
     
     rv$message <- 
       if(rv$message == "Choose a Variable to Examine." | grepl(message, rv$message))
@@ -504,6 +506,7 @@ shinyServer(function(input, output, session) {
       footer = NULL
     ))
     
+    rv$messageList <- c(rv$messageList, rv$message)
     
     rv$env.scenario <- simulateSimario(rv$env.scenario, isolate(input$nRun), simulateKnowLab)
     
@@ -530,7 +533,7 @@ shinyServer(function(input, output, session) {
     
     rv$env.scenario <- NULL
     
-    updateTextInput(session, "nameSB", "Name of your scenario", 
+    updateTextInput(session, "nameSB",
                     value = paste0("Scenario", length(rv$savedScenario) + 1) )
     
   })
@@ -562,6 +565,12 @@ shinyServer(function(input, output, session) {
     
     selectInput("selSB", "Select Scenario for comparison:",
                 choices = c(names(rv$savedScenario )))
+    
+  })
+  
+  output$displaySB <- renderUI({
+    
+    return(HTML(rv$messageList[which(names(rv$savedScenario ) == input$selSB)]))
     
   })
   
@@ -793,28 +802,30 @@ shinyServer(function(input, output, session) {
       return(NULL)
     }    
 
-
-    results[, (ncol(results)-2):ncol(results)] <- format(round(results[, (ncol(results)-2):ncol(results)],1), nsmall = 1)
     
     index <- c(grep("Lower", colnames(results)), grep("Upper", colnames(results)))
     
+    notToRound <- c("<span style=\"font-size:20px\">Year</span>", 
+                 "<span style=\"font-size:20px\">groupByData</span>", 
+                 "<span style=\"font-size:20px\">Var</span>")
+    
     if(!input$ci)
       results <- results[,-index]
-    
+   
     if(input$input_type_TB == "Percentage")
       colnames(results) <- gsub("Mean", "Percent", colnames(results))
-    
+     
     rv$tableResult$Base <- results
     
     colnames(results) <- 
       paste0('<span style="font-size:20px">',colnames(results),'</span>')
     
-    
     DT::datatable(results, rownames = FALSE, extensions = 'Scroller', escape = FALSE,
                   options = list(pageLength = 9999999, dom = 't',
                                  scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
                                  scrollCollapse = TRUE))  %>%
-      formatStyle(1:ncol(results), 'font-size' = '20px')
+      formatStyle(1:ncol(results), 'font-size' = '20px') %>% 
+      formatRound(which(!colnames(results) %in% notToRound), digits = 1)
   })
   
   
@@ -848,22 +859,7 @@ shinyServer(function(input, output, session) {
                                 envBase = env.base, digits = 5)
     }
  
-    # if("Var" %in% names(results) )
-    #   temp <- results  %>% distinct(Var, Mean, Lower, Upper, .keep_all = TRUE)
-    # else if("Mean" %in% names(results) )
-    #   temp <- results  %>% distinct( Mean, Lower, Upper, .keep_all = TRUE)
-    # else 
-    #   temp <- results  %>% distinct(Min, X10th, X25th, X50th, X75th, X90th, Max, .keep_all = TRUE)
-    # 
-    # if(length(unique(temp$Year)) > 1)
-    #   temp <- results[results$Year >= range(temp$Year)[1] & results$Year <= range(temp$Year)[2],]
-    # 
-    # if((nrow(temp) != nrow(results)) & (1 %in% temp$Year)){
-    #   results <- temp %>% filter(Year == 1)
-    # } else if((nrow(temp) != nrow(results))){
-    #   results <- temp
-    # }
-    
+  
     SBTB <<-results
     
     results
@@ -906,15 +902,18 @@ shinyServer(function(input, output, session) {
       return(NULL)
     }    
     
-    results[, (ncol(results)-2):ncol(results)] <- format(round(results[, (ncol(results)-2):ncol(results)],1), nsmall = 1)
-    
     index <- c(grep("Lower", colnames(results)), grep("Upper", colnames(results)))
+    
+    notToRound <- c("<span style=\"font-size:20px\">Year</span>", 
+                    "<span style=\"font-size:20px\">groupByData</span>", 
+                    "<span style=\"font-size:20px\">Var</span>")
     
     if(!input$ci)
       results <- results[,-index]
-    
+     
     if(input$input_type_TB == "Percentage")
       colnames(results) <- gsub("Mean", "Percent", colnames(results))
+    
     
     
     rv$tableResult$Scenario <- results
@@ -926,7 +925,8 @@ shinyServer(function(input, output, session) {
                   options = list(pageLength = 9999999, dom = 't',
                                  scrollX = TRUE,  deferRender = TRUE, scrollY = 600,
                                  scrollCollapse = TRUE))  %>%
-      formatStyle(1:ncol(results), 'font-size' = '20px') 
+      formatStyle(1:ncol(results), 'font-size' = '20px') %>% 
+      formatRound(which(!colnames(results) %in% notToRound), digits = 1)
     
   })
   
@@ -982,8 +982,11 @@ shinyServer(function(input, output, session) {
     
     combineResults <- data.frame(Scenario = "Base", baseTB)
     
+    
     if(!is.null(SBTB))
-      combineResults <- rbind(combineResults, data.frame(Scenario = "Scenario", SBTB))
+      combineResults <- rbind(combineResults, 
+                              data.frame(Scenario = "Scenario", SBTB))
+    
     
     combineResults
   })
@@ -991,6 +994,7 @@ shinyServer(function(input, output, session) {
   
   output$barchartBase<- renderPlotly({
     
+
     tables.list <- combineResults()
     
     tables.list <- tables.list %>% filter(Scenario == "Base")
@@ -1017,13 +1021,15 @@ shinyServer(function(input, output, session) {
     if(input$input_type_TB == "Percentage")
       p  <-  p + ylab("Percentage")
     
-    if(isolate(input$ci))
+    if(input$ci)
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
     
     ggplotly(p)
   })
   
   output$barchartSC<- renderPlotly({
+    
+    input$ci
     
     tables.list <- combineResults()
     
@@ -1052,7 +1058,7 @@ shinyServer(function(input, output, session) {
     if(input$input_type_TB == "Percentage")
       p  <-  p + ylab("Percentage")
     
-    if(isolate(input$ci))
+    if(input$ci)
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
     
     ggplotly(p)
@@ -1079,8 +1085,7 @@ shinyServer(function(input, output, session) {
       ggplot(tables.list, aes(fill=Scenario, y = Mean, x = Year)) 
     
     p <- 
-      p +  
-      ggtitle(varList$Name[varList$Name==input$dynamicTB]) + 
+      p + ggtitle(varList$Name[varList$Name==input$dynamicTB]) + 
       geom_bar(position=dodge, stat = "identity") + 
       theme(text = element_text(size = 15))
     
@@ -1088,8 +1093,8 @@ shinyServer(function(input, output, session) {
     if(input$input_type_TB == "Percentage")
       p  <-  p + ylab("Percentage")
     
-    
-    if(any(grepl("Lower", colname)))
+  
+    if(input$ci)
       p <- p + geom_errorbar(limitsGGplot, position=dodge, width=0.25)
     
     ggplotly(p)
@@ -1099,6 +1104,7 @@ shinyServer(function(input, output, session) {
   
   output$linePlotBase<- renderPlotly({
     
+
     tables.list <- combineResults()
     
     tables.list <- tables.list %>% filter(Scenario == "Base")
@@ -1123,7 +1129,7 @@ shinyServer(function(input, output, session) {
     if(input$input_type_TB == "Percentage")
       p  <-  p + ylab("Percentage")
     
-    if(isolate(input$ci))
+    if(input$ci)
       p <- p + geom_errorbar(limitsGGplot, width=0.2)
     
     ggplotly(p)
@@ -1153,7 +1159,7 @@ shinyServer(function(input, output, session) {
     if(input$input_type_TB == "Percentage")
       p  <-  p + ylab("Percentage")
     
-    if(isolate(input$ci))
+    if(input$ci)
       p <- p + geom_errorbar(limitsGGplot, width=0.2)
     
     ggplotly(p)
@@ -1161,6 +1167,8 @@ shinyServer(function(input, output, session) {
   
   
   output$linePlot<- renderPlotly({
+    
+    input$ci
     
     tables.list <- combineResults()
     
@@ -1184,7 +1192,7 @@ shinyServer(function(input, output, session) {
     if(input$input_type_TB == "Percentage")
       p  <-  p + ylab("Percentage")
     
-    if(isolate(input$ci))
+    if(input$ci)
       p <- p + geom_errorbar(limitsGGplot, width=0.25, 
                              position = dodge)
     
@@ -1193,6 +1201,8 @@ shinyServer(function(input, output, session) {
   
   
   output$boxPlotBase<- renderPlot({
+    
+    input$ci
     
     tables.list <- combineResults()
     
@@ -1217,6 +1227,8 @@ shinyServer(function(input, output, session) {
   
   output$boxPlotSC<- renderPlot({
     
+    input$ci
+    
     tables.list <- combineResults()
     
     tables.list <- tables.list %>% filter(Scenario == "Scenario")
@@ -1238,6 +1250,8 @@ shinyServer(function(input, output, session) {
   })
   
   output$boxPlot<- renderPlot({
+    
+    input$ci
     
     tables.list <- combineResults()
     

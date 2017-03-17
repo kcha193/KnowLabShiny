@@ -1,7 +1,7 @@
 id,label,group,shape,title,color
 SES at birth,SES at birth,,ellipse,"""Professional""=1 <br> ""Clerical""=2 <br> ""Semi-skilled""=3 ",orange
-Maternal punitiveness,Maternal punitiveness,,ellipse,"""No""=0 <br> ""Yes""=1",orange
-Maternal emotional responsiveness,Maternal emotional responsiveness,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+Maternal punitiveness,Maternal punitiveness,,ellipse,"""No""=0 <br> ""Yes""=1<br>Represents cutoffs on the <br> ""emotional responsivity"" scale <br> of the HOME inventory",orange
+Maternal emotional responsiveness,Maternal emotional responsiveness,,ellipse,"""No""=0 <br> ""Yes""=1<br>Represents cutoffs on the <br> ""restriction and punishment"" scale <br> of the HOME inventory",orange
 Being Bullied,Being Bullied,,ellipse,"""""Not been Bullied""=0 <br> ""Been Bullied""=1",lightblue
 ADHD,ADHD,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Parental Alcohol Abuse,Parental Alcohol Abuse,,ellipse,"""No""=0 <br> ""Yes""=1",orange
@@ -22,10 +22,10 @@ Maternal Diabetes,Maternal Diabetes,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Print Exposure,Print Exposure,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Drinks per week during pregnancy,Drinks during pregnancy,,ellipse,"""0""  <br>""1"" <br>""2"" <br>""3"" <br>""4"" <br>""5"" <br>""6"" <br>""7"" <br>""8+""",orange
 NCEA,NCEA,,ellipse,"""Attained""=1 <br> ""Failed""=2 <br> ""Dropout""=3",lightblue
-Early Childhood Education,Early Childhood Education,,ellipse,"""No""=0 <br> ""Yes""=1",orange
-Highest education level between parents,Parental Education,,ellipse,"""Tertiary""=1 <br> ""Secondary""=2 <br> ""No formal qualifications""=3",orange
+Early Childhood Education,Early Childhood Education,,ellipse,"""None""=0 <br> ""At least 6 months""=1",orange
+Parental Education,Parental Education,,ellipse,"""Tertiary""=1 <br> ""Secondary""=2 <br> ""No formal qualifications""=3",orange
 Reading Books to Baby,Reading Books to Baby,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 "Not in employment, education, or training (NEET)",NEET,,ellipse,"""Not NEET""=0 <br> ""NEET""=1",lightblue
 Obesity,Obesity,,ellipse,"""No""=0 <br> ""Obese""=1",lightblue
-TV hours,Watch TV for more than 2 hours,,ellipse,"""No""=0 <br> ""Yes""=1",orange
+TV hours (2 hours or more),Watch TV for more than 2 hours,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Preterm Birth,Preterm Birth with less than 37 weeks,,ellipse,"""No""=0 <br> ""Yes""=1",orange

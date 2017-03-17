@@ -3,8 +3,9 @@ title: KnowLabShinyNew
 account: compassnz
 server: shinyapps.io
 appId: 154626
-bundleId: 741117
+bundleId: 749072
 url: https://compassnz.shinyapps.io/knowlabshinynew/
-when: 1489115270.96146
+when: 1489621275.90448
 asMultiple: FALSE
 asStatic: FALSE
+ignoredFiles: .RData
