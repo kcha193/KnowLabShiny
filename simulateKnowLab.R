@@ -1023,6 +1023,9 @@ simulateKnowLab <- function(run, simenv) {
     r1ParentEducLvl2 <- ifelse(r1ParentEduc == 2, 1, 0)		
     r1ParentEducLvl3 <- ifelse(r1ParentEduc == 3, 1, 0)
     
+    z1HighBwLvl1 <- ifelse(bwkg>4, 1, 0)
+    z1LowBwLvl1 <- ifelse(bwkg<2.5, 1, 0)
+    
     if(iteration>=2 ) {			
       
       z1OverweightLvl1 <- 

@@ -3,6 +3,8 @@ title: KnowLabShiny
 account: compassnz
 server: shinyapps.io
 appId: 125942
-bundleId: 750574
+bundleId: 815291
 url: https://compassnz.shinyapps.io/knowlabshiny/
-when: 1489700510.611
+when: 1493925307.91009
+asMultiple: FALSE
+asStatic: FALSE

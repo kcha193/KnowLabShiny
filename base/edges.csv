@@ -52,8 +52,8 @@ IQ,NCEA,to,"Coeff=0.57 <br>
 Strenze, 2007",http://www.sciencedirect.com/science/article/pii/S0160289606001127
 NCEA,"Not in employment, education, or training (NEET)",to,"OR=2.58 (Passed vs None) Age 17 to 21 <br>
 Pacheco and van der Westhuizen, 2016",http://foundation.vodafone.co.nz/wp-content/uploads/2016/10/YNEET-REASEARCH.pdf
-TV hours,Obesity,to,"OR=4.57 (Yes vs No) <br>
-Wu et al, 2015",https://goo.gl/0XzuvU
+TV hours (2 hours or more),Obesity,to,"OR=2.42 (Yes vs No) <br>
+Tremblay et al, 2011",https://goo.gl/0XzuvU
 Highest education level between parents,Obesity,to,"OR=1.62 (No formal qualification vs Tertiary) <br>
 Wu et al, 2015",https://goo.gl/cfLgEB
 SES at birth,Obesity,to,"OR=1.73 (Most deprived vs least deprived) Age 1 to 15<br>
@@ -90,5 +90,11 @@ Smoking during pregnancy (cigarettes per day),Overweight,to,"OR=1.47 (Smoking in
 Weng et al, 2012",https://www.ncbi.nlm.nih.gov/pubmed/23109090
 Parental Education,Overweight,to,"OR=1.16 (No formal qualification vs Tertiary) <br>
 Wu et al, 2015",https://goo.gl/YNXpWS
-TV hours (2 hours or more),Overweight,to,"OR=3.86 (Yes v.s. No) <br>
-Wu et al, 2015",https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3186735/
+TV hours (2 hours or more),Overweight,to,"OR=2.21 (Yes v.s. No) <br>
+Tremblay et al, 2011",https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3186735/
+Birth weight (kg),Obesity,to,"OR=2.04 (Birthweight >=4000g vs Birthweight <4000g) Age 1 to 18 <br>
+OR=0.77 (Birthweight <2500g vs Birthweight >=2500g) Age 1 to 18 <br>
+Yu et al, 2011",http://onlinelibrary.wiley.com/doi/10.1111/j.1467-789X.2011.00867.x/abstract
+Birth weight (kg),Overweight,to,"OR=1.76 (Birthweight >=4000g vs Birthweight <4000g) Age 1 to 18 <br>
+OR=0.6 (Birthweight <2500g vs Birthweight >=2500g) Age 1 to 18 <br>
+Schellong et al, 2012",http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0047776
