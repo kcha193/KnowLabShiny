@@ -50,7 +50,7 @@ dSiderBar <- dashboardSidebar(
     box(textInput("wrkSpaceName", label = "Name the Project:"),
         downloadButton('saveWrkspace', "Save Project"),    
     h5("Latest Update:"),
-    h5("2017-03-17"),
+    h5("2017-05-24"),
     h5("Contact email:"), 
     a("Barry Milne", href= "mailto:b.milne@auckland.ac.nz"),
     br(),

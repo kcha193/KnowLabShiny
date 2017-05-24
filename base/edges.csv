@@ -21,7 +21,7 @@ Kerr-Wilson et al, 2013",https://www.ncbi.nlm.nih.gov/pubmed/21393308
 Birth weight (kg),IQ,to,"Coeff=-4.98 (Birthweight < 2500g vs Birthweight >= 2500g) Age 13 to 21 <br>
 Kormos et al, 2014",https://www.ncbi.nlm.nih.gov/pubmed/23896861
 Maternal Diabetes,IQ,to,"Coeff=-11.70 (Maternal diabetes vs None) Age 3 to 12 <br>
-Robles et al, 2015",https://www.ncbi.nlm.nih.gov/pubmed/26566144
+Camprubi Robles et al, 2015",https://www.ncbi.nlm.nih.gov/pubmed/26566144
 Otitis media,IQ,to,"Coeff=-6.30 (Otitis media vs None) Age 1 to 5 <br>
 Roberts et al, 2004",https://www.ncbi.nlm.nih.gov/pubmed/14993583
 Print Exposure,IQ,to,"Coeff=5.58 (Print exposure vs None) Age 6 to 21 <br>
@@ -65,7 +65,7 @@ Cappuccio et al, 2008",https://www.google.co.nz/url?sa=t&rct=j&q=&esrc=s&source=
 Caesarean delivery,Obesity,to,"OR=1.37 (Caesarean delivery vs Vaginal delivery) Age 3 to 21<br>
 Li et al, 2013",https://goo.gl/7e9iUL
 Smoking during pregnancy (cigarettes per day),Obesity,to,"OR=1.52 (Smoking in pregnancy vs No smoking in pregnancy) <br>
-Weng et al, 2012",https://www.google.co.nz/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjGl7fn0enQAhUlJMAKHSvaC04QFggdMAA&url=https%3A%2F%2Fwww.ncbi.nlm.nih.gov%2Fpubmed%2F19400912&usg=AFQjCNGEb9zswPkoqPLAxgSLBnz6miB3fA&sig2=nWY4_Zhxpvsvb5nrVBC2MA
+Ino, 2010",https://www.google.co.nz/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=0ahUKEwjGl7fn0enQAhUlJMAKHSvaC04QFggdMAA&url=https%3A%2F%2Fwww.ncbi.nlm.nih.gov%2Fpubmed%2F19400912&usg=AFQjCNGEb9zswPkoqPLAxgSLBnz6miB3fA&sig2=nWY4_Zhxpvsvb5nrVBC2MA
 SES at birth,Overweight,to,"OR=1.58 (Most deprived vs least deprived) Age 1 to 15<br>
 Wu et al, 2015",https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4481703/
 Breastfeeding (months),Overweight,to,"OR=0.85 (Breastfed vs Not breastfed) Age 2 to 14<br>
@@ -90,7 +90,7 @@ Smoking during pregnancy (cigarettes per day),Overweight,to,"OR=1.47 (Smoking in
 Weng et al, 2012",https://www.ncbi.nlm.nih.gov/pubmed/23109090
 Parental Education,Overweight,to,"OR=1.16 (No formal qualification vs Tertiary) <br>
 Wu et al, 2015",https://goo.gl/YNXpWS
-TV hours (2 hours or more),Overweight,to,"OR=2.21 (Yes v.s. No) <br>
+TV hours (2 hours or more),Overweight,to,"OR=2.21 (Yes vs No) <br>
 Tremblay et al, 2011",https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3186735/
 Birth weight (kg),Obesity,to,"OR=2.04 (Birthweight >=4000g vs Birthweight <4000g) Age 1 to 18 <br>
 OR=0.77 (Birthweight <2500g vs Birthweight >=2500g) Age 1 to 18 <br>

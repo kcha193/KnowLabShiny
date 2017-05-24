@@ -87,8 +87,7 @@ shinyServer(function(input, output, session) {
                        message = "Choose a Variable to Examine.", 
                        currSB = "NULL", 
                        tableResult = list(),
-                       messageList = "", 
-                       compareFreq = numeric(3))
+                       messageList = "")
   
   
   
@@ -175,9 +174,7 @@ shinyServer(function(input, output, session) {
     
     nodes <- read.csv("base/nodes.csv")
     
-    
     edges  <- read.csv("base/edges.csv")
-    
     
     visNetwork(nodes, edges, height = "500px", width = "100%") %>% 
       visNodes(value=1, shadow=FALSE,	font=list(size=15)) %>% 
@@ -188,12 +185,11 @@ shinyServer(function(input, output, session) {
       visEvents( selectEdge = "function(properties) {
                  if(properties.nodes == ''){
                  window.open(properties.edges);
-                 }
-  }", 
+                 }}", 
                  selectNode = "function(properties) {
                  Shiny.onInputChange('var_SB', properties.nodes);
                  Shiny.onInputChange('dynamicTB', properties.nodes);}") %>%
-      visLayout(randomSeed = 0220171)
+      visLayout(randomSeed = 2705)
     }) 
   
   
@@ -835,43 +831,9 @@ shinyServer(function(input, output, session) {
   
   SBTB <<- NULL
   
-  compareFreq <- 
-    function(env.base, env.scenario, varName){
-      
-      if(varName %in% time_invariant_vars$Varname){
-        Base <-	table(env.base$simframe[[varName]])[-1]/5000
-        
-        Scenario <-	table(env.scenario$simframe[[varName]])[-1]/5000
-        
-      } else {
-        Base <-	
-          sapply(env.base$modules$run_results, function(x) 
-            apply(x[[varName]],  2, table)[-1,])/5000
-        
-        Scenario <-
-          sapply(env.scenario$modules$run_results, function(x) 
-            apply(x[[varName]],  2, table)[-1,])/5000
-      }
-      
-      results <- numeric(3)
-      
-      for(i in 1:20){
-        lm.fit <- lm(c(Base[i,], Scenario[i,]) ~ factor(rep(c("B", "S"), each = 10)))
-        
-        results <- 
-          rbind(results,c(summary(lm.fit )$coef[2,1],confint(	lm.fit )[2,]))
-      }
-      
-      results <- round(apply(results, 2, mean, na.rm = TRUE)*100, 4)	
-      
-      names(results) <- c("Mean Diff", "Lower CI", "Upper CI")
-      
-      results
-    }
   
   summaryOutputSBTB <- reactive({
     
-    rv$compareFreq <- numeric(3)
     
     inputType = c("frequencies", "means", "quantiles")
     
@@ -900,14 +862,7 @@ shinyServer(function(input, output, session) {
     }
 
 
-    if (inputType[input$input_type_TB] ==  "frequencies" &
-        !varList$Var[varList$Name == input$dynamicTB] %in% time_invariant_vars$Varname &
-        varList$Var[varList$Name == input$dynamicTB] %in%
-        names(rv$savedScenario[[input$selSB]]$modules$run_results$run1)
-    )
-      rv$compareFreq <- compareFreq(env.base, rv$savedScenario[[input$selSB]], 
-                                    varList$Var[varList$Name==input$dynamicTB])
-      
+
       
     SBTB <<-results
     
@@ -1040,10 +995,6 @@ shinyServer(function(input, output, session) {
     combineResults
   })
   
-  output$compare <- 
-    renderPrint({
-      rv$compareFreq
-  })
   
   output$barchartBase<- renderPlotly({
     
