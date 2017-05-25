@@ -83,6 +83,7 @@ shinyServer(function(input, output, session) {
   
   rv <- reactiveValues(env.scenario = NULL, 
                        finalFormulaSB = NULL, 
+                       finalFormulaTB = NULL,
                        savedScenario = list(),
                        message = "Choose a Variable to Examine.", 
                        currSB = "NULL", 
@@ -255,6 +256,9 @@ shinyServer(function(input, output, session) {
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
     
+    if(input$subGrp_SB == "None")
+      return()
+    
     index = env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_SB]]][
       (names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_SB]]])==input$subGrp_SB1)]
     
@@ -277,6 +281,7 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent( input$completeSB, { 
+    
     rv$finalFormulaSB <- paste(rv$finalFormulaSB, logisetexprSB())
   })
   
@@ -298,6 +303,9 @@ shinyServer(function(input, output, session) {
     textareaInput("logisetexprSB",  "Subgroup formula:", value = rv$finalFormulaSB)
   })
   
+  observeEvent( input$logisetexprSB, { 
+    rv$finalFormulaSB <- input$logisetexprSB
+  })
   
   baseOutputSB <- reactive({ 
     
@@ -530,6 +538,9 @@ shinyServer(function(input, output, session) {
     
     rv$env.scenario <- NULL
     
+    rv$finalFormulaSB<- NULL
+    rv$finalFormulaTB<- NULL
+    
     updateTextInput(session, "nameSB",
                     value = paste0("Scenario", length(rv$savedScenario) + 1) )
     
@@ -605,8 +616,7 @@ shinyServer(function(input, output, session) {
   output$uiSubGrpTB <- renderUI({
     
     input$input_type_TB
-    rv$finalFormulaSB<- NULL
-    
+
     selectInput("subGrp_TB", HTML("<b> <font size=\"4\">STEP 3 (optional): </font></b> Select ByGroup:"), 
                 choices = c(None='None',  sort(freqList$Name)))
   })
@@ -652,6 +662,9 @@ shinyServer(function(input, output, session) {
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
     
+    if(input$subGrp_TB1 == "None")
+      return()
+    
     index = env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]][
       (names(env.base$dict$codings[[varList$Var[varList$Name == input$subGrp_TB1]]])==
          input$subGrp_TB2)]
@@ -679,37 +692,40 @@ shinyServer(function(input, output, session) {
   })
   
   observeEvent( input$leftBrackTB, { 
-    rv$finalFormulaSB <- paste0("(", rv$finalFormulaSB)
+    rv$finalFormulaTB <- paste0("(", rv$finalFormulaTB)
   })
   
   observeEvent( input$rightBrackTB, { 
-    rv$finalFormulaSB <-  paste0(rv$finalFormulaSB,")")
+    rv$finalFormulaTB <-  paste0(rv$finalFormulaTB,")")
   })
   
   
   observeEvent( input$andTB, { 
-    rv$finalFormulaSB <- paste(rv$finalFormulaSB, "&")
+    rv$finalFormulaTB <- paste(rv$finalFormulaTB, "&")
   })
   
   observeEvent( input$orTB, { 
-    rv$finalFormulaSB <- paste(rv$finalFormulaSB,  "|")
+    rv$finalFormulaTB <- paste(rv$finalFormulaTB,  "|")
   })
   
   observeEvent( input$completeTB, { 
-    rv$finalFormulaSB <- paste(rv$finalFormulaSB, logisetexprTB())
+    
+    rv$finalFormulaTB <- paste(rv$finalFormulaTB, logisetexprTB())
   })
   
   observeEvent( input$resetTB, { 
-    rv$finalFormulaSB <- NULL
+    rv$finalFormulaTB <- NULL
   })
   
   output$uilogisetexprTB <- renderUI({  
-    textareaInput("logisetexprTB",  "Subgroup formula:", value = rv$finalFormulaSB)
+    textareaInput("logisetexprTB",  "Subgroup formula:", value = rv$finalFormulaTB)
+  })
+  
+  observeEvent( input$logisetexprSB, { 
+    rv$finalFormulaTB <- input$logisetexprTB
   })
   
   baseTB <<- NULL 
-  
-  
   
   
   summaryOutputTB <- reactive( { 
