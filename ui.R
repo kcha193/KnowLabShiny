@@ -50,7 +50,7 @@ dSiderBar <- dashboardSidebar(
     box(textInput("wrkSpaceName", label = "Name the Project:"),
         downloadButton('saveWrkspace', "Save Project"),    
     h5("Latest Update:"),
-    h5("2017-05-24"),
+    h5("2017-06-29"),
     h5("Contact email:"), 
     a("Barry Milne", href= "mailto:b.milne@auckland.ac.nz"),
     br(),
@@ -114,8 +114,16 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                                    using Shiny R package and R programming language. Thus, the Shiny app can be shared as a web page, 
                                    which allows the user to run across a number of different platforms, and does not require 
                                    any specialist software to be installed."),
-                                 p(""),
-                                 a(href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass.html",
+                                 h4("To cite this application, please use the following,"),
+                                 p("Milne, B., Chang, K., Zhu, T., Liu, C., Shackleton, N., von Randow, M., Lay-Yee, R., McLay, J., Davis, P. (2017) Shiny application: Knowledge laboratory of the early life-course. http://compassnz.shinyapps.io/knowlabshiny/"),
+                                 h4("The source code is stored in three places:"), 
+                                  HTML("<ul>
+                                        <li>Simario R package is at: <a href = \"https://github.com/kcha193/simarioV2\"> https://github.com/kcha193/simarioV2 </a>.</li>
+                                        <li>Models of knowledge laboratory is at: <a href = \"https://bitbucket.org/Kcha193/knowlab\"> https://bitbucket.org/Kcha193/knowlab </a>.</li>
+                                        <li>Shiny application is at: <a href = \"https://github.com/kcha193/KnowLabShiny\"> https://github.com/kcha193/KnowLabShiny </a>.</li>
+                                      </ul>" ),
+                                  p(""),
+                                    a(href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass.html",
                                    img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
                                        width = 200)), 
              br(),br(),
