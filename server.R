@@ -105,7 +105,7 @@ shinyServer(function(input, output, session) {
   catvars <- c( "r1stchildethn", "SESBTH", "z1genderLvl1", "z1CaesareanLvl1", "z1BreakfastLvl1", "r1mBMI", 
                 "r1ParentEduc", "z1GALvl1", "z1stmDiabeteLvl1", "z1HearingLvl1", "z1ECELvl1", "z1PrintExpLvl1", 
                 "z1ADHDLvl1", "z1ParentInvolveLvl1", "r1Region", "z1OverweightLvl1", "z1ObeseLvl1", "r1Sleep",
-                "r1Score", "z1NEETLvl1", "z1BullyLvl1", "r1SchoolFunding", 
+                "r1Score", "z1NEETLvl1", "z1BullyLvl1", "r1SchoolFunding", "z1RuralLvl1",
                 "r1SchoolGender", "z1AlcAbuseLvl1", "z1DepressLvl1", "z1PUNISHLvl1", "z1INTERACTLvl1", 
                 "z1ParentAlcLvl1", "z1ParentDepressLvl1", "z1WatchTVLvl1", "pregalc", "pregsmk", "bwkg", 
                 "BREAST", "IQ")
@@ -137,7 +137,7 @@ shinyServer(function(input, output, session) {
               "z1ParentAlc", "z1ParentDepress", "z1WatchTVLvl1", "BREAST", "bwkg", 
               "pregalc", "pregsmk", "r1stchildethn", "SESBTH", "z1genderLvl1", "z1CaesareanLvl1", 
               "z1BreakfastLvl1", "r1mBMI",  "r1ParentEduc", "z1GALvl1", "z1stmDiabeteLvl1", "z1HearingLvl1",      
-              "z1ECELvl1", "z1PrintExpLvl1", "z1ADHDLvl1", "z1ParentInvolveLvl1")
+              "z1ECELvl1", "z1PrintExpLvl1", "z1ADHDLvl1", "z1ParentInvolveLvl1", "z1Rural")
   
   var_SB_New <- sapply(strip_lvl_suffix(var_SB), 
                        function(x) varList$Var[ strip_lvl_suffix(varList$Var) %in% x])
