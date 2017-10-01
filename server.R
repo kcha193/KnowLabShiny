@@ -429,7 +429,7 @@ shinyServer(function(input, output, session) {
   
   output$actionAddSBUI <- renderUI({
     tagList(
-      HTML("<b> <font size=\"4\">STEP 5: </font></b> Click after every variable adjusment"),
+      HTML("<b> <font size=\"4\">STEP 5: </font></b> Click after every variable adjustment"),
       actionButton("actionAddSB", label = "Add Scenario")
     )
   })

@@ -2,7 +2,7 @@
 
 simulateKnowLab <- function(run, simenv) {
   
-  
+ 
   simulate_family_household <- function() {
     
     if (iteration>=2 & iteration<=5) {
@@ -291,53 +291,53 @@ simulateKnowLab <- function(run, simenv) {
     #kids
     if (iteration<=5) {
       change_children_num <- predSimNorm(models$chkids2_5)
-      
+    
       change_children_num[change_children_num < 1 - kids_previous] <- 
         (1 - kids_previous)[change_children_num < 1 - kids_previous]
       
-      
-      #consistency tweak
-      
-      
-      kids <- kids_previous + change_children_num
-      
-      kids <- round(kids)
-      
-      #max cut-off tweak
-      kids[kids>10] <- 10
-      
-      #generate propensities for scenario testing
-      kidsmodels <- PropensityModels[["kids"]]
-      kidsPropensities <- predictOrdinal(kidsmodels, NUMCHILDREN, stochastic=TRUE)
-      
-      kids <- adjustContVar(kids, "kids", propens=kidsPropensities[,-ncol(kidsPropensities)], 
-                            simenv = simenv, iteration = iteration)
-      
-      kids[kids<1] <- 1
-      kids[kids>10] <- 10
-      
-      checkNAs(kids)
-      
-      change_kids <- kids - kids_previous
-      
-      #household_size
-      householdsize <- round(householdsize_previous - as.integer(onelessp) + as.integer(onemorep) + change_kids)
-      householdsize[householdsize < 2] <- 2
-      
-      #CALIBRATION
-      mult.factor <- c(NA, rep(1, 2), .989, .967, .965)
-      householdsize <- householdsize*mult.factor[iteration]
-      #no rounding or else we just get exactly the same values as not aligning
-      #note: this means that confreqs will have decimals in it.					
-      
-      #scenarios
-      householdsize <- adjustContVar(householdsize, "householdsize", simenv = simenv, iteration = iteration)
-      
-      #max cut-off tweak
-      householdsize[householdsize < 2] <- 2
-      householdsize[householdsize > 14] <- 14
-      checkNAs(householdsize)
-      
+    
+    #consistency tweak
+
+    
+    kids <- kids_previous + change_children_num
+    
+    kids <- round(kids)
+    
+    #max cut-off tweak
+    kids[kids>10] <- 10
+    
+    #generate propensities for scenario testing
+    kidsmodels <- PropensityModels[["kids"]]
+    kidsPropensities <- predictOrdinal(kidsmodels, NUMCHILDREN, stochastic=TRUE)
+    
+    kids <- adjustContVar(kids, "kids", propens=kidsPropensities[,-ncol(kidsPropensities)], 
+                          simenv = simenv, iteration = iteration)
+    
+    kids[kids<1] <- 1
+    kids[kids>10] <- 10
+    
+    checkNAs(kids)
+    
+    change_kids <- kids - kids_previous
+    
+    #household_size
+    householdsize <- round(householdsize_previous - as.integer(onelessp) + as.integer(onemorep) + change_kids)
+    householdsize[householdsize < 2] <- 2
+    
+    #CALIBRATION
+    mult.factor <- c(NA, rep(1, 2), .989, .967, .965)
+    householdsize <- householdsize*mult.factor[iteration]
+    #no rounding or else we just get exactly the same values as not aligning
+    #note: this means that confreqs will have decimals in it.					
+    
+    #scenarios
+    householdsize <- adjustContVar(householdsize, "householdsize", simenv = simenv, iteration = iteration)
+    
+    #max cut-off tweak
+    householdsize[householdsize < 2] <- 2
+    householdsize[householdsize > 14] <- 14
+    checkNAs(householdsize)
+    
     } 
     
     #modify enclosing environment
@@ -395,7 +395,7 @@ simulateKnowLab <- function(run, simenv) {
     
     z1chparLvl0 <<- as.integer(!z1chparLvl1)
     checkNAs(z1chparLvl1)
-    
+   
     
     
     z1chpar_ethLvl1 <- z1chparLvl1*(r1stchildethnLvl1 + r1stchildethnLvl4)
@@ -417,7 +417,7 @@ simulateKnowLab <- function(run, simenv) {
     #####  chres  ######
     ####################
     #create binary variable for whether parents changed previously or not
-    
+
     z1chres.prev <- rep(NA, length(chres_previous))
     z1chres.prev[chres_previous>0] <- 1
     z1chres.prev[chres_previous==0] <- 0
@@ -450,7 +450,7 @@ simulateKnowLab <- function(run, simenv) {
     chres[chres>13] <- sample(c(2:10, 13), sum(chres>13), 
                               prob=c(.656, .198, .072, .023, .017, 
                                      .008, .004, .019, .001, .001), replace=TRUE)
-    
+
     checkNAs(chres)
     
     #generate propensities for scenario testing
@@ -459,7 +459,7 @@ simulateKnowLab <- function(run, simenv) {
     
     chres <- adjustContVar(chres, "chres", propens=chresPropensities[,-ncol(chresPropensities)], 
                            simenv = simenv, iteration = iteration)
-    
+ 
     
     chres <<- chres		
   }
@@ -480,101 +480,101 @@ simulateKnowLab <- function(run, simenv) {
       z1mhrs1 <- predSimBinomsSelect_notChangeScores(z1mhrs.prev, models$z1mhrswrk.prev0.a2_5.mg1, models$z1mhrswrk.prev1.a2_5)	
       z1mhrs2 <- predSimBinomsSelect_notChangeScores(z1mhrs.prev, models$z1mhrswrk.prev0.a2_5.mg2, models$z1mhrswrk.prev1.a2_5)	
       z1mhrs3 <- predSimBinomsSelect_notChangeScores(z1mhrs.prev, models$z1mhrswrk.prev0.a2_5.mg3, models$z1mhrswrk.prev1.a2_5)
-      
-      #then assign to the variable denoting whether the mother works or not, the values from the vector corresponding to her mumgroup
-      z1mhrs <- rep(NA, length(mhrswrk_previous))
-      z1mhrs[mumgroup==0] <- z1mhrs1[mumgroup==0] #0 #
-      z1mhrs[mumgroup==1] <- z1mhrs1[mumgroup==1]
-      z1mhrs[mumgroup==2] <- z1mhrs2[mumgroup==2]
-      z1mhrs[mumgroup==3] <- z1mhrs3[mumgroup==3]
-      
-      #for mothers that do work, simulate the number of hours they work
-      #create separate vectors of length number of children for each mumgroup model
-      
+     
+    #then assign to the variable denoting whether the mother works or not, the values from the vector corresponding to her mumgroup
+    z1mhrs <- rep(NA, length(mhrswrk_previous))
+    z1mhrs[mumgroup==0] <- z1mhrs1[mumgroup==0] #0 #
+    z1mhrs[mumgroup==1] <- z1mhrs1[mumgroup==1]
+    z1mhrs[mumgroup==2] <- z1mhrs2[mumgroup==2]
+    z1mhrs[mumgroup==3] <- z1mhrs3[mumgroup==3]
+    
+    #for mothers that do work, simulate the number of hours they work
+    #create separate vectors of length number of children for each mumgroup model
+
       mhrswrk.pre1 <- predSimNBinom(models$mhrswrk.a2_5.mg1) + 1
       #the other mumgroups had small numbers and so a standard NB model with a single dispersion parameter was used
       mhrswrk.pre2 <- predSimNBinom(models$mhrswrk.a2_5.mg2) + 1
       mhrswrk.pre3 <- predSimNBinom(models$mhrswrk.a2_5.mg3) + 1
       #the '+ 1' is the backtransformation (mhrswrk - 1 is NB distributed)
-      
-      
-      #assign to mhrswrk, the values from the vector corresponding to her mumgroup
-      mhrswrk[mumgroup==1] <- mhrswrk.pre1[mumgroup==1]
-      mhrswrk[mumgroup==2] <- mhrswrk.pre2[mumgroup==2]
-      mhrswrk[mumgroup==3] <- mhrswrk.pre3[mumgroup==3]
-      mhrswrk[z1mhrs==0] <- 0
-      mhrswrk <- round(mhrswrk)
-      mhrswrk[mhrswrk < 0] <- 0
-      mhrswrk[mhrswrk>73] <- 73
-      
-      #index <- which(mhrswrk > 40)
-      #mhrswrk[index] <- mhrswrk[index] - 15
-      
-      #CALIBRATION
-      mult.factor <- c(NA, 1.22, 1.29, 1.36, 1.37)
-      mhrswrk <- mhrswrk*mult.factor[iteration]
-      #no rounding or else we just get exactly the same values as not aligning
-      
-      #generate propensities for scenario testing
-      mhrswrkmodels <- PropensityModels[["mhrswrk"]]
-      mhrswrkPropensities <- predictOrdinal(mhrswrkmodels, NUMCHILDREN, stochastic=TRUE)
-      
-      #scenarios
-      mhrswrk <- adjustContVar(mhrswrk, "mhrswrk", 
-                               propens=mhrswrkPropensities[,-ncol(mhrswrkPropensities)], 
-                               simenv = simenv, iteration = iteration)
-      checkNAs(mhrswrk)
-      
-      #fhrswrk
-      #create binary variable for whether the father worked previously or not
-      z1fhrs.prev <- rep(NA, length(fhrswrk_previous))
-      z1fhrs.prev[fhrswrk_previous>0] <- 1
-      z1fhrs.prev[fhrswrk_previous==0] <- 0
-      
-      #simulate for the current iteration whether the father works or not
-      #first create separate vectors of length number of children for each dadgroup model
-      
+     
+    
+    #assign to mhrswrk, the values from the vector corresponding to her mumgroup
+    mhrswrk[mumgroup==1] <- mhrswrk.pre1[mumgroup==1]
+    mhrswrk[mumgroup==2] <- mhrswrk.pre2[mumgroup==2]
+    mhrswrk[mumgroup==3] <- mhrswrk.pre3[mumgroup==3]
+    mhrswrk[z1mhrs==0] <- 0
+    mhrswrk <- round(mhrswrk)
+    mhrswrk[mhrswrk < 0] <- 0
+    mhrswrk[mhrswrk>73] <- 73
+    
+    #index <- which(mhrswrk > 40)
+    #mhrswrk[index] <- mhrswrk[index] - 15
+    
+    #CALIBRATION
+    mult.factor <- c(NA, 1.22, 1.29, 1.36, 1.37)
+    mhrswrk <- mhrswrk*mult.factor[iteration]
+    #no rounding or else we just get exactly the same values as not aligning
+    
+    #generate propensities for scenario testing
+    mhrswrkmodels <- PropensityModels[["mhrswrk"]]
+    mhrswrkPropensities <- predictOrdinal(mhrswrkmodels, NUMCHILDREN, stochastic=TRUE)
+    
+    #scenarios
+    mhrswrk <- adjustContVar(mhrswrk, "mhrswrk", 
+                             propens=mhrswrkPropensities[,-ncol(mhrswrkPropensities)], 
+                             simenv = simenv, iteration = iteration)
+    checkNAs(mhrswrk)
+    
+    #fhrswrk
+    #create binary variable for whether the father worked previously or not
+    z1fhrs.prev <- rep(NA, length(fhrswrk_previous))
+    z1fhrs.prev[fhrswrk_previous>0] <- 1
+    z1fhrs.prev[fhrswrk_previous==0] <- 0
+    
+    #simulate for the current iteration whether the father works or not
+    #first create separate vectors of length number of children for each dadgroup model
+
       z1fhrs1 <- predSimBinomsSelect_notChangeScores(z1fhrs.prev, models$z1fhrswrk.prev0.a2_5.dg1 , 
                                                      models$z1fhrswrk.prev1.a2_5.dg1)	
       z1fhrs2 <- predSimBinomsSelect_notChangeScores(z1fhrs.prev, models$z1fhrswrk.prev0.a2_5.dg2 , 
                                                      models$z1fhrswrk.prev1.a2_5.dg2)	
       z1fhrs3 <- predSimBinomsSelect_notChangeScores(z1fhrs.prev, models$z1fhrswrk.prev0.a2_5.dg3 , 
                                                      models$z1fhrswrk.prev1.a2_5.dg3)
-      
-      #then assign to the variable denoting whether the father works or not, the values from the vector corresponding to his dadgroup
-      z1fhrs <- rep(NA, length(fhrswrk_previous))
-      z1fhrs[dadgroup==0] <- z1fhrs1[dadgroup==0] #0 #
-      z1fhrs[dadgroup==1] <- z1fhrs1[dadgroup==1]
-      z1fhrs[dadgroup==2] <- z1fhrs2[dadgroup==2]
-      z1fhrs[dadgroup==3] <- z1fhrs3[dadgroup==3]
-      
-      #for fathers that do work, simulate the number of hours they work
-      #3 normal models are used
-      
+    
+    #then assign to the variable denoting whether the father works or not, the values from the vector corresponding to his dadgroup
+    z1fhrs <- rep(NA, length(fhrswrk_previous))
+    z1fhrs[dadgroup==0] <- z1fhrs1[dadgroup==0] #0 #
+    z1fhrs[dadgroup==1] <- z1fhrs1[dadgroup==1]
+    z1fhrs[dadgroup==2] <- z1fhrs2[dadgroup==2]
+    z1fhrs[dadgroup==3] <- z1fhrs3[dadgroup==3]
+    
+    #for fathers that do work, simulate the number of hours they work
+    #3 normal models are used
+
       fhrswrk.pre <- predSimNorm(models$fhrswrk.a2_5)
-      
-      
-      fhrswrk <- fhrswrk.pre
-      fhrswrk[z1fhrs==0] <- 0
-      fhrswrk <- round(fhrswrk)
-      fhrswrk[fhrswrk < 0] <- 0
-      fhrswrk[fhrswrk > 100] <- 100
-      
-      # fhrswrk[fhrswrk > 40] <- fhrswrk[fhrswrk > 40] - 2
-      # fhrswrk[fhrswrk < 36 & fhrswrk > 20 ] <- fhrswrk[fhrswrk < 36 & fhrswrk > 20 ] + 4
-      
-      # mult.factor <- c(NA, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95,
-      #                  0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95)
-      # fhrswrk <- fhrswrk*mult.factor[iteration]
-      
-      #generate propensities for scenario testing
-      fhrswrkmodels <- PropensityModels[["fhrswrk"]]
-      fhrswrkPropensities <- predictOrdinal(fhrswrkmodels, NUMCHILDREN, stochastic=TRUE)
-      
-      fhrswrk <- adjustContVar(fhrswrk, "fhrswrk", propens=mhrswrkPropensities[,-ncol(fhrswrkPropensities)], 
-                               simenv = simenv, iteration = iteration)
-      checkNAs(fhrswrk)
-      
+     
+    
+    fhrswrk <- fhrswrk.pre
+    fhrswrk[z1fhrs==0] <- 0
+    fhrswrk <- round(fhrswrk)
+    fhrswrk[fhrswrk < 0] <- 0
+    fhrswrk[fhrswrk > 100] <- 100
+
+    # fhrswrk[fhrswrk > 40] <- fhrswrk[fhrswrk > 40] - 2
+    # fhrswrk[fhrswrk < 36 & fhrswrk > 20 ] <- fhrswrk[fhrswrk < 36 & fhrswrk > 20 ] + 4
+    
+    # mult.factor <- c(NA, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95,
+    #                  0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95, 0.95)
+    # fhrswrk <- fhrswrk*mult.factor[iteration]
+    
+    #generate propensities for scenario testing
+    fhrswrkmodels <- PropensityModels[["fhrswrk"]]
+    fhrswrkPropensities <- predictOrdinal(fhrswrkmodels, NUMCHILDREN, stochastic=TRUE)
+    
+    fhrswrk <- adjustContVar(fhrswrk, "fhrswrk", propens=mhrswrkPropensities[,-ncol(fhrswrkPropensities)], 
+                             simenv = simenv, iteration = iteration)
+    checkNAs(fhrswrk)
+    
     }
     
     mhrswrk <<- mhrswrk
@@ -584,38 +584,38 @@ simulateKnowLab <- function(run, simenv) {
     
     if (iteration<=5) {
       welfareLvl1 <- predSimBinomsSelect(welfare_previousLvl1, models$welfarePrev0.a2_5, models$welfarePrev1.a2_5)
-      
-      
-      #generate propensities for scenario testing
-      welfaremodel <- PropensityModels[["welfare"]]
-      welfarePropensities <- predLogistic(welfaremodel[[1]])
-      #add some random variation to the propensity scores so that each run the units changed can differ
-      #give each unit it's own standard deviation according to a binomial distribution
-      s <- sqrt(welfarePropensities*(1 - welfarePropensities))
-      welfarePropensities <- rnorm(length(welfarePropensities), welfarePropensities, s)
-      
-      #CALIBRATION
-      mult.factor <- c(NA, 2.05, 1.22, 1.04, 1.03)
-      prop1 <- mean(welfareLvl1)*mult.factor[iteration]
-      calib.cat.adjust <- c(1-prop1, prop1)
-      welfareLvl1 <- adjustCatVarCalib(welfareLvl1, "welfare", propens=welfarePropensities, 
-                                       desiredProps=calib.cat.adjust, simenv = simenv, iteration = iteration)
-      
-      
-      #Scenarios
-      welfareLvl1 <<- adjustCatVar(welfareLvl1, "welfare", propens=welfarePropensities, simenv = simenv, iteration = iteration)
-      checkNAs(welfareLvl1)
-      welfareLvl0 <<- as.integer(!welfareLvl1)
-      
-      
-      welfare_ethLvl1 <<- welfareLvl1*(r1stchildethnLvl1 + r1stchildethnLvl4)
-      welfare_ethLvl2 <<- welfareLvl1*r1stchildethnLvl2
-      welfare_ethLvl3 <<- welfareLvl1*r1stchildethnLvl3
-      
-      welfare_previous_ethLvl1 <<- welfare_previousLvl1*(r1stchildethnLvl1 + r1stchildethnLvl4)
-      welfare_previous_ethLvl2 <<- welfare_previousLvl1*r1stchildethnLvl2
-      welfare_previous_ethLvl3 <<- welfare_previousLvl1*r1stchildethnLvl3
-      
+     
+    
+    #generate propensities for scenario testing
+    welfaremodel <- PropensityModels[["welfare"]]
+    welfarePropensities <- predLogistic(welfaremodel[[1]])
+    #add some random variation to the propensity scores so that each run the units changed can differ
+    #give each unit it's own standard deviation according to a binomial distribution
+    s <- sqrt(welfarePropensities*(1 - welfarePropensities))
+    welfarePropensities <- rnorm(length(welfarePropensities), welfarePropensities, s)
+    
+    #CALIBRATION
+    mult.factor <- c(NA, 2.05, 1.22, 1.04, 1.03)
+    prop1 <- mean(welfareLvl1)*mult.factor[iteration]
+    calib.cat.adjust <- c(1-prop1, prop1)
+    welfareLvl1 <- adjustCatVarCalib(welfareLvl1, "welfare", propens=welfarePropensities, 
+                                     desiredProps=calib.cat.adjust, simenv = simenv, iteration = iteration)
+    
+    
+    #Scenarios
+    welfareLvl1 <<- adjustCatVar(welfareLvl1, "welfare", propens=welfarePropensities, simenv = simenv, iteration = iteration)
+    checkNAs(welfareLvl1)
+    welfareLvl0 <<- as.integer(!welfareLvl1)
+    
+    
+    welfare_ethLvl1 <<- welfareLvl1*(r1stchildethnLvl1 + r1stchildethnLvl4)
+    welfare_ethLvl2 <<- welfareLvl1*r1stchildethnLvl2
+    welfare_ethLvl3 <<- welfareLvl1*r1stchildethnLvl3
+    
+    welfare_previous_ethLvl1 <<- welfare_previousLvl1*(r1stchildethnLvl1 + r1stchildethnLvl4)
+    welfare_previous_ethLvl2 <<- welfare_previousLvl1*r1stchildethnLvl2
+    welfare_previous_ethLvl3 <<- welfare_previousLvl1*r1stchildethnLvl3
+    
     }
     
   }
@@ -693,112 +693,112 @@ simulateKnowLab <- function(run, simenv) {
   }
   
   simulate_behavioural_factors <- function() {
-    
-    #msmoke
-    #create binary variable for whether the mother smoked previously or not
-    z1msmk.prev <- rep(NA, length(msmoke_previous))
-    z1msmk.prev[msmoke_previous>0] <- 1
-    z1msmk.prev[msmoke_previous==0] <- 0
-    
-    #simulate for the current iteration whether the mother works or not
-    #first create separate vectors of length number of children for each mumgroup model
-    if (iteration<=5) {
-      z1msmk1 <- predSimBinomsSelect_notChangeScores(z1msmk.prev, models$z1msmoke.prev0.a2_5.mg1, models$z1msmoke.prev1.a2_5)	
-      z1msmk2 <- predSimBinomsSelect_notChangeScores(z1msmk.prev, models$z1msmoke.prev0.a2_5.mg2, models$z1msmoke.prev1.a2_5)	
-      z1msmk3 <- predSimBinomsSelect_notChangeScores(z1msmk.prev, models$z1msmoke.prev0.a2_5.mg3, models$z1msmoke.prev1.a2_5)
-    } 
-    #then assign to the variable denoting whether the mother works or not, the values from the vector corresponding to her mumgroup
-    z1msmk <- rep(NA, length(mhrswrk_previous))
-    z1msmk[mumgroup==0] <- 0 
-    z1msmk[mumgroup==1] <- z1msmk1[mumgroup==1]
-    z1msmk[mumgroup==2] <- z1msmk2[mumgroup==2]
-    z1msmk[mumgroup==3] <- z1msmk3[mumgroup==3]
-    
-    #for mothers that do work, simulate the number of hours they work
-    #3 normal models are used
-    if (iteration<=5) {
-      msmoke.pre <- predSimNorm(models$msmoke.a2_5)
-    } 
-    msmoke <- msmoke.pre
-    msmoke[z1msmk==0] <- 0
-    msmoke <- round(msmoke)
-    msmoke[msmoke < 0] <- 0
-    msmoke[msmoke > 70] <- 70
-    
-    #generate msmoke propensities for scenario testing
-    msmokemodels <- PropensityModels[["msmoke"]]
-    msmokePropensities <- predictOrdinal(msmokemodels, NUMCHILDREN, stochastic=TRUE)
-    
-    #CALIBRATION
-    mult.factor <- c(NA, .993, .979, .991, 1.022, .964, .971, .974, .959, .957, .955, .962, .957, rep(1, 8))
-    prop0 <- mean(msmoke==0)*mult.factor[iteration]
-    m.bin <- bin(msmoke, binbreaks$msmoke)
-    tab <- table(m.bin)/sum(table(m.bin))
-    w <- tab[2:4]
-    w2 <- w/sum(w)
-    props1 <- (1-prop0)*w2
-    calib.cat.adjust <- c(prop0, props1)
-    msmoke <- adjustContVarCalib(msmoke, "msmoke", propens=msmokePropensities,
-                                 desiredProps=calib.cat.adjust, simenv = simenv, iteration = iteration)
-    
-    #sceanrios
-    msmoke <- adjustContVar(msmoke, "msmoke", propens=msmokePropensities[,-ncol(msmokePropensities)], 
-                            simenv = simenv, iteration = iteration)
-    checkNAs(msmoke)
-    
-    #fsmoke
-    #create binary variable for whether the father smokeed previously or not
-    z1fsmk.prev <- rep(NA, length(fsmoke_previous))
-    z1fsmk.prev[fsmoke_previous>0] <- 1
-    z1fsmk.prev[fsmoke_previous==0] <- 0
-    
-    #simulate for the current iteration whether the father works or not
-    #first create separate vectors of length number of children for each dadgroup model
-    ##z1fsmk0 <- predSimBinomsSelect_notChangeScores(z1fsmk.prev, models$z1fsmoke.dg0.prev0, models$z1fsmoke.dg0.prev1)
-    if (iteration<=5) {
-      z1fsmk1 <- predSimBinomsSelect_notChangeScores(z1fsmk.prev, models$z1fsmoke.prev0.a2_5.dg1, models$z1fsmoke.prev1.a2_5.dg1)	
-      z1fsmk2 <- predSimBinomsSelect_notChangeScores(z1fsmk.prev, models$z1fsmoke.prev0.a2_5.dg2, models$z1fsmoke.prev1.a2_5.dg2)	
-      z1fsmk3 <- predSimBinomsSelect_notChangeScores(z1fsmk.prev, models$z1fsmoke.prev0.a2_5.dg3, models$z1fsmoke.prev1.a2_5.dg3)
-    } 
-    #then assign to the variable denoting whether the father works or not, the values from the vector corresponding to his dadgroup
-    z1fsmk <- rep(NA, length(fhrswrk_previous))
-    z1fsmk[dadgroup==0] <- 0
-    z1fsmk[dadgroup==1] <- z1fsmk1[dadgroup==1]
-    z1fsmk[dadgroup==2] <- z1fsmk2[dadgroup==2]
-    z1fsmk[dadgroup==3] <- z1fsmk3[dadgroup==3]
-    
-    #for fathers that do work, simulate the number of hours they work
-    #3 normal models are used
-    if (iteration<=5) {
-      fsmoke.pre <- predSimNormsSelect3Models(dadgroup, models$fsmoke.a2_5.dg1, models$fsmoke.a2_5.dg2, models$fsmoke.a2_5.dg3)
-    } else if (iteration>5) {
-      fsmoke.pre <- predSimNormsSelect3Models(dadgroup, models$fsmoke.a6_13.dg1, models$fsmoke.a6_13.dg2, models$fsmoke.a6_13.dg3)
-    }
-    fsmoke <- fsmoke.pre
-    fsmoke[z1fsmk==0] <- 0
-    fsmoke <- round(fsmoke)
-    fsmoke[fsmoke < 0] <- 0
-    fsmoke[fsmoke > 70] <- 70
-    
-    #generate fsmoke propensities for scenario testing
-    fsmokemodels <- PropensityModels[["fsmoke"]]
-    fsmokePropensities <- predictOrdinal(fsmokemodels, NUMCHILDREN, stochastic=TRUE)
-    
-    #CALIBRATION
-    mult.factor <- c(NA, .924, .957, .959, .959, .985, .975, .976, .966, .959, .960, .954, .954, rep(1, 8))
-    prop0 <- mean(fsmoke==0)*mult.factor[iteration]
-    f.bin <- bin(fsmoke, binbreaks$fsmoke)
-    tab <- table(f.bin)/sum(table(f.bin))
-    w <- tab[2:4]
-    w2 <- w/sum(w)
-    props1 <- (1-prop0)*w2
-    calib.cat.adjust <- c(prop0, props1)
-    fsmoke <- adjustContVarCalib(fsmoke, "fsmoke", propens=fsmokePropensities,
-                                 desiredProps=calib.cat.adjust, simenv = simenv, iteration = iteration)
-    
-    #scenarios
-    fsmoke <- adjustContVar(fsmoke, "fsmoke", propens=fsmokePropensities[,-ncol(fsmokePropensities)], simenv = simenv, iteration = iteration)
-    checkNAs(fsmoke)
+ 
+      #msmoke
+      #create binary variable for whether the mother smoked previously or not
+      z1msmk.prev <- rep(NA, length(msmoke_previous))
+      z1msmk.prev[msmoke_previous>0] <- 1
+      z1msmk.prev[msmoke_previous==0] <- 0
+      
+      #simulate for the current iteration whether the mother works or not
+      #first create separate vectors of length number of children for each mumgroup model
+      if (iteration<=5) {
+        z1msmk1 <- predSimBinomsSelect_notChangeScores(z1msmk.prev, models$z1msmoke.prev0.a2_5.mg1, models$z1msmoke.prev1.a2_5)	
+        z1msmk2 <- predSimBinomsSelect_notChangeScores(z1msmk.prev, models$z1msmoke.prev0.a2_5.mg2, models$z1msmoke.prev1.a2_5)	
+        z1msmk3 <- predSimBinomsSelect_notChangeScores(z1msmk.prev, models$z1msmoke.prev0.a2_5.mg3, models$z1msmoke.prev1.a2_5)
+      } 
+      #then assign to the variable denoting whether the mother works or not, the values from the vector corresponding to her mumgroup
+      z1msmk <- rep(NA, length(mhrswrk_previous))
+      z1msmk[mumgroup==0] <- 0 
+      z1msmk[mumgroup==1] <- z1msmk1[mumgroup==1]
+      z1msmk[mumgroup==2] <- z1msmk2[mumgroup==2]
+      z1msmk[mumgroup==3] <- z1msmk3[mumgroup==3]
+      
+      #for mothers that do work, simulate the number of hours they work
+      #3 normal models are used
+      if (iteration<=5) {
+        msmoke.pre <- predSimNorm(models$msmoke.a2_5)
+      } 
+      msmoke <- msmoke.pre
+      msmoke[z1msmk==0] <- 0
+      msmoke <- round(msmoke)
+      msmoke[msmoke < 0] <- 0
+      msmoke[msmoke > 70] <- 70
+      
+      #generate msmoke propensities for scenario testing
+      msmokemodels <- PropensityModels[["msmoke"]]
+      msmokePropensities <- predictOrdinal(msmokemodels, NUMCHILDREN, stochastic=TRUE)
+      
+      #CALIBRATION
+      mult.factor <- c(NA, .993, .979, .991, 1.022, .964, .971, .974, .959, .957, .955, .962, .957, rep(1, 8))
+      prop0 <- mean(msmoke==0)*mult.factor[iteration]
+      m.bin <- bin(msmoke, binbreaks$msmoke)
+      tab <- table(m.bin)/sum(table(m.bin))
+      w <- tab[2:4]
+      w2 <- w/sum(w)
+      props1 <- (1-prop0)*w2
+      calib.cat.adjust <- c(prop0, props1)
+      msmoke <- adjustContVarCalib(msmoke, "msmoke", propens=msmokePropensities,
+                                   desiredProps=calib.cat.adjust, simenv = simenv, iteration = iteration)
+      
+      #sceanrios
+      msmoke <- adjustContVar(msmoke, "msmoke", propens=msmokePropensities[,-ncol(msmokePropensities)], 
+                              simenv = simenv, iteration = iteration)
+      checkNAs(msmoke)
+      
+      #fsmoke
+      #create binary variable for whether the father smokeed previously or not
+      z1fsmk.prev <- rep(NA, length(fsmoke_previous))
+      z1fsmk.prev[fsmoke_previous>0] <- 1
+      z1fsmk.prev[fsmoke_previous==0] <- 0
+      
+      #simulate for the current iteration whether the father works or not
+      #first create separate vectors of length number of children for each dadgroup model
+      ##z1fsmk0 <- predSimBinomsSelect_notChangeScores(z1fsmk.prev, models$z1fsmoke.dg0.prev0, models$z1fsmoke.dg0.prev1)
+      if (iteration<=5) {
+        z1fsmk1 <- predSimBinomsSelect_notChangeScores(z1fsmk.prev, models$z1fsmoke.prev0.a2_5.dg1, models$z1fsmoke.prev1.a2_5.dg1)	
+        z1fsmk2 <- predSimBinomsSelect_notChangeScores(z1fsmk.prev, models$z1fsmoke.prev0.a2_5.dg2, models$z1fsmoke.prev1.a2_5.dg2)	
+        z1fsmk3 <- predSimBinomsSelect_notChangeScores(z1fsmk.prev, models$z1fsmoke.prev0.a2_5.dg3, models$z1fsmoke.prev1.a2_5.dg3)
+      } 
+      #then assign to the variable denoting whether the father works or not, the values from the vector corresponding to his dadgroup
+      z1fsmk <- rep(NA, length(fhrswrk_previous))
+      z1fsmk[dadgroup==0] <- 0
+      z1fsmk[dadgroup==1] <- z1fsmk1[dadgroup==1]
+      z1fsmk[dadgroup==2] <- z1fsmk2[dadgroup==2]
+      z1fsmk[dadgroup==3] <- z1fsmk3[dadgroup==3]
+      
+      #for fathers that do work, simulate the number of hours they work
+      #3 normal models are used
+      if (iteration<=5) {
+        fsmoke.pre <- predSimNormsSelect3Models(dadgroup, models$fsmoke.a2_5.dg1, models$fsmoke.a2_5.dg2, models$fsmoke.a2_5.dg3)
+      } else if (iteration>5) {
+        fsmoke.pre <- predSimNormsSelect3Models(dadgroup, models$fsmoke.a6_13.dg1, models$fsmoke.a6_13.dg2, models$fsmoke.a6_13.dg3)
+      }
+      fsmoke <- fsmoke.pre
+      fsmoke[z1fsmk==0] <- 0
+      fsmoke <- round(fsmoke)
+      fsmoke[fsmoke < 0] <- 0
+      fsmoke[fsmoke > 70] <- 70
+      
+      #generate fsmoke propensities for scenario testing
+      fsmokemodels <- PropensityModels[["fsmoke"]]
+      fsmokePropensities <- predictOrdinal(fsmokemodels, NUMCHILDREN, stochastic=TRUE)
+      
+      #CALIBRATION
+      mult.factor <- c(NA, .924, .957, .959, .959, .985, .975, .976, .966, .959, .960, .954, .954, rep(1, 8))
+      prop0 <- mean(fsmoke==0)*mult.factor[iteration]
+      f.bin <- bin(fsmoke, binbreaks$fsmoke)
+      tab <- table(f.bin)/sum(table(f.bin))
+      w <- tab[2:4]
+      w2 <- w/sum(w)
+      props1 <- (1-prop0)*w2
+      calib.cat.adjust <- c(prop0, props1)
+      fsmoke <- adjustContVarCalib(fsmoke, "fsmoke", propens=fsmokePropensities,
+                                   desiredProps=calib.cat.adjust, simenv = simenv, iteration = iteration)
+      
+      #scenarios
+      fsmoke <- adjustContVar(fsmoke, "fsmoke", propens=fsmokePropensities[,-ncol(fsmokePropensities)], simenv = simenv, iteration = iteration)
+      checkNAs(fsmoke)
     
     
     msmoke <<- msmoke
@@ -816,7 +816,7 @@ simulateKnowLab <- function(run, simenv) {
     gptotvis[gptotvis>46] <<- 46
     
     
-    
+
     
     
     #houtptot
@@ -1011,10 +1011,13 @@ simulateKnowLab <- function(run, simenv) {
     
     r1Sleep <- adjustCatVar(r1Sleep, "r1Sleep", simenv = simenv, iteration = iteration)
     
+    z1RuralLvl1 <- adjustCatVar(z1RuralLvl1, "z1RuralLvl1", simenv = simenv, iteration = iteration)
+    
+    r1stchildethnLvl2z1RuralLvl1 <- ifelse(z1RuralLvl1 == 1 & r1stchildethn == 2, 1, 0)
+    
     r1SleepLvl1 <- ifelse(r1Sleep == 1, 1, 0)
     r1SleepLvl2 <- ifelse(r1Sleep == 2, 1, 0)		
     r1SleepLvl3 <- ifelse(r1Sleep == 3, 1, 0)
-    
     
     z1breastLvl1 <- ifelse(BREAST == 0, 0, 1)
     z1pregsmkLvl1 <- ifelse(pregsmk == 0, 0, 1)		
@@ -1044,7 +1047,7 @@ simulateKnowLab <- function(run, simenv) {
       
       z1ObeseLvl1 <<- NAs     
     }	
-    
+
   }
   
   simulate_IQ <- function() {	 	
@@ -1191,7 +1194,7 @@ simulateKnowLab <- function(run, simenv) {
       z1ScoreLvl1 <- ifelse(currectScore > 87, 1,0)
       z1DropLvl1 <- ifelse(currectScore <= 80, 1,0)
       z1FailLvl1 <- ifelse(currectScore > 80 & currectScore <= 87, 1, 0)
-      
+     
       r1Score <- rep(0, 5000)
       
       r1Score[z1ScoreLvl1==1] <- 1
@@ -1261,7 +1264,7 @@ simulateKnowLab <- function(run, simenv) {
   
   simulate_AlcAbuse <- function() {	 		 
     
-    
+      
     fage_imputed[fage_imputed ==99] <- NA
     
     male = c(11.5, 43.2, 28.6, 27.1, 25.4, 20.8, 14.8, 5.4)/100
@@ -1303,10 +1306,10 @@ simulateKnowLab <- function(run, simenv) {
     z1FatherAlcLvl1 <<- z1FatherAlcLvl1
     
     #browser()
-    
+
     z1ParentAlcLvl1 <- apply(cbind(z1MotherAlcLvl1, z1FatherAlcLvl1), 1, max, na.rm = TRUE)
     
-    
+
     if( iteration > 2 ){
       temp <- t(chol(matrix(c(1,0.96, 0.96,1), ncol = 2))) %*% rbind(z1ParentAlcPreLvl1, z1ParentAlcLvl1)
       
@@ -1317,14 +1320,14 @@ simulateKnowLab <- function(run, simenv) {
       z1ParentAlcLvl1 <- sapply(temp, function(x) rbinom(1,1,x))
       
     }
-    
-    
+  
+      
     z1ParentAlcLvl1 <<- adjustCatVar(z1ParentAlcLvl1, "z1ParentAlcLvl1", 
                                      simenv = simenv, iteration = iteration)
     
     
     if(iteration >=15 & iteration <= 21){
-      
+           
       z1AlcAbuseLvl1 <<- 
         predSimBinom(models[[paste("z1AlcAbuseA", iteration, sep = "")]])	   
       
@@ -1337,7 +1340,7 @@ simulateKnowLab <- function(run, simenv) {
   
   simulate_Depress <- function() {	 		 
     
-    
+     
     breaks <- c(14, 24, 34, 44, 54, 64, 74, Inf)
     
     fage_imputed[fage_imputed ==99] <- NA
@@ -1381,14 +1384,14 @@ simulateKnowLab <- function(run, simenv) {
     z1FatherDepressLvl1 <<- z1FatherDepressLvl1
     
     z1ParentDepressLvl1 <- apply(cbind(z1MotherDepressLvl1,
-                                       z1FatherDepressLvl1),1, max, na.rm=TRUE)
+                                        z1FatherDepressLvl1),1, max, na.rm=TRUE)
     
     if( iteration > 2 ){
       temp <- t(chol(matrix(c(1,0.93, 0.93,1), ncol = 2))) %*% 
         rbind(z1ParentDepressPreLvl1, z1ParentDepressLvl1)
       
       temp <- temp[2,]
-      
+    
       temp <- temp * mean(z1ParentDepressLvl1)/mean(temp)
       temp[temp>1] <- 1
       
@@ -1401,10 +1404,10 @@ simulateKnowLab <- function(run, simenv) {
     
     
     if(iteration >=15 & iteration <= 21){
-      
+ 
       z1DepressLvl1 <<- 
         predSimBinom(models[[paste("z1DepressA", iteration, sep = "")]])	 
-      
+  
     } else {
       z1DepressLvl1 <<- NAs
     }  
@@ -1433,8 +1436,7 @@ simulateKnowLab <- function(run, simenv) {
     mage_years <<- MAGE + 1
     #when look at collated means - can see the effect from y2 onwards but doesn't show effect for y1
     
-    
-    
+   
     school <- apply(transition_probabilities$r1School, 1, function(x) sample(1:100, 1, prob = x))
     
     
@@ -1445,27 +1447,37 @@ simulateKnowLab <- function(run, simenv) {
         2, 2, 2, 2, 2, 2, 0, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 
         2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 1, 2, 1, 2, 1, 2, 1, 1)[school]
     
-    
+
     r1SchoolFundingLvl1 <<- ifelse(r1SchoolFunding == 1, 1,0)
     r1SchoolFundingLvl2 <<- ifelse(r1SchoolFunding == 2, 1,0)
     
     r1SchoolFunding <<-  r1SchoolFunding 
     
     r1SchoolGender <-
-      c(0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 1, 0, 0, 2, 0, 0,
-        0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 
-        0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 
-        2, 2, 0, 2, 1)[school]
+       c(0, 0, 2, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 1, 0, 0, 2, 0, 0,
+         0, 1, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 
+         0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 1, 
+         0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 
+         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 
+         2, 2, 0, 2, 1)[school]
     
     r1SchoolGenderLvl1 <<- ifelse(r1SchoolGender == 1, 1,0)
     r1SchoolGenderLvl2 <<- ifelse(r1SchoolGender == 2, 1,0)
-    
+ 
     r1SchoolGender <<-  r1SchoolGender 
     
-    
     r1School <<- school
+    
+    z1RuralLvl1 <<-
+    apply(cbind(r1Region, r1stchildethn), 1, 
+          function(x) 
+            sample(0:1,1,
+            prob = c(1 - transition_probabilities$z1Rural$r1Rural[
+              transition_probabilities$z1Rural$r1Region==x[1] & 
+                transition_probabilities$z1Rural$r1stchildethn==x[2]]/100, 
+              transition_probabilities$z1Rural$r1Rural[
+                transition_probabilities$z1Rural$r1Region==x[1] & 
+                  transition_probabilities$z1Rural$r1stchildethn==x[2]]/100)))
     
   }
   
@@ -1543,7 +1555,7 @@ simulateKnowLab <- function(run, simenv) {
       kids <<- mhrswrk <<- sptype <<- typnode <<- welfareLvl1 <<- NAs
       z1accomLvl1 <<- z1chparLvl1 <<- z1homeownLvl1 <<- z1overcrowdLvl1 <<- NAs
     }
-    
+ 
     store_current_values_in_outcomes(iteration)
     
     simulate_interact_punish_npresch() 

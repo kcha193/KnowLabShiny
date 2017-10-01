@@ -50,7 +50,7 @@ dSiderBar <- dashboardSidebar(
     box(textInput("wrkSpaceName", label = "Name the Project:"),
         downloadButton('saveWrkspace', "Save Project"),    
     h5("Latest Update:"),
-    h5("2017-06-29"),
+    h5("2017-08-30"),
     h5("Contact email:"), 
     a("Barry Milne", href= "mailto:b.milne@auckland.ac.nz"),
     br(),
@@ -115,7 +115,7 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                                    which allows the user to run across a number of different platforms, and does not require 
                                    any specialist software to be installed."),
                                  h4("To cite this application, please use the following,"),
-                                 p("Milne, B., Chang, K., Zhu, T., Liu, C., Shackleton, N., von Randow, M., Lay-Yee, R., McLay, J., Davis, P. (2017) Shiny application: Knowledge laboratory of the early life-course. http://compassnz.shinyapps.io/knowlabshiny/"),
+                                 p("Milne, B., Chang, K., Shackleton, N., Zhu, T., Liu, C., von Randow, M., Lay-Yee, R., McLay, J., Davis, P. (2017) Shiny application: Knowledge laboratory of the early life-course. http://compassnz.shinyapps.io/knowlabshiny/"),
                                  h4("The source code is stored in three places:"), 
                                   HTML("<ul>
                                         <li>Simario R package is at: <a href = \"https://github.com/kcha193/simarioV2\"> https://github.com/kcha193/simarioV2 </a>.</li>
@@ -219,7 +219,7 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                                           paste0("<p>More runs will give you tighter confidence intervals, but the simulation will take longer to run. </p>"),
                                           placement ="right", options = list(container = "body"))),
                             # Show a plot of the generated distribution
-                            box(title ="Setting the Secarino", status = "warning", solidHeader = TRUE,
+                            box(title ="Setting the Scenario", status = "warning", solidHeader = TRUE,
                                 box (title = HTML("<font size=\"4\">STEP 3: </font>Variable Adjustment"), status = "success", solidHeader = TRUE,
                                      rHandsontableOutput("hotable"), 
                                      bsPopover("hotable", "",trigger = "manual",
