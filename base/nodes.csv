@@ -29,4 +29,4 @@ Reading Books to Baby,Reading Books to Baby,,ellipse,"""No""=0 <br> ""Yes""=1",o
 Obesity,Obesity,,ellipse,"""No""=0 <br> ""Obese""=1",lightblue
 TV hours (2 hours or more),Watch TV for more than 2 hours,,ellipse,"""No""=0 <br> ""Yes""=1",orange
 Preterm Birth,Preterm Birth with less than 37 weeks,,ellipse,"""No""=0 <br> ""Yes""=1",orange
-Living in Rural area,Living in Rural area for Maori,,ellipse,"""Urban""=0 <br> ""Rural""=1",orange
+Living in Rural area,Living in Rural area,,ellipse,"""Urban""=0 <br> ""Rural""=1",orange
