@@ -6,7 +6,6 @@ library(DT)
 library(rhandsontable)
 library(plotly)
 library(visNetwork)
-library(rdrop2)
 library(shinyBS)
 
 options(shiny.maxRequestSize=10000*1024^2)
@@ -68,6 +67,7 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
               dashboardBody(
                 tags$head(
                   tags$link(rel = "stylesheet", type = "text/css", href = "bootstrap.css"),
+                  tags$head(includeScript("google-analytics.js")),
                   tags$style(HTML('
                                   .main-header .logo {
                                   font-weight: bold;
@@ -124,7 +124,7 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                                       </ul>" ),
                                   p(""),
                                     a(href="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass.html",
-                                   img(src="http://www.arts.auckland.ac.nz/en/about/our-research/research-centres-and-archives/compass/_jcr_content/par/textimage/image.img.png/1443396492336.png", 
+                                   img(src="compass.png", 
                                        width = 200)), 
              br(),br(),
              actionButton(inputId='ab1', label=HTML("<b> <font size=\"4\"> Getting Started </font> </b> <br><b> <font size=\"4\"> (User Guide)  </font></b>"), 
@@ -136,7 +136,8 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                           fluidRow(
                             column(width = 3,
                             box(title ="Instruction", width = 12,
-                               status = "primary",solidHeader = TRUE, 
+                               status = "primary",solidHeader = TRUE,
+                               tags$head(includeScript("google-analytics.js")),
                     HTML("<p> <b> HOVER OVER </b> an arrow to see the coefficient and citation for that path. </p> <br> <br>
                           <p> <b> CLICK ON </b> an arrow to open the citation for that coefficient.  </p> <br> <br>
                           <p> <b> HOVER OVER </b> a bubble to see the levels of that variable. </p> <br> <br>
@@ -160,6 +161,7 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                           fluidRow(
                             box(title ="Variable", width = 3,
                                 status = "primary",solidHeader = TRUE,
+                                tags$head(includeScript("google-analytics.js")),
                                 uiOutput("uiNameSB"),
                                 # bsPopover("uiNameSB", "", trigger = "manual",
                                 #           paste0("Type in the box to give your  ",
@@ -236,6 +238,7 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
                           fluidRow(
                             box(title ="Variable",  width = 3,
                                 status = "primary",solidHeader = TRUE,
+                                tags$head(includeScript("google-analytics.js")),
                                 selectInput("input_type_TB", HTML("<b> <font size=\"4\">STEP 1: </font></b> Select Summary Measure"),
                                             c("Percentage", "Mean","Quantile" )),
                                 # bsPopover("input_type_TB", "", trigger = "manual",
