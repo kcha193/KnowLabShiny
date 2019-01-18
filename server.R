@@ -331,7 +331,6 @@ shinyServer(function(input, output, session) {
     
     results <- baseOutputSB()
     
-    
     datatable(results, class = 'table-condensed',  extensions = 'Scroller',
               options = list(pageLength = 21, dom = 't',
                              scrollX = TRUE, scrollY = 600,
@@ -345,12 +344,15 @@ shinyServer(function(input, output, session) {
   output$hotable <- renderRHandsontable({
    
     if(is.null(input$hotable) | (isolate(rv$currSB) != input$var_SB)){
-      
-      catAdj <- env.base$cat.adjustments[[as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
+ 
+      catAdj <- env.base$cat.adjustments[[
+        as.character(varName_SB$old[varName_SB$Name==input$var_SB])]]
       
       rv$currSB <- input$var_SB
       
-      ageRange <- strsplit(dict$age[as.character(varName_SB$Var[varName_SB$Name==input$var_SB])], "--")[[1]]
+      ageRange <- 
+        strsplit(dict$age[as.character(
+          varName_SB$Var[varName_SB$Name==input$var_SB])], "--")[[1]]
       
     
       
@@ -391,8 +393,10 @@ shinyServer(function(input, output, session) {
         index <- which(apply(tbl, 1, function(x) sum(is.na(x)) == 1))
         
         if(length(index) == 0)
-          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL, contextMenu = FALSE) %>%  hot_cols(colWidths = 130) %>% 
-                   hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
+          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL, contextMenu = FALSE) %>%  
+                   hot_cols(colWidths = 130)) 
+                 
+                 # %>%  hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
         
         #browser()
         
@@ -413,8 +417,10 @@ shinyServer(function(input, output, session) {
         temp <- tbl[,2]
         
         if(sum(is.na(temp)) != 1)
-          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL, contextMenu = FALSE) %>%  hot_cols(colWidths = 130) %>%
-                   hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
+          return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL, contextMenu = FALSE) %>% 
+                   hot_cols(colWidths = 130))
+                 
+                 #%>% hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE))
         
         temp[is.na(temp)] <- 100 - sum(temp, na.rm = TRUE)
         
@@ -423,8 +429,10 @@ shinyServer(function(input, output, session) {
       }
     }
     
-    return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL, contextMenu = FALSE) %>%  hot_cols(colWidths = 130) %>% 
-             hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE ))
+    return(rhandsontable(tbl, readOnly = FALSE, rowHeaders = NULL, contextMenu = FALSE) %>%  
+             hot_cols(colWidths = 130))
+           
+           #%>% hot_validate_numeric(col = 2:ncol(tbl), min = 0, max = 100, allowInvalid = TRUE ))
   })
   
   output$actionAddSBUI <- renderUI({

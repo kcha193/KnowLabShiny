@@ -5,9 +5,9 @@ account: compassnz
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 125942
-bundleId: 1033543
+bundleId: 1821346
 url: https://compassnz.shinyapps.io/knowlabshiny/
-when: 1508361179.46829
+when: 1547781207.26083
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: .RData
