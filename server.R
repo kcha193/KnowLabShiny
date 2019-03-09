@@ -190,7 +190,7 @@ shinyServer(function(input, output, session) {
                  selectNode = "function(properties) {
                  Shiny.onInputChange('var_SB', properties.nodes);
                  Shiny.onInputChange('dynamicTB', properties.nodes);}") %>%
-      visLayout(randomSeed = 2705)
+      visLayout(randomSeed = 27051983)
     }) 
   
   
@@ -505,10 +505,10 @@ shinyServer(function(input, output, session) {
   }) 
   
   observeEvent(input$actionSB1, { 
-    
-    if(!is.null(input$uilogisetexprSB))
-      rv$env.scenario <- setGlobalSubgroupFilterExpression( rv$env.scenario, 
-                                                            input$uilogisetexprSB)
+
+    if(!is.null(rv$finalFormulaSB))
+      rv$env.scenario <-
+        setGlobalSubgroupFilterExpression( rv$env.scenario, trimws(rv$finalFormulaSB))
     
     
     #Simulation for the new scenario is here. 
