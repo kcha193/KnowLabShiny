@@ -131,7 +131,12 @@ dashboardPage(skin = "red", title = "Knowledge Lab",
              br(),br(),
              actionButton(inputId='ab1', label=HTML("<b> <font size=\"4\"> Getting Started </font> </b> <br><b> <font size=\"4\"> (User Guide)  </font></b>"), 
                           width = "200px", hight = "100px",
-                          onclick ="window.open('https://drive.google.com/open?id=0ByGI4aqoCDeldHdNaDBLQzFLXzg', '_blank')"))),   
+                          onclick ="window.open('https://drive.google.com/open?id=0ByGI4aqoCDeldHdNaDBLQzFLXzg', '_blank')"), 
+             actionButton(inputId='ab1', label=HTML("<b> <font size=\"4\"> Getting Started </font> </b> <br><b> <font size=\"4\"> (Live Demo)  </font></b>"), 
+                          width = "200px", hight = "100px",
+                          style="color: #fff; background-color: #b7325a; border-color: #b7325a",
+                          onclick ="window.open('https://youtu.be/3eTUwUIa4jI', '_blank')")
+             )),   
                             #box( width = 6,  includeHTML("ppt.Rhtml"))),
                                 
                     tabItem("mi", 
